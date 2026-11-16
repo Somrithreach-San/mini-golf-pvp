@@ -22,7 +22,12 @@
   overflow: hidden;
   border-radius: 20px;
   padding: 40px 20px 22px;
-  background: linear-gradient(180deg, #fcfaff 0%, #f5edff 55%, #eee2fe 100%);
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(circle at 0% 0%, #ebdff6 0%, #f4ecfb 35%, transparent 65%),
+    radial-gradient(circle at 100% 0%, #ebdff6 0%, #f4ecfb 35%, transparent 65%),
+    radial-gradient(circle at 50% 100%, #f6eefc 0%, #fbf7fe 45%, transparent 75%),
+    linear-gradient(180deg, #f7effd 0%, #ffffff 35%, #ffffff 75%, #f7effd 100%);
   box-shadow:
     inset 0 2px 0 #ffffff,
     0 5px 0 #d5c2ec,

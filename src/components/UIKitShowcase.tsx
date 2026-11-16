@@ -8,44 +8,169 @@ export function CornerHalftoneBackground() {
   return (
     <svg
       className="kit-corner-dots"
-      viewBox="0 0 360 520"
+      viewBox="0 0 700 700"
       preserveAspectRatio="none"
       aria-hidden="true"
     >
-      <g fill="#e3d2f8" opacity="0.65">
-        {/* Top-Left Cluster */}
-        <circle cx="14" cy="18" r="14" />
-        <circle cx="42" cy="12" r="9" />
-        <circle cx="12" cy="48" r="10" />
-        <circle cx="36" cy="38" r="7" />
-        <circle cx="62" cy="22" r="5" />
-        <circle cx="18" cy="74" r="6" />
-        {/* Top-Right Cluster */}
-        <circle cx="344" cy="18" r="15" />
-        <circle cx="316" cy="14" r="10" />
-        <circle cx="346" cy="50" r="11" />
-        <circle cx="322" cy="40" r="7.5" />
-        <circle cx="342" cy="78" r="7" />
-        <circle cx="326" cy="68" r="4.5" />
-        {/* Middle Edge Accents */}
-        <circle cx="10" cy="210" r="11" />
-        <circle cx="24" cy="232" r="6" />
-        <circle cx="350" cy="220" r="12" />
-        <circle cx="334" cy="244" r="6.5" />
-        {/* Bottom-Left Cluster */}
-        <circle cx="14" cy="502" r="16" />
-        <circle cx="44" cy="508" r="11" />
-        <circle cx="12" cy="470" r="11" />
-        <circle cx="36" cy="480" r="7.5" />
-        <circle cx="68" cy="504" r="6" />
-        <circle cx="22" cy="444" r="6" />
-        {/* Bottom-Right Cluster */}
-        <circle cx="346" cy="502" r="16" />
-        <circle cx="316" cy="508" r="11" />
-        <circle cx="348" cy="468" r="11" />
-        <circle cx="324" cy="478" r="8" />
-        <circle cx="292" cy="502" r="6" />
-        <circle cx="338" cy="442" r="6" />
+      <g fill="#ffffff">
+        <circle cx="0" cy="0" r="48" />
+        <circle cx="35" cy="10" r="38" />
+        <circle cx="75" cy="15" r="30" />
+        <circle cx="115" cy="20" r="26" />
+        <circle cx="155" cy="25" r="22" />
+        <circle cx="0" cy="45" r="42" />
+        <circle cx="35" cy="55" r="34" />
+        <circle cx="75" cy="58" r="28" />
+        <circle cx="115" cy="62" r="24" />
+        <circle cx="160" cy="65" r="20" />
+        <circle cx="0" cy="95" r="36" />
+        <circle cx="35" cy="100" r="32" />
+        <circle cx="75" cy="105" r="26" />
+        <circle cx="120" cy="108" r="22" />
+        <circle cx="165" cy="110" r="18" />
+        <circle cx="0" cy="145" r="32" />
+        <circle cx="40" cy="150" r="28" />
+        <circle cx="85" cy="152" r="24" />
+        <circle cx="130" cy="152" r="20" />
+        <circle cx="175" cy="150" r="16" />
+        <circle cx="0" cy="195" r="26" />
+        <circle cx="45" cy="198" r="24" />
+        <circle cx="95" cy="195" r="20" />
+        <circle cx="145" cy="190" r="16" />
+        <circle cx="0" cy="245" r="22" />
+        <circle cx="50" cy="242" r="18" />
+        <circle cx="105" cy="235" r="15" />
+        <circle cx="195" cy="30" r="16" opacity="0.9" />
+        <circle cx="230" cy="40" r="12" opacity="0.8" />
+        <circle cx="265" cy="55" r="9" opacity="0.7" />
+        <circle cx="295" cy="70" r="7" opacity="0.6" />
+        <circle cx="320" cy="85" r="5" opacity="0.5" />
+        <circle cx="205" cy="75" r="14" opacity="0.9" />
+        <circle cx="245" cy="90" r="10" opacity="0.8" />
+        <circle cx="280" cy="110" r="8" opacity="0.7" />
+        <circle cx="310" cy="130" r="6" opacity="0.6" />
+        <circle cx="215" cy="125" r="12" opacity="0.85" />
+        <circle cx="255" cy="145" r="9" opacity="0.75" />
+        <circle cx="290" cy="165" r="7" opacity="0.6" />
+        <circle cx="220" cy="175" r="11" opacity="0.8" />
+        <circle cx="260" cy="195" r="8" opacity="0.7" />
+        <circle cx="190" cy="215" r="12" opacity="0.8" />
+        <circle cx="230" cy="230" r="8" opacity="0.65" />
+        <circle cx="155" cy="255" r="11" opacity="0.75" />
+        <circle cx="195" cy="265" r="7" opacity="0.6" />
+        <circle cx="110" cy="285" r="10" opacity="0.7" />
+        <circle cx="65" cy="295" r="12" opacity="0.75" />
+        <circle cx="20" cy="305" r="14" opacity="0.8" />
+        <circle cx="240" cy="65" r="5" opacity="0.6" />
+        <circle cx="275" cy="85" r="4" opacity="0.5" />
+        <circle cx="225" cy="150" r="6" opacity="0.6" />
+        <circle cx="270" cy="130" r="5" opacity="0.5" />
+        <circle cx="175" cy="180" r="7" opacity="0.7" />
+        <circle cx="140" cy="225" r="6" opacity="0.6" />
+        <circle cx="170" cy="240" r="5" opacity="0.55" />
+        <circle cx="85" cy="265" r="6" opacity="0.6" />
+        <circle cx="700" cy="0" r="48" />
+        <circle cx="665" cy="10" r="38" />
+        <circle cx="625" cy="15" r="30" />
+        <circle cx="585" cy="20" r="26" />
+        <circle cx="545" cy="25" r="22" />
+        <circle cx="700" cy="45" r="42" />
+        <circle cx="665" cy="55" r="34" />
+        <circle cx="625" cy="58" r="28" />
+        <circle cx="585" cy="62" r="24" />
+        <circle cx="540" cy="65" r="20" />
+        <circle cx="700" cy="95" r="36" />
+        <circle cx="665" cy="100" r="32" />
+        <circle cx="625" cy="105" r="26" />
+        <circle cx="580" cy="108" r="22" />
+        <circle cx="535" cy="110" r="18" />
+        <circle cx="700" cy="145" r="32" />
+        <circle cx="660" cy="150" r="28" />
+        <circle cx="615" cy="152" r="24" />
+        <circle cx="570" cy="152" r="20" />
+        <circle cx="525" cy="150" r="16" />
+        <circle cx="700" cy="195" r="26" />
+        <circle cx="655" cy="198" r="24" />
+        <circle cx="605" cy="195" r="20" />
+        <circle cx="555" cy="190" r="16" />
+        <circle cx="700" cy="245" r="22" />
+        <circle cx="650" cy="242" r="18" />
+        <circle cx="595" cy="235" r="15" />
+        <circle cx="505" cy="30" r="16" opacity="0.9" />
+        <circle cx="470" cy="40" r="12" opacity="0.8" />
+        <circle cx="435" cy="55" r="9" opacity="0.7" />
+        <circle cx="405" cy="70" r="7" opacity="0.6" />
+        <circle cx="380" cy="85" r="5" opacity="0.5" />
+        <circle cx="495" cy="75" r="14" opacity="0.9" />
+        <circle cx="455" cy="90" r="10" opacity="0.8" />
+        <circle cx="420" cy="110" r="8" opacity="0.7" />
+        <circle cx="390" cy="130" r="6" opacity="0.6" />
+        <circle cx="485" cy="125" r="12" opacity="0.85" />
+        <circle cx="445" cy="145" r="9" opacity="0.75" />
+        <circle cx="410" cy="165" r="7" opacity="0.6" />
+        <circle cx="480" cy="175" r="11" opacity="0.8" />
+        <circle cx="440" cy="195" r="8" opacity="0.7" />
+        <circle cx="510" cy="215" r="12" opacity="0.8" />
+        <circle cx="470" cy="230" r="8" opacity="0.65" />
+        <circle cx="545" cy="255" r="11" opacity="0.75" />
+        <circle cx="505" cy="265" r="7" opacity="0.6" />
+        <circle cx="590" cy="285" r="10" opacity="0.7" />
+        <circle cx="635" cy="295" r="12" opacity="0.75" />
+        <circle cx="680" cy="305" r="14" opacity="0.8" />
+        <circle cx="460" cy="65" r="5" opacity="0.6" />
+        <circle cx="425" cy="85" r="4" opacity="0.5" />
+        <circle cx="475" cy="150" r="6" opacity="0.6" />
+        <circle cx="430" cy="130" r="5" opacity="0.5" />
+        <circle cx="525" cy="180" r="7" opacity="0.7" />
+        <circle cx="560" cy="225" r="6" opacity="0.6" />
+        <circle cx="530" cy="240" r="5" opacity="0.55" />
+        <circle cx="615" cy="265" r="6" opacity="0.6" />
+        <circle cx="40" cy="680" r="40" opacity="0.95" />
+        <circle cx="100" cy="675" r="36" opacity="0.95" />
+        <circle cx="170" cy="680" r="34" opacity="0.95" />
+        <circle cx="245" cy="675" r="36" opacity="0.95" />
+        <circle cx="320" cy="680" r="32" opacity="0.95" />
+        <circle cx="390" cy="675" r="34" opacity="0.95" />
+        <circle cx="460" cy="680" r="32" opacity="0.95" />
+        <circle cx="530" cy="675" r="36" opacity="0.95" />
+        <circle cx="600" cy="680" r="34" opacity="0.95" />
+        <circle cx="660" cy="675" r="38" opacity="0.95" />
+        <circle cx="70" cy="630" r="26" opacity="0.9" />
+        <circle cx="135" cy="635" r="24" opacity="0.9" />
+        <circle cx="205" cy="630" r="22" opacity="0.85" />
+        <circle cx="280" cy="638" r="25" opacity="0.88" />
+        <circle cx="355" cy="632" r="22" opacity="0.85" />
+        <circle cx="425" cy="635" r="24" opacity="0.88" />
+        <circle cx="495" cy="630" r="22" opacity="0.85" />
+        <circle cx="565" cy="635" r="25" opacity="0.9" />
+        <circle cx="630" cy="630" r="26" opacity="0.9" />
+        <circle cx="40" cy="585" r="18" opacity="0.8" />
+        <circle cx="105" cy="590" r="16" opacity="0.8" />
+        <circle cx="175" cy="585" r="14" opacity="0.75" />
+        <circle cx="250" cy="595" r="15" opacity="0.75" />
+        <circle cx="325" cy="590" r="13" opacity="0.7" />
+        <circle cx="395" cy="595" r="14" opacity="0.7" />
+        <circle cx="465" cy="590" r="13" opacity="0.7" />
+        <circle cx="535" cy="595" r="15" opacity="0.75" />
+        <circle cx="600" cy="590" r="16" opacity="0.8" />
+        <circle cx="660" cy="585" r="18" opacity="0.8" />
+        <circle cx="75" cy="550" r="11" opacity="0.65" />
+        <circle cx="145" cy="555" r="9" opacity="0.6" />
+        <circle cx="220" cy="550" r="8" opacity="0.55" />
+        <circle cx="360" cy="555" r="8" opacity="0.55" />
+        <circle cx="480" cy="550" r="8" opacity="0.55" />
+        <circle cx="560" cy="555" r="9" opacity="0.6" />
+        <circle cx="625" cy="550" r="11" opacity="0.65" />
+        <circle cx="40" cy="520" r="7" opacity="0.5" />
+        <circle cx="660" cy="520" r="7" opacity="0.5" />
+        <polygon points="38,542 46,550 38,558 30,550" opacity="0.75" />
+        <polygon points="662,537 670,545 662,553 654,545" opacity="0.75" />
+        <polygon points="240,109 246,115 240,121 234,115" opacity="0.65" />
+        <polygon points="460,109 466,115 460,121 454,115" opacity="0.65" />
+        <polygon points="185,273 192,280 185,287 178,280" opacity="0.6" />
+        <polygon points="515,273 522,280 515,287 508,280" opacity="0.6" />
+        <polygon points="300,564 306,570 300,576 294,570" opacity="0.55" />
+        <polygon points="400,564 406,570 400,576 394,570" opacity="0.55" />
       </g>
     </svg>
   );
