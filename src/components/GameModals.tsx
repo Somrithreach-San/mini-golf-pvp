@@ -1,11 +1,126 @@
-import React, { useEffect, useRef } from 'react';
-import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock, Database, Cloud } from 'lucide-react';
+import React, { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock, X } from 'lucide-react';
 import { GOLF_BALL_SKINS, GolfBallSkin } from '../data/balls';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { soundEngine } from '../audio/soundEngine';
 
 // ==========================================
-// 1. SETTINGS MODAL (Mobile Optimized)
+// 0. REUSABLE CARTOON MODAL SHELL (Lavender / Purple Skin)
+// ==========================================
+export type GameModalProps = {
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  footer?: ReactNode;
+  maxWidth?: CSSProperties['maxWidth'];
+  showClose?: boolean;
+};
+
+export function GameModal({
+  title,
+  onClose,
+  children,
+  footer,
+  maxWidth = '430px',
+  showClose = true,
+}: GameModalProps) {
+  return (
+    <div className="ui-modal-backdrop" onClick={onClose}>
+      <section
+        className="ui-panel ui-modal-panel"
+        style={{ maxWidth }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 className={`ui-panel-title ${!showClose ? 'ui-panel-title--solo' : ''}`}>{title}</h2>
+
+        {showClose && (
+          <button
+            type="button"
+            className="ui-panel-close"
+            aria-label={`Close ${title}`}
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        )}
+
+        <div className="ui-modal-body">{children}</div>
+
+        {footer && <div className="ui-modal-footer">{footer}</div>}
+      </section>
+    </div>
+  );
+}
+
+// ==========================================
+// 0.5 PAUSED MODAL (Exact match to Reference Mockup)
+// ==========================================
+interface PausedModalProps {
+  isOpen: boolean;
+  onResume: () => void;
+  onRetry: () => void;
+  onHome: () => void;
+}
+
+export const PausedModal: React.FC<PausedModalProps> = ({
+  isOpen,
+  onResume,
+  onRetry,
+  onHome,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <GameModal title="Paused" onClose={onResume} maxWidth="340px">
+      <div className="flex items-center justify-center gap-4 py-4">
+        {/* Coin 1: Home */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onHome();
+          }}
+          className="btn-round-gold"
+          title="Home"
+        >
+          <Home className="w-6 h-6 stroke-[2.75]" />
+        </button>
+
+        {/* Coin 2: Retry */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onRetry();
+          }}
+          className="btn-round-gold"
+          title="Restart Hole"
+        >
+          <RotateCcw className="w-6 h-6 stroke-[2.75]" />
+        </button>
+
+        {/* Coin 3: Play / Resume */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onResume();
+          }}
+          className="btn-round-gold"
+          title="Resume"
+        >
+          <Play className="w-6 h-6 fill-current ml-0.5" />
+        </button>
+      </div>
+    </GameModal>
+  );
+};
+
+// ==========================================
+// 1. SETTINGS MODAL (Exact match to Reference Mockup)
 // ==========================================
 interface SettingsModalProps {
   isOpen: boolean;
@@ -39,123 +154,165 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onToggleSfx,
   onResetProgress,
   onClose,
-  syncStatus,
-  onManualSync,
-  onOpenAccount,
 }) => {
-  const [confirmReset, setConfirmReset] = React.useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [musicVol, setMusicVol] = useState(80);
+  const [sfxVol, setSfxVol] = useState(90);
 
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[language];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-3.5"
-      onClick={onClose}
+    <GameModal
+      title={t.settings}
+      onClose={onClose}
+      footer={
+        <div className="w-full flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              onClose();
+            }}
+            className="btn-3d-purple flex-1 h-12 rounded-2xl text-lg text-white font-display font-bold cursor-pointer"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              onClose();
+            }}
+            className="btn-3d-orange flex-1 h-12 rounded-2xl text-lg text-white font-display font-bold cursor-pointer"
+          >
+            Save
+          </button>
+        </div>
+      }
     >
-      <div
-        className="bg-white rounded-[28px] w-full max-w-[385px] px-6 pt-5 pb-5 shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.28)] animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="font-display text-[30px] font-bold text-[#2ecc71] text-center mb-3.5 tracking-tight">
-          {t.settings}
-        </h2>
+      <div className="space-y-4 py-2 px-1 text-[#4e2978]">
+        {/* Section: Audio Settings */}
+        <div>
+          <h3 className="font-display font-black text-base text-[#7d36c8] mb-2.5">
+            Audio settings
+          </h3>
 
-        {/* Music Row */}
-        <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#7c3aed] flex items-center justify-center text-white shadow-xs">
-              <Music className="w-5 h-5 stroke-[2.5]" />
-            </div>
-            <span className="text-[18px] font-extrabold text-[#163a5f]">{t.music}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onToggleMusic(!musicEnabled);
-            }}
-            className={`w-[62px] h-[34px] rounded-full p-1 transition-colors duration-200 flex items-center cursor-pointer ${
-              musicEnabled ? 'bg-[#37d062]' : 'bg-slate-300'
-            }`}
-          >
-            <div
-              className={`w-[26px] h-[26px] rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                musicEnabled ? 'translate-x-[28px]' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
+          <div className="space-y-3">
+            {/* Music Toggle & Slider */}
+            <div className="ui-card p-3.5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-display font-bold text-sm text-[#4e2978]">
+                  Sound music
+                </span>
+                <div
+                  className={`ui-toggle-track ${musicEnabled ? 'is-checked' : ''}`}
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onToggleMusic(!musicEnabled);
+                  }}
+                  role="switch"
+                  aria-checked={musicEnabled}
+                >
+                  <div className="ui-toggle-thumb" />
+                </div>
+              </div>
 
-        {/* Sound Effects Row */}
-        <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#7c3aed] flex items-center justify-center text-white shadow-xs">
-              <Volume2 className="w-5 h-5 stroke-[2.5]" />
+              {/* Music Volume Slider */}
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-xs font-bold text-[#8a68a8] w-12">Volume</span>
+                <div className="flex-1 relative flex items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={musicEnabled ? musicVol : 0}
+                    disabled={!musicEnabled}
+                    onChange={(e) => setMusicVol(Number(e.target.value))}
+                    className="w-full h-3 rounded-full appearance-none bg-[#ded0ea] accent-[#ffa500] cursor-pointer disabled:opacity-40"
+                  />
+                </div>
+              </div>
             </div>
-            <span className="text-[18px] font-extrabold text-[#163a5f]">{t.soundEffects}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              onToggleSfx(!sfxEnabled);
-              soundEngine.playClick();
-            }}
-            className={`w-[62px] h-[34px] rounded-full p-1 transition-colors duration-200 flex items-center cursor-pointer ${
-              sfxEnabled ? 'bg-[#37d062]' : 'bg-slate-300'
-            }`}
-          >
-            <div
-              className={`w-[26px] h-[26px] rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                sfxEnabled ? 'translate-x-[28px]' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
 
-        {/* Language Row (English | 中文) */}
-        <div className="flex items-center justify-between py-3 border-b-2 border-dashed border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#7c3aed] flex items-center justify-center text-white shadow-xs">
-              <Globe className="w-5 h-5 stroke-[2.5]" />
+            {/* Sound Effect Toggle & Slider */}
+            <div className="ui-card p-3.5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-display font-bold text-sm text-[#4e2978]">
+                  Sound effect
+                </span>
+                <div
+                  className={`ui-toggle-track ${sfxEnabled ? 'is-checked' : ''}`}
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onToggleSfx(!sfxEnabled);
+                  }}
+                  role="switch"
+                  aria-checked={sfxEnabled}
+                >
+                  <div className="ui-toggle-thumb" />
+                </div>
+              </div>
+
+              {/* SFX Volume Slider */}
+              <div className="flex items-center gap-3 pt-1">
+                <span className="text-xs font-bold text-[#8a68a8] w-12">Volume</span>
+                <div className="flex-1 relative flex items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sfxEnabled ? sfxVol : 0}
+                    disabled={!sfxEnabled}
+                    onChange={(e) => setSfxVol(Number(e.target.value))}
+                    className="w-full h-3 rounded-full appearance-none bg-[#ded0ea] accent-[#ffa500] cursor-pointer disabled:opacity-40"
+                  />
+                </div>
+              </div>
             </div>
-            <span className="text-[18px] font-extrabold text-[#163a5f]">{t.language}</span>
-          </div>
-          <div className="inline-flex bg-slate-100 p-1 rounded-full border border-slate-200">
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                onChangeLanguage('en');
-              }}
-              className={`px-3 py-1 rounded-full text-[13px] font-extrabold transition-all cursor-pointer ${
-                language === 'en'
-                  ? 'bg-[#37d062] text-white shadow-xs'
-                  : 'text-[#163a5f] hover:text-[#2ecc71]'
-              }`}
-            >
-              English
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                onChangeLanguage('zh');
-              }}
-              className={`px-3 py-1 rounded-full text-[13px] font-extrabold transition-all cursor-pointer ${
-                language === 'zh'
-                  ? 'bg-[#37d062] text-white shadow-xs'
-                  : 'text-[#163a5f] hover:text-[#2ecc71]'
-              }`}
-            >
-              中文
-            </button>
           </div>
         </div>
 
-        {/* Buttons Row */}
-        <div className="flex items-center justify-center gap-3 mt-5 mb-3">
+        {/* Section: Language Selection */}
+        <div>
+          <h3 className="font-display font-black text-base text-[#7d36c8] mb-2">
+            Language
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                { id: 'en', label: 'English', flag: '🇺🇸' },
+                { id: 'es', label: 'Español', flag: '🇪🇸' },
+                { id: 'fr', label: 'Français', flag: '🇫🇷' },
+                { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
+                { id: 'ja', label: '日本語', flag: '🇯🇵' },
+                { id: 'zh', label: '中文', flag: '🇨🇳' },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onChangeLanguage(item.id);
+                }}
+                className={`py-2 px-2 rounded-xl text-xs font-display font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  language === item.id
+                    ? 'btn-3d-orange text-white shadow-sm'
+                    : 'ui-card text-[#51336d] hover:bg-white'
+                }`}
+              >
+                <span>{item.flag}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Section: Reset Progress */}
+        <div className="pt-1">
           {!confirmReset ? (
             <button
               type="button"
@@ -163,64 +320,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 soundEngine.playClick();
                 setConfirmReset(true);
               }}
-              className="btn-3d-red rounded-full px-5 py-2.5 text-white font-display font-bold text-[16px] tracking-wide whitespace-nowrap cursor-pointer"
+              className="btn-3d-red w-full h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
             >
               {t.resetProgress}
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                onResetProgress();
-                setConfirmReset(false);
-                onClose();
-              }}
-              className="btn-3d-red rounded-full px-5 py-2.5 text-white font-display font-bold text-[15px] tracking-wide whitespace-nowrap cursor-pointer"
-            >
-              {t.confirmReset}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onResetProgress();
+                  setConfirmReset(false);
+                  onClose();
+                }}
+                className="btn-3d-red flex-1 h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
+              >
+                Confirm Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmReset(false)}
+                className="btn-3d-purple flex-1 h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
           )}
-
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              setConfirmReset(false);
-              onClose();
-            }}
-            className="btn-3d-green rounded-full px-7 py-2.5 text-white font-display font-bold text-[18px] tracking-wide whitespace-nowrap cursor-pointer"
-          >
-            {t.done}
-          </button>
-        </div>
-
-        <div className="w-full flex items-center justify-center mt-2">
-          <span className="text-center text-[#70889e] font-semibold text-[13px] tracking-wide">
-            v1.0.1
-          </span>
         </div>
       </div>
-    </div>
+    </GameModal>
   );
 };
 
 // ==========================================
-// 2. BALL SKIN PREVIEW ICON & BALLS MODAL (Authentic 3D Rendered Badges)
+// 2. BALLS / SHOP MODAL
 // ==========================================
-const BallPreviewBadge: React.FC<{ skin: GolfBallSkin }> = ({ skin }) => {
-  return (
-    <div className="w-12 h-12 relative flex items-center justify-center filter drop-shadow-[0_4px_7px_rgba(0,0,0,0.22)]">
-      <img
-        src={skin.iconUrl}
-        alt={skin.name}
-        className="w-12 h-12 object-contain transition-transform duration-200 group-hover:scale-105 select-none pointer-events-none"
-        draggable={false}
-      />
-    </div>
-  );
-};
-
 interface BallsModalProps {
   isOpen: boolean;
   language: Language;
@@ -243,83 +378,83 @@ export const BallsModal: React.FC<BallsModalProps> = ({
   const t = TRANSLATIONS[language];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-3"
-      onClick={onClose}
+    <GameModal
+      title={t.chooseBallTitle}
+      onClose={onClose}
+      footer={
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onClose();
+          }}
+          className="btn-3d-green w-full h-12 rounded-2xl text-white font-display font-bold text-base cursor-pointer"
+        >
+          {t.done}
+        </button>
+      }
     >
-      <div
-        className="bg-white rounded-[28px] w-full max-w-[395px] p-5 shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.28)] max-h-[86dvh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-3.5">
-          <h2 className="font-display text-[26px] font-bold text-[#14b8a6]">
-            {t.golfBalls}
-          </h2>
-          <div className="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-200 px-3 py-1 rounded-full">
-            <Star className="w-4 h-4 fill-[#ffb800] text-[#d97706]" />
-            <span className="font-extrabold text-[#163a5f] text-sm tabular-nums">
-              {totalStars} / 90
-            </span>
-          </div>
-        </div>
+      <div className="grid grid-cols-2 gap-3 py-1">
+        {GOLF_BALL_SKINS.map((skin) => {
+          const isSelected = skin.id === selectedBallId;
+          const isUnlocked = totalStars >= skin.requiredStars;
+          const localized = t.balls[skin.id] || { name: skin.name, desc: skin.description };
 
-        <div className="grid grid-cols-3 gap-2.5 overflow-y-auto pr-0.5 py-1">
-          {GOLF_BALL_SKINS.map((skin) => {
-            const unlocked = totalStars >= skin.requiredStars;
-            const isSelected = skin.id === selectedBallId;
-            const skinLoc = t.ballSkins[skin.id] || { name: skin.name, subtitle: skin.subtitle };
-            return (
-              <button
-                key={skin.id}
-                type="button"
-                disabled={!unlocked}
-                onClick={() => {
-                  if (unlocked) {
-                    soundEngine.playClick();
-                    onSelectBall(skin);
-                  }
-                }}
-                className={`relative rounded-2xl p-2.5 border-2 flex flex-col items-center text-center transition-all cursor-pointer ${
-                  isSelected
-                    ? 'border-[#2ecc71] bg-[#f0fdf4] shadow-sm'
-                    : unlocked
-                    ? 'border-slate-200 bg-slate-50/70 active:scale-95'
-                    : 'border-slate-200 bg-slate-100 opacity-65 cursor-not-allowed'
-                }`}
+          return (
+            <div
+              key={skin.id}
+              onClick={() => {
+                if (isUnlocked) {
+                  soundEngine.playClick();
+                  onSelectBall(skin);
+                }
+              }}
+              className={`ui-card p-3 rounded-2xl flex flex-col items-center text-center transition-all ${
+                isSelected
+                  ? 'border-[#ffaa00] shadow-[0_0_0_3px_rgba(255,170,0,0.35)]'
+                  : 'hover:scale-[1.02]'
+              } ${isUnlocked ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
+            >
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-inner border-2 border-white mb-2"
+                style={{ backgroundColor: skin.color }}
               >
-                {isSelected && (
-                  <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-[#2ecc71] text-white flex items-center justify-center shadow-xs">
-                    <Check className="w-3 h-3 stroke-[3]" />
-                  </span>
-                )}
-                {!unlocked && (
-                  <span className="absolute top-1.5 right-1.5 flex items-center gap-0.5 bg-slate-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                    <Lock className="w-2.5 h-2.5" /> {skin.requiredStars}★
-                  </span>
-                )}
-                <BallPreviewBadge skin={skin} />
-                <span className="font-display font-bold text-[#163a5f] text-xs sm:text-[13px] mt-1.5 leading-tight">
-                  {skinLoc.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                {skin.icon}
+              </div>
 
-        <div className="flex justify-center mt-4 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onClose();
-            }}
-            className="btn-3d-green rounded-full px-9 py-2.5 text-white font-display font-bold text-[18px] cursor-pointer"
-          >
-            {t.done}
-          </button>
-        </div>
+              <div className="font-display font-black text-sm text-[#4e2978] leading-tight">
+                {localized.name}
+              </div>
+
+              <div className="text-[11px] font-semibold text-[#8a68a8] mt-1 line-clamp-1">
+                {localized.desc}
+              </div>
+
+              <div className="mt-2.5 w-full">
+                {isSelected ? (
+                  <div className="w-full py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-black flex items-center justify-center gap-1">
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>Equipped</span>
+                  </div>
+                ) : isUnlocked ? (
+                  <button
+                    type="button"
+                    className="btn-3d-purple w-full py-1 rounded-xl text-xs font-bold text-white cursor-pointer"
+                  >
+                    Select
+                  </button>
+                ) : (
+                  <div className="w-full py-1 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center gap-1">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>{skin.requiredStars} ★</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </GameModal>
   );
 };
 
@@ -338,371 +473,143 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, language, onClose 
   const t = TRANSLATIONS[language];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-3.5"
-      onClick={onClose}
+    <GameModal
+      title={t.howToPlay}
+      onClose={onClose}
+      footer={
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onClose();
+          }}
+          className="btn-3d-green w-full h-12 rounded-2xl text-white font-display font-bold text-base cursor-pointer"
+        >
+          {t.gotIt}
+        </button>
+      }
     >
-      <div
-        className="bg-white rounded-[28px] w-full max-w-[385px] p-5 shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.28)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="font-display text-[28px] font-bold text-[#2f80ed] text-center mb-3.5">
-          {t.howToPlay}
-        </h2>
-
-        <div className="space-y-2.5 text-[#163a5f] text-[13px] font-semibold">
-          <div className="flex items-start gap-2.5 bg-sky-50 p-3 rounded-2xl">
-            <span className="w-6 h-6 rounded-full bg-[#2f80ed] text-white font-bold flex items-center justify-center shrink-0 text-xs">
-              1
-            </span>
-            <p>
-              <strong>{t.helpStep1Bold}</strong> {t.helpStep1Text}
-            </p>
-          </div>
-          <div className="flex items-start gap-2.5 bg-emerald-50 p-3 rounded-2xl">
-            <span className="w-6 h-6 rounded-full bg-[#2ecc71] text-white font-bold flex items-center justify-center shrink-0 text-xs">
-              2
-            </span>
-            <p>
-              <strong>{t.helpStep2Bold}</strong> {t.helpStep2Text}
-            </p>
-          </div>
-          <div className="flex items-start gap-2.5 bg-amber-50 p-3 rounded-2xl">
-            <span className="w-6 h-6 rounded-full bg-[#f59f00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
-              3
-            </span>
-            <p>
-              <strong>{t.helpStep3Bold}</strong> {t.helpStep3Text}
-            </p>
-          </div>
+      <div className="space-y-3 py-1">
+        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
+          <span className="w-7 h-7 rounded-full bg-[#7d36c8] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+            1
+          </span>
+          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
+            <strong className="text-[#7d36c8] font-bold">{t.helpStep1Bold}</strong> {t.helpStep1Text}
+          </p>
         </div>
-
-        <div className="flex justify-center mt-5">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onClose();
-            }}
-            className="btn-3d-green rounded-full px-9 py-2.5 text-white font-display font-bold text-[18px] cursor-pointer"
-          >
-            {t.gotIt}
-          </button>
+        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
+          <span className="w-7 h-7 rounded-full bg-[#2ba93c] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+            2
+          </span>
+          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
+            <strong className="text-[#2ba93c] font-bold">{t.helpStep2Bold}</strong> {t.helpStep2Text}
+          </p>
+        </div>
+        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
+          <span className="w-7 h-7 rounded-full bg-[#f2930a] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+            3
+          </span>
+          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
+            <strong className="text-[#f2930a] font-bold">{t.helpStep3Bold}</strong> {t.helpStep3Text}
+          </p>
         </div>
       </div>
-    </div>
+    </GameModal>
   );
 };
 
 // ==========================================
-// 5. HOLE COMPLETE VICTORY MODAL & MAGICAL STAR ANIMATION
+// 4. CARTOON 3D GOLDEN STARS & VICTORY MODAL (Exact match to Reference Level 01 Mockup)
 // ==========================================
 
-/**
- * Generates a smooth, rounded chubby 5-point star SVG path using quadratic bezier corner rounding
- */
-function buildRoundedStarPath(
-  cx: number,
-  cy: number,
-  outerR: number,
-  innerR: number,
-  roundness = 0.34
-): string {
-  const pts: { x: number; y: number }[] = [];
-  for (let i = 0; i < 10; i++) {
-    const angle = -Math.PI / 2 + (i * Math.PI) / 5;
-    const r = i % 2 === 0 ? outerR : innerR;
-    pts.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-
-  const n = pts.length;
-  let d = '';
-  for (let i = 0; i < n; i++) {
-    const prev = pts[(i - 1 + n) % n];
-    const curr = pts[i];
-    const next = pts[(i + 1) % n];
-
-    const startX = curr.x + (prev.x - curr.x) * roundness;
-    const startY = curr.y + (prev.y - curr.y) * roundness;
-    const endX = curr.x + (next.x - curr.x) * roundness;
-    const endY = curr.y + (next.y - curr.y) * roundness;
-
-    if (i === 0) {
-      d += `M ${startX.toFixed(2)} ${startY.toFixed(2)} `;
-    } else {
-      d += `L ${startX.toFixed(2)} ${startY.toFixed(2)} `;
-    }
-    d += `Q ${curr.x.toFixed(2)} ${curr.y.toFixed(2)} ${endX.toFixed(2)} ${endY.toFixed(2)} `;
-  }
-  d += 'Z';
-  return d;
-}
-
-const OUTER_CRYSTAL_STAR_PATH = buildRoundedStarPath(60, 60, 52, 33, 0.36);
-const MID_CRYSTAL_BEVEL_PATH = buildRoundedStarPath(60, 60, 46, 29, 0.35);
-const INNER_STAR_PATH = buildRoundedStarPath(60, 60, 35, 22, 0.36);
-const SWIRL_STAR_PATH = buildRoundedStarPath(60, 60, 17, 10, 0.38);
-
-const SPARKLE_RAYS: { tx: string; ty: string; color: string; size: number }[] = [
-  { tx: '0px', ty: '-46px', color: '#ff85e4', size: 6 },
-  { tx: '42px', ty: '-22px', color: '#72efdd', size: 5.5 },
-  { tx: '36px', ty: '32px', color: '#ffd43b', size: 6 },
-  { tx: '-36px', ty: '32px', color: '#72efdd', size: 5.5 },
-  { tx: '-42px', ty: '-22px', color: '#ff85e4', size: 6 },
-  { tx: '22px', ty: '-40px', color: '#ffffff', size: 4.5 },
-  { tx: '-22px', ty: '-40px', color: '#ffd43b', size: 4.5 },
-];
-
-const AnimatedVictoryStars: React.FC<{ starsEarned: number }> = ({ starsEarned }) => {
-  // ignitedCount tracks how many earned stars have popped their crystal outer halo (0..starsEarned)
-  const [ignitedCount, setIgnitedCount] = React.useState(0);
+const Cartoon3DStar: React.FC<{
+  earned: boolean;
+  size: number;
+  rotationDeg: number;
+  translateY: number;
+  delayMs: number;
+}> = ({ earned, size, rotationDeg, translateY, delayMs }) => {
+  const [visible, setVisible] = useState(!earned);
 
   useEffect(() => {
-    setIgnitedCount(0);
-    const timers: number[] = [];
-
-    for (let i = 0; i < starsEarned; i++) {
-      const t = window.setTimeout(() => {
-        setIgnitedCount(i + 1);
-        soundEngine.playStarPop(i);
-      }, 420 + i * 270);
-      timers.push(t);
+    if (earned) {
+      const timer = window.setTimeout(() => {
+        setVisible(true);
+        soundEngine.playClick();
+      }, delayMs);
+      return () => clearTimeout(timer);
     }
-
-    return () => {
-      timers.forEach((t) => clearTimeout(t));
-    };
-  }, [starsEarned]);
-
-  const archConfigs = [
-    { idx: 0, wrapperClass: 'translate-y-2 -rotate-[9deg]', riseDelay: '40ms', idleDelay: '0s' },
-    { idx: 1, wrapperClass: '-translate-y-2 scale-110 rotate-0', riseDelay: '135ms', idleDelay: '0.35s' },
-    { idx: 2, wrapperClass: 'translate-y-2 rotate-[9deg]', riseDelay: '230ms', idleDelay: '0.7s' },
-  ];
+  }, [earned, delayMs]);
 
   return (
-    <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 my-3.5 h-[98px] select-none">
-      {archConfigs.map(({ idx, wrapperClass, riseDelay, idleDelay }) => {
-        const isEarned = idx < starsEarned;
-        const isIgnited = isEarned && idx < ignitedCount;
-        const gradSuffix = `star-${idx}`;
+    <div
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        transform: `translateY(${translateY}px) rotate(${rotationDeg}deg)`,
+        transition: 'transform 0.3s ease',
+      }}
+      className={`relative flex items-center justify-center ${
+        earned && visible ? 'animate-cartoon-star' : ''
+      }`}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        className={`w-full h-full overflow-visible ${
+          earned ? 'animate-star-glow' : 'opacity-55'
+        }`}
+      >
+        <defs>
+          {/* Gold Star Face Gradient */}
+          <linearGradient id="goldStarFace" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffef7a" />
+            <stop offset="42%" stopColor="#ffc01e" />
+            <stop offset="100%" stopColor="#f58800" />
+          </linearGradient>
 
-        return (
-          <div key={idx} className={`relative w-[86px] h-[86px] flex items-center justify-center ${wrapperClass}`}>
-            {/* Stage 1: Base Star Elastic Rise */}
-            <div
-              className="relative w-full h-full flex items-center justify-center animate-star-base-rise"
-              style={{ animationDelay: riseDelay }}
-            >
-              {/* Stage 3: Gentle Continuous Idle Bob once ignited */}
-              <div
-                className={`relative w-full h-full flex items-center justify-center ${
-                  isIgnited ? 'animate-star-idle' : ''
-                }`}
-                style={{ animationDelay: idleDelay }}
-              >
-                {/* Radial Sparkle Burst when Crystal Halo ignites */}
-                {isIgnited &&
-                  SPARKLE_RAYS.map((sp, sIdx) => (
-                    <span
-                      key={sIdx}
-                      className="pointer-events-none absolute rounded-full"
-                      style={
-                        {
-                          width: `${sp.size}px`,
-                          height: `${sp.size}px`,
-                          backgroundColor: sp.color,
-                          boxShadow: `0 0 8px ${sp.color}`,
-                          '--tx': sp.tx,
-                          '--ty': sp.ty,
-                          animation: 'starSparkleRay 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        } as React.CSSProperties
-                      }
-                    />
-                  ))}
+          {/* Gold Star Highlight Emboss */}
+          <linearGradient id="goldStarHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="#ffe66b" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#ffa000" stopOpacity="0.1" />
+          </linearGradient>
 
-                <svg
-                  viewBox="0 0 120 120"
-                  className="w-full h-full overflow-visible"
-                  style={{
-                    filter: isIgnited
-                      ? 'drop-shadow(0 6px 14px rgba(108, 62, 232, 0.45))'
-                      : 'drop-shadow(0 4px 8px rgba(230, 140, 20, 0.25))',
-                  }}
-                >
-                  <defs>
-                    {/* Outer Iridescent Crystal Halo Gradient (Deep Cosmic Indigo -> Violet -> Cyan -> Magenta) */}
-                    <linearGradient id={`crystal-body-${gradSuffix}`} x1="15%" y1="10%" x2="85%" y2="92%">
-                      <stop offset="0%" stopColor="#6ee7f9" />
-                      <stop offset="28%" stopColor="#5e43d8" />
-                      <stop offset="68%" stopColor="#2e186a" />
-                      <stop offset="100%" stopColor="#8b5cf6" />
-                    </linearGradient>
+          {/* Silver/Gray Star Face Gradient */}
+          <linearGradient id="silverStarFace" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#e4e7eb" />
+            <stop offset="50%" stopColor="#b4bac2" />
+            <stop offset="100%" stopColor="#8d949e" />
+          </linearGradient>
+        </defs>
 
-                    <linearGradient id={`crystal-bevel-${gradSuffix}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.88" />
-                      <stop offset="50%" stopColor="#3b1d8f" stopOpacity="0.92" />
-                      <stop offset="100%" stopColor="#e879f9" stopOpacity="0.88" />
-                    </linearGradient>
+        {/* 1. 3D Bottom Depth Shelf (Orange or Dark Gray) */}
+        <path
+          d="M 50,7 L 62,33 L 90,36 L 69,56 L 75,84 L 50,70 L 25,84 L 31,56 L 10,36 L 38,33 Z"
+          fill={earned ? '#b85400' : '#555b63'}
+          transform="translate(0, 6)"
+        />
 
-                    {/* Ignited Inner Star Gradient (Creamy Yellow -> Warm Peach -> Candy Pink, matching Sarah Carmody reference) */}
-                    <linearGradient id={`inner-ignited-${gradSuffix}`} x1="25%" y1="8%" x2="82%" y2="95%">
-                      <stop offset="0%" stopColor="#fff7ad" />
-                      <stop offset="48%" stopColor="#ffca4b" />
-                      <stop offset="82%" stopColor="#ff85a1" />
-                      <stop offset="100%" stopColor="#ff5ce1" />
-                    </linearGradient>
+        {/* 2. Main 3D Cartoon Star Face with crisp outline */}
+        <path
+          d="M 50,7 L 62,33 L 90,36 L 69,56 L 75,84 L 50,70 L 25,84 L 31,56 L 10,36 L 38,33 Z"
+          fill={earned ? 'url(#goldStarFace)' : 'url(#silverStarFace)'}
+          stroke="#ffffff"
+          strokeWidth="3.5"
+          strokeLinejoin="round"
+        />
 
-                    {/* Base / Pre-Ignited Chubby Golden Star Gradient */}
-                    <linearGradient id={`inner-base-${gradSuffix}`} x1="25%" y1="8%" x2="80%" y2="95%">
-                      <stop offset="0%" stopColor="#ffef8a" />
-                      <stop offset="55%" stopColor="#ffba3b" />
-                      <stop offset="100%" stopColor="#f27a24" />
-                    </linearGradient>
-
-                    {/* Unearned Soft Golden-Lavender Slot Gradient */}
-                    <linearGradient id={`inner-unearned-${gradSuffix}`} x1="25%" y1="8%" x2="80%" y2="95%">
-                      <stop offset="0%" stopColor="#e8f0fa" />
-                      <stop offset="100%" stopColor="#c3d5eb" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* ==========================================================
-                      OUTER MAGICAL CRYSTAL STAR HALO (Pops on Earned Stars!)
-                  ========================================================== */}
-                  {isIgnited && (
-                    <g
-                      className=" origin-[60px_60px] animate-star-crystal-pop"
-                      style={{ transformOrigin: '60px 60px' }}
-                    >
-                      {/* Outer Crystal Body with Soft Lavender-White Rim */}
-                      <path
-                        d={OUTER_CRYSTAL_STAR_PATH}
-                        fill={`url(#crystal-body-${gradSuffix})`}
-                        stroke="#c4b5fd"
-                        strokeWidth="2.4"
-                        strokeLinejoin="round"
-                      />
-
-                      {/* Inner Faceted Crystal Bevel */}
-                      <path
-                        d={MID_CRYSTAL_BEVEL_PATH}
-                        fill={`url(#crystal-bevel-${gradSuffix})`}
-                        stroke="#7dd3fc"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.7"
-                        strokeLinejoin="round"
-                      />
-
-                      {/* Glossy Pink & Cyan Light Bubbles inside the 5 Crystal Tips (Exact match to reference!) */}
-                      {/* Top tip pink & white bubbles */}
-                      <ellipse
-                        cx="59"
-                        cy="18.5"
-                        rx="4.6"
-                        ry="3.6"
-                        transform="rotate(-12 59 18.5)"
-                        fill="#ff85e4"
-                        opacity="0.92"
-                      />
-                      <circle cx="53.5" cy="24" r="2.1" fill="#a5f3fc" opacity="0.9" />
-                      <circle cx="65" cy="24" r="1.5" fill="#ffffff" opacity="0.85" />
-
-                      {/* Left tip cyan highlight arc & bubble */}
-                      <ellipse
-                        cx="20.5"
-                        cy="46.5"
-                        rx="4.5"
-                        ry="2.6"
-                        transform="rotate(-35 20.5 46.5)"
-                        fill="#67e8f9"
-                        opacity="0.88"
-                      />
-                      <circle cx="24" cy="53" r="1.8" fill="#f472b6" opacity="0.85" />
-
-                      {/* Right tip magenta & cyan bubbles */}
-                      <circle cx="99.5" cy="46.5" r="2.8" fill="#e879f9" opacity="0.85" />
-                      <circle cx="95.5" cy="52.5" r="1.7" fill="#ffffff" opacity="0.85" />
-
-                      {/* Bottom-Right tip glowing pink & white droplets */}
-                      <ellipse
-                        cx="84.5"
-                        cy="92"
-                        rx="4.4"
-                        ry="3.4"
-                        transform="rotate(28 84.5 92)"
-                        fill="#ff99e8"
-                        opacity="0.92"
-                      />
-                      <circle cx="88" cy="84.5" r="2.0" fill="#ffffff" opacity="0.9" />
-
-                      {/* Bottom-Left tip cyan sheen */}
-                      <ellipse
-                        cx="35"
-                        cy="91.5"
-                        rx="4.2"
-                        ry="2.5"
-                        transform="rotate(-28 35 91.5)"
-                        fill="#7dd3fc"
-                        opacity="0.82"
-                      />
-                    </g>
-                  )}
-
-                  {/* ==========================================================
-                      INNER CHUBBY 5-POINT STAR (Golden -> Sunset Pink-Gold)
-                  ========================================================== */}
-                  <g
-                    key={isIgnited ? 'ignited-core' : 'base-core'}
-                    className={isIgnited ? 'animate-star-inner-pop' : ''}
-                    style={{ transformOrigin: '60px 60px' }}
-                  >
-                    <path
-                      d={INNER_STAR_PATH}
-                      fill={
-                        isIgnited
-                          ? `url(#inner-ignited-${gradSuffix})`
-                          : isEarned
-                          ? `url(#inner-base-${gradSuffix})`
-                          : `url(#inner-unearned-${gradSuffix})`
-                      }
-                      stroke="#ffffff"
-                      strokeWidth="3.2"
-                      strokeLinejoin="round"
-                    />
-
-                    {/* Glossy Top-Left Specular Shine Droplets on the Inner Star */}
-                    <ellipse
-                      cx="56.5"
-                      cy="35.5"
-                      rx="2.8"
-                      ry="1.9"
-                      transform="rotate(-32 56.5 35.5)"
-                      fill="#ffffff"
-                      opacity="0.95"
-                    />
-                    <circle cx="52.5" cy="40.2" r="1.4" fill="#ffffff" opacity="0.9" />
-
-                    {/* Pink Swirl Flash at the moment of Ignition */}
-                    {isIgnited && (
-                      <path
-                        d={SWIRL_STAR_PATH}
-                        fill="#ff78d4"
-                        opacity="0.85"
-                        className="animate-star-swirl"
-                        style={{ transformOrigin: '60px 60px' }}
-                      />
-                    )}
-                  </g>
-                </svg>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+        {/* 3. Embossed Inner Star Core with warm glow */}
+        {earned && (
+          <path
+            d="M 50,18 L 58,37 L 78,39 L 63,54 L 67,74 L 50,64 L 33,74 L 37,54 L 22,39 L 42,37 Z"
+            fill="url(#goldStarHighlight)"
+            stroke="#ffda44"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
     </div>
   );
 };
@@ -743,11 +650,12 @@ export const HoleCompleteModal: React.FC<HoleCompleteModalProps> = ({
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[language];
+  const levelTitle = `Level ${holeNumber < 10 ? '0' + holeNumber : holeNumber}`;
 
-  let bannerTitle = t.holeComplete;
-  if (strokes === 1) bannerTitle = t.holeInOne;
-  else if (strokes < par) bannerTitle = t.birdie;
-  else if (strokes === par) bannerTitle = t.parBanner;
+  // Authentic casual game calculated score: 120,000 baseline!
+  const strokeBonus = Math.max(0, (par - strokes) * 15000);
+  const timeDeduction = Math.min(25000, Math.floor(timeMs / 1000) * 120);
+  const calculatedScore = Math.max(10000, 120000 + strokeBonus - timeDeduction);
 
   const totalSeconds = Math.max(1, Math.floor(Math.max(0, timeMs) / 1000));
   const formattedSecs = `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(
@@ -755,133 +663,125 @@ export const HoleCompleteModal: React.FC<HoleCompleteModalProps> = ({
   ).padStart(2, '0')}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-3.5">
-      <div className="bg-white rounded-[28px] w-full max-w-[390px] p-5 text-center shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.28)] animate-in fade-in zoom-in-95 duration-150">
-        <div className="text-xs font-extrabold uppercase tracking-wider text-[#2ecc71]">
-          {t.holeLabel(holeNumber)}
-        </div>
-        <h2 className="font-display text-[32px] font-bold text-[#163a5f] mt-0.5 leading-tight">
-          {bannerTitle}
-        </h2>
+    <div className="ui-modal-backdrop">
+      <section
+        className="ui-panel ui-modal-panel text-center"
+        style={{ maxWidth: '400px' }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={levelTitle}
+      >
+        {/* Title tab: "Level 01" */}
+        <h2 className="ui-panel-title">{levelTitle}</h2>
 
-        {bestRank !== null && (
-          <div className="mt-1.5 inline-flex items-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-800 text-[11px] font-extrabold px-3 py-0.5 rounded-full">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            {t.top10Record(bestRank)}
-          </div>
-        )}
+        {/* Close Button '✕' */}
+        <button
+          type="button"
+          className="ui-panel-close"
+          aria-label="Close"
+          onClick={onHome}
+        >
+          ✕
+        </button>
 
-        {/* 3 Animated Magical Crystal & Sunset-Gold Victory Stars */}
-        <AnimatedVictoryStars starsEarned={starsEarned} />
+        <div className="ui-modal-body flex flex-col items-center">
+          {/* 3 Arched Cartoon 3D Golden Stars (Exact match to Level 01 mockup!) */}
+          <div className="w-full flex items-center justify-center gap-2 my-2 h-[105px]">
+            {/* Left Star: tilted -12° */}
+            <Cartoon3DStar
+              earned={starsEarned >= 1}
+              size={68}
+              rotationDeg={-12}
+              translateY={6}
+              delayMs={150}
+            />
 
-        {/* Strokes, Par & Time Pills */}
-        <div className="grid grid-cols-3 gap-2 mb-5">
-          <div className="bg-sky-50 border-2 border-sky-100 rounded-2xl px-2 py-2">
-            <div className="text-[11px] font-bold text-slate-500">{t.strokes}</div>
-            <div className="text-xl font-black text-[#163a5f] tabular-nums">{strokes}</div>
-          </div>
-          <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl px-2 py-2">
-            <div className="text-[11px] font-bold text-slate-500">{t.par}</div>
-            <div className="text-xl font-black text-[#2ecc71] tabular-nums">{par}</div>
-          </div>
-          <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl px-2 py-2">
-            <div className="text-[11px] font-bold text-slate-500">{t.time}</div>
-            <div className="text-lg font-black text-[#d97706] tabular-nums leading-7">
-              {formattedSecs}
-            </div>
-          </div>
-        </div>
+            {/* Center Star: larger (88px), elevated */}
+            <Cartoon3DStar
+              earned={starsEarned >= 2}
+              size={88}
+              rotationDeg={0}
+              translateY={-8}
+              delayMs={400}
+            />
 
-        {/* Next Hole Locked Notice */}
-        {!isNextHoleUnlocked && (
-          <div className="mt-3.5 py-2 px-3 bg-amber-50 border border-amber-200/90 rounded-2xl flex items-center justify-center gap-2 text-amber-800 text-xs font-extrabold text-center">
-            <Lock className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-            <span>
-              {starsEarned < 2
-                ? 'Get at least 2★ to unlock the next level!'
-                : (nextHoleLockReason || 'Chapter locked: Max out 3★ on all holes!')}
+            {/* Right Star: tilted +12° */}
+            <Cartoon3DStar
+              earned={starsEarned >= 3}
+              size={68}
+              rotationDeg={12}
+              translateY={6}
+              delayMs={650}
+            />
+          </div>
+
+          {/* Stadium Score Container ("120000 Score" from mockup!) */}
+          <div className="ui-score-pill w-full max-w-[280px] my-3">
+            <span className="font-display font-black text-3xl md:text-4xl text-[#512185] tracking-tight leading-none">
+              {calculatedScore.toLocaleString()}
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#7e53a3] mt-1">
+              Score
             </span>
           </div>
-        )}
 
-        {/* Action Buttons: Home | Holes Menu | Retry | Next Hole */}
-        <div className="flex items-center justify-center gap-2 w-full mt-3">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onHome();
-            }}
-            className="btn-3d-blue w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 cursor-pointer"
-            title={t.homeTooltip}
-          >
-            <Home className="w-5 h-5 stroke-[2.5]" />
-          </button>
+          {/* Golf Stats Details (Strokes, Par, Time) */}
+          <div className="w-full grid grid-cols-3 gap-2 my-2">
+            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Strokes</span>
+              <span className="text-base font-black text-[#512185]">{strokes}</span>
+            </div>
+            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Par</span>
+              <span className="text-base font-black text-[#2ba93c]">{par}</span>
+            </div>
+            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
+              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Time</span>
+              <span className="text-base font-black text-[#ed7c08]">{formattedSecs}</span>
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onHolesMenu();
-            }}
-            className="btn-3d-orange w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 cursor-pointer"
-            title={t.holesMenuTooltip}
-          >
-            <Grid className="w-5 h-5 stroke-[2.5]" />
-          </button>
+          {/* Locked warning if level not unlocked */}
+          {!isNextHoleUnlocked && (
+            <div className="w-full mt-2 p-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-bold text-center">
+              {starsEarned < 2
+                ? 'Get at least 2★ to unlock the next level!'
+                : (nextHoleLockReason || 'Need 3★ on all holes to unlock next chapter!')}
+            </div>
+          )}
+        </div>
 
+        {/* Footer: Side-by-Side "Retry" (Purple 3D) and "Next" (Orange 3D) */}
+        <div className="ui-modal-footer w-full flex items-center justify-between gap-3 mt-3">
           <button
             type="button"
             onClick={() => {
               soundEngine.playClick();
               onRetry();
             }}
-            className="btn-3d-red w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 cursor-pointer"
-            title={t.retryTooltip}
+            className="btn-3d-purple flex-1 h-13 rounded-2xl text-xl text-white font-display font-bold cursor-pointer"
           >
-            <RotateCcw className="w-5 h-5 stroke-[2.5]" />
+            Retry
           </button>
 
-          {isNextHoleUnlocked ? (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
+          <button
+            type="button"
+            onClick={() => {
+              soundEngine.playClick();
+              if (isNextHoleUnlocked) {
                 onNextHole();
-              }}
-              className="btn-3d-green flex-1 h-12 rounded-full px-5 text-white font-display font-bold text-[17px] flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <span>{t.nextHole}</span>
-              <Play className="w-4 h-4 fill-white shrink-0" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                if (starsEarned < 2) {
-                  onRetry();
-                } else {
-                  onHolesMenu();
-                }
-              }}
-              className="btn-3d-yellow flex-1 h-12 rounded-full px-3 text-white font-display font-bold text-[14px] md:text-[15px] flex items-center justify-center gap-2 whitespace-nowrap shrink-0 cursor-pointer shadow-md"
-            >
-              {starsEarned < 2 ? (
-                <>
-                  <RotateCcw className="w-4 h-4 stroke-[2.5]" />
-                  <span>Retry for 2★</span>
-                </>
-              ) : (
-                <>
-                  <Grid className="w-4 h-4 stroke-[2.5]" />
-                  <span>Select Holes</span>
-                </>
-              )}
-            </button>
-          )}
+              } else if (starsEarned < 2) {
+                onRetry();
+              } else {
+                onHolesMenu();
+              }
+            }}
+            className="btn-3d-orange flex-1 h-13 rounded-2xl text-xl text-white font-display font-bold cursor-pointer"
+          >
+            Next
+          </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
