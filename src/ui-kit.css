@@ -1,0 +1,769 @@
+/* =========================================================
+   1. MAIN WINDOW FRAME & HALFTONE INNER CARD
+   ========================================================= */
+.kit-window {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 10px 12px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #9f58e8 0%, #8737d9 100%);
+  border: 2px solid #ba82f4;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 7px 0 #6720b6,
+    0 16px 28px rgba(28, 8, 56, 0.42);
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  user-select: none;
+}
+
+.kit-canvas {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 40px 20px 22px;
+  background: linear-gradient(180deg, #fcfaff 0%, #f5edff 55%, #eee2fe 100%);
+  box-shadow:
+    inset 0 2px 0 #ffffff,
+    0 5px 0 #d5c2ec,
+    0 7px 0 rgba(90, 30, 150, 0.25);
+}
+
+/* Subtle decorative halftone dots clustered at the edges/corners */
+.kit-corner-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.kit-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* =========================================================
+   2. HEADER RIBBON ("Title here") & CLOSE BUTTON ("X")
+   ========================================================= */
+.kit-header-ribbon {
+  position: absolute;
+  top: -18px;
+  left: 34px;
+  right: 92px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #954fe5 0%, #732bc3 100%);
+  border: 2.5px solid #b477f5;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 5px 0 #511996,
+    0 8px 12px rgba(32, 8, 64, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.kit-header-ribbon--solo {
+  right: 34px;
+}
+
+/* Inner recessed plaque inside the header ribbon */
+.kit-header-ribbon::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #7d35cd 0%, #712ac2 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(52, 12, 99, 0.6),
+    0 1.5px 0 rgba(196, 148, 250, 0.45);
+  pointer-events: none;
+}
+
+.kit-header-title {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-shadow:
+    0 2.5px 0 #4a158c,
+    0 4px 6px rgba(35, 8, 70, 0.35);
+  text-align: center;
+}
+
+.kit-close-btn {
+  position: absolute;
+  top: -18px;
+  right: 16px;
+  width: 56px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #954fe5 0%, #732bc3 100%);
+  border: 2.5px solid #b477f5;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 5px 0 #511996,
+    0 8px 12px rgba(32, 8, 64, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.kit-close-btn::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #7d35cd 0%, #712ac2 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(52, 12, 99, 0.6),
+    0 1.5px 0 rgba(196, 148, 250, 0.45);
+  pointer-events: none;
+}
+
+.kit-close-btn:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    0 2px 0 #511996,
+    0 4px 6px rgba(32, 8, 64, 0.28);
+}
+
+/* =========================================================
+   3. CIRCULAR 3D BUTTONS (GRAY/SILVER & GOLD PAUSE)
+   ========================================================= */
+.kit-round-btn {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  flex-shrink: 0;
+}
+
+.kit-round-btn::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* Silver / Neutral Round Button */
+.kit-round-btn--silver {
+  background: linear-gradient(180deg, #f7f7f7 0%, #d5d5d5 100%);
+  border: 2px solid #ffffff;
+  box-shadow:
+    inset 0 2px 0 #ffffff,
+    0 6px 0 #9b9b9b,
+    0 10px 14px rgba(45, 25, 75, 0.25);
+}
+.kit-round-btn--silver::before {
+  background: linear-gradient(180deg, #dfdfdf 0%, #d4d4d4 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(120, 120, 120, 0.35),
+    0 1.5px 0 rgba(255, 255, 255, 0.85);
+}
+.kit-round-btn--silver:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #9b9b9b, 0 5px 8px rgba(45, 25, 75, 0.2);
+}
+
+/* Gold Round Button (Pause & Action Coins) */
+.kit-round-btn--gold {
+  background: linear-gradient(180deg, #ffe45e 0%, #fba919 55%, #ee8406 100%);
+  border: 2px solid #fff29c;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    0 6px 0 #b85404,
+    0 10px 14px rgba(45, 25, 75, 0.28);
+  color: #9c3b00;
+}
+.kit-round-btn--gold::before {
+  background: linear-gradient(180deg, #f9b01c 0%, #ef8e08 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(158, 69, 0, 0.45),
+    0 1.5px 0 rgba(255, 240, 150, 0.75);
+}
+.kit-round-btn--gold:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b85404, 0 5px 8px rgba(45, 25, 75, 0.22);
+}
+
+.kit-pause-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 5px;
+}
+.kit-pause-bar {
+  width: 6.5px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #9c3b00 0%, #ba4b02 100%);
+  box-shadow:
+    inset 0 1.5px 1px rgba(60, 20, 0, 0.45),
+    0 1.5px 0 rgba(255, 224, 120, 0.65);
+}
+
+/* =========================================================
+   4. 3-STAR PROGRESS BAR & CURRENCY COUNTER WITH "+"
+   ========================================================= */
+.kit-star-bar {
+  position: relative;
+  width: 122px;
+  height: 18px;
+  border-radius: 999px;
+  background: #4b1580;
+  border: 2px solid #8a3a00;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.45),
+    0 2px 0 rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+}
+
+.kit-star-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.22) 0px,
+      rgba(255, 255, 255, 0.22) 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    linear-gradient(180deg, #ffdf4d 0%, #f58207 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.65);
+}
+
+.kit-star-icons {
+  position: absolute;
+  inset: -6px 6px -6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+/* Resource Counter Pill with "+" Button */
+.kit-resource-pill {
+  position: relative;
+  width: 122px;
+  height: 28px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.08) 1.5px, transparent 2px) 0 0 / 10px 10px,
+    linear-gradient(180deg, #544e56 0%, #635d66 100%);
+  box-shadow:
+    inset 0 2.5px 4px rgba(0, 0, 0, 0.45),
+    0 1.5px 0 #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 32px 0 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.kit-plus-btn {
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffe45e 0%, #f4930b 100%);
+  border: 1.5px solid #fff29c;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.7),
+    0 3px 0 #b45005,
+    0 4px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1.5px 0 #9e4200;
+  cursor: pointer;
+}
+.kit-plus-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #b45005;
+}
+
+/* =========================================================
+   5. SUNKEN TEXT INPUT FIELD
+   ========================================================= */
+.kit-input {
+  width: 100%;
+  height: 50px;
+  border-radius: 15px;
+  background: #ffffff;
+  border: 2.5px solid #ccb5ee;
+  box-shadow:
+    inset 0 3px 5px rgba(135, 95, 195, 0.18),
+    0 2px 0 #ffffff;
+  padding: 0 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #54317c;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.kit-input::placeholder {
+  color: #b7a2d4;
+}
+.kit-input:focus {
+  border-color: #9b51e0;
+  box-shadow:
+    inset 0 3px 5px rgba(135, 95, 195, 0.22),
+    0 0 0 3px rgba(155, 81, 224, 0.18);
+}
+
+/* =========================================================
+   6. TOGGLE SWITCHES & CHECKBOXES
+   ========================================================= */
+.kit-toggle {
+  position: relative;
+  width: 88px;
+  height: 42px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.kit-toggle--amber {
+  background: linear-gradient(180deg, #f39a0d 0%, #fdbc29 100%);
+  border: 2px solid #e08704;
+  box-shadow:
+    inset 0 3px 5px rgba(160, 72, 0, 0.42),
+    0 2px 0 #ffffff;
+}
+
+.kit-toggle--lavender {
+  background: linear-gradient(180deg, #ebe2f8 0%, #f7f3fd 100%);
+  border: 2px solid #d5c2ef;
+  box-shadow:
+    inset 0 3px 5px rgba(125, 95, 170, 0.25),
+    0 2px 0 #ffffff;
+}
+
+.kit-toggle-thumb {
+  position: absolute;
+  top: -3px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe45e 0%, #fba919 55%, #ee8406 100%);
+  border: 2px solid #fff29c;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.7),
+    0 4px 0 #b85404,
+    0 6px 9px rgba(45, 25, 75, 0.26);
+  transition: left 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.kit-toggle-thumb::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f9b01c 0%, #ef8e08 100%);
+  box-shadow:
+    inset 0 1.5px 2px rgba(158, 69, 0, 0.45),
+    0 1px 0 rgba(255, 240, 150, 0.75);
+}
+
+/* Checkboxes */
+.kit-checkbox {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.kit-checkbox--checked {
+  background: linear-gradient(180deg, #cc3cff 0%, #8f12d8 100%);
+  border: 2px solid #e58aff;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.45),
+    0 3px 0 #5b0892,
+    0 5px 8px rgba(45, 15, 75, 0.24);
+}
+.kit-checkbox--checked::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #a81ee8 0%, #8d11d4 100%);
+  box-shadow: inset 0 1.5px 2px rgba(55, 5, 90, 0.45);
+}
+
+.kit-checkbox--unchecked {
+  background: linear-gradient(180deg, #efe8fa 0%, #fbf9ff 100%);
+  border: 2px solid #d5c1ee;
+  box-shadow:
+    inset 0 2px 4px rgba(125, 95, 165, 0.24),
+    0 1.5px 0 #ffffff;
+}
+
+/* =========================================================
+   7. CANDY-STRIPED SLIDER BAR & DIVIDER
+   ========================================================= */
+.kit-slider-wrap {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.kit-slider-groove {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ebe2f8 0%, #f6f1fc 100%);
+  border: 2px solid #d7c5f0;
+  box-shadow:
+    inset 0 2px 4px rgba(120, 90, 165, 0.22),
+    0 1.5px 0 #ffffff;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+}
+
+.kit-slider-track {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #5f21a8;
+  box-shadow: inset 0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.kit-slider-fill {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: -1px;
+  border-radius: 999px;
+  border: 1.5px solid #b55200;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.28) 0px,
+      rgba(255, 255, 255, 0.28) 7px,
+      transparent 7px,
+      transparent 14px
+    ),
+    linear-gradient(180deg, #ffdd47 0%, #f58208 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.65);
+}
+
+.kit-slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe45e 0%, #fba919 55%, #ee8406 100%);
+  border: 2px solid #fff29c;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.7),
+    0 5px 0 #b85404,
+    0 8px 12px rgba(45, 25, 75, 0.28);
+  pointer-events: none;
+}
+.kit-slider-thumb::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f9b01c 0%, #ef8e08 100%);
+  box-shadow:
+    inset 0 1.5px 2px rgba(158, 69, 0, 0.45),
+    0 1px 0 rgba(255, 240, 150, 0.75);
+}
+
+.kit-slider-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.kit-divider {
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: #dad0e8;
+  box-shadow: 0 1.5px 0 #ffffff;
+}
+
+/* =========================================================
+   8. DOUBLE-BEVEL GLOSSY 3D RECTANGULAR BUTTONS
+   ========================================================= */
+.kit-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  font-family: 'Fredoka', 'Nunito', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+/* The recessed inner plaque inside every button */
+.kit-btn::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.kit-btn-label {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Sizes */
+.kit-btn--sm {
+  height: 48px;
+  border-radius: 14px;
+  font-size: 16px;
+  padding: 0 14px;
+}
+.kit-btn--sm::before {
+  inset: 5px;
+  border-radius: 9px;
+}
+
+.kit-btn--md {
+  height: 60px;
+  border-radius: 17px;
+  font-size: 21px;
+  padding: 0 20px;
+}
+.kit-btn--md::before {
+  inset: 6px;
+  border-radius: 11px;
+}
+
+.kit-btn--lg {
+  width: 100%;
+  height: 66px;
+  border-radius: 18px;
+  font-size: 25px;
+  padding: 0 24px;
+}
+.kit-btn--lg::before {
+  inset: 6px;
+  border-radius: 12px;
+}
+
+/* Color Variant: Gold / Amber */
+.kit-btn--gold {
+  background: linear-gradient(180deg, #ffe254 0%, #fba919 55%, #ee8406 100%);
+  border: 2px solid #fff094;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    0 6px 0 #b85305,
+    0 10px 14px rgba(45, 20, 75, 0.25);
+  text-shadow:
+    0 2px 0 #9e4400,
+    0 3px 5px rgba(90, 35, 0, 0.35);
+}
+.kit-btn--gold::before {
+  background:
+    radial-gradient(circle at 12% 25%, rgba(255, 235, 130, 0.35) 3px, transparent 4px),
+    radial-gradient(circle at 88% 75%, rgba(210, 100, 0, 0.18) 4px, transparent 5px),
+    linear-gradient(180deg, #fcb622 0%, #f1940b 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(168, 72, 0, 0.4),
+    0 1.5px 0 rgba(255, 240, 150, 0.72);
+}
+.kit-btn--gold:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--gold:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b85305, 0 5px 8px rgba(45, 20, 75, 0.2);
+}
+
+/* Color Variant: Vibrant Purple / Magenta */
+.kit-btn--purple {
+  background: linear-gradient(180deg, #d346ff 0%, #a51ef4 55%, #840fd0 100%);
+  border: 2px solid #eb94ff;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    0 6px 0 #560791,
+    0 10px 14px rgba(45, 20, 75, 0.26);
+  text-shadow:
+    0 2px 0 #4d0782,
+    0 3px 5px rgba(45, 0, 80, 0.38);
+}
+.kit-btn--purple::before {
+  background:
+    radial-gradient(circle at 12% 25%, rgba(240, 160, 255, 0.28) 3px, transparent 4px),
+    radial-gradient(circle at 88% 75%, rgba(75, 0, 130, 0.2) 4px, transparent 5px),
+    linear-gradient(180deg, #b527f8 0%, #9214dc 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(72, 4, 122, 0.48),
+    0 1.5px 0 rgba(235, 160, 255, 0.55);
+}
+.kit-btn--purple:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--purple:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #560791, 0 5px 8px rgba(45, 20, 75, 0.2);
+}
+
+/* Color Variant: Emerald Green */
+.kit-btn--green {
+  background: linear-gradient(180deg, #62f268 0%, #2ed13c 55%, #1cb02a 100%);
+  border: 2px solid #9effa2;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 6px 0 #12781d,
+    0 10px 14px rgba(45, 20, 75, 0.24);
+  text-shadow:
+    0 2px 0 #0f6818,
+    0 3px 5px rgba(0, 60, 10, 0.35);
+}
+.kit-btn--green::before {
+  background:
+    radial-gradient(circle at 15% 25%, rgba(170, 255, 175, 0.3) 3px, transparent 4px),
+    linear-gradient(180deg, #37db45 0%, #22be30 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(12, 95, 22, 0.42),
+    0 1.5px 0 rgba(175, 255, 180, 0.65);
+}
+.kit-btn--green:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--green:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #12781d, 0 5px 8px rgba(45, 20, 75, 0.2);
+}
+
+/* Color Variant: Crimson Red */
+.kit-btn--red {
+  background: linear-gradient(180deg, #ff7a82 0%, #ef3c49 55%, #d4222f 100%);
+  border: 2px solid #ffb0b5;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 6px 0 #8f121b,
+    0 10px 14px rgba(45, 20, 75, 0.24);
+  text-shadow:
+    0 2px 0 #730a11,
+    0 3px 5px rgba(50, 0, 10, 0.35);
+}
+.kit-btn--red::before {
+  background:
+    radial-gradient(circle at 15% 25%, rgba(255, 180, 185, 0.3) 3px, transparent 4px),
+    linear-gradient(180deg, #f74552 0%, #db2836 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(110, 10, 20, 0.42),
+    0 1.5px 0 rgba(255, 180, 185, 0.65);
+}
+.kit-btn--red:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--red:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #8f121b, 0 5px 8px rgba(45, 20, 75, 0.2);
+}
+
+/* Color Variant: Sky Blue */
+.kit-btn--blue {
+  background: linear-gradient(180deg, #64bdff 0%, #2b88ea 55%, #186ac9 100%);
+  border: 2px solid #9fdbff;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 6px 0 #0d468a,
+    0 10px 14px rgba(20, 30, 60, 0.24);
+  text-shadow:
+    0 2px 0 #093466,
+    0 3px 5px rgba(0, 20, 50, 0.35);
+}
+.kit-btn--blue::before {
+  background:
+    radial-gradient(circle at 15% 25%, rgba(180, 225, 255, 0.3) 3px, transparent 4px),
+    linear-gradient(180deg, #3795f5 0%, #1e72d6 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(10, 55, 110, 0.42),
+    0 1.5px 0 rgba(180, 225, 255, 0.65);
+}
+.kit-btn--blue:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--blue:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #0d468a, 0 5px 8px rgba(20, 30, 60, 0.2);
+}
+
+/* Color Variant: Bright Teal */
+.kit-btn--teal {
+  background: linear-gradient(180deg, #5feae5 0%, #1fc4c4 55%, #129a9f 100%);
+  border: 2px solid #a3f7f4;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 6px 0 #0a6569,
+    0 10px 14px rgba(10, 40, 50, 0.24);
+  text-shadow:
+    0 2px 0 #07474a,
+    0 3px 5px rgba(0, 30, 35, 0.35);
+}
+.kit-btn--teal::before {
+  background:
+    radial-gradient(circle at 15% 25%, rgba(180, 250, 248, 0.3) 3px, transparent 4px),
+    linear-gradient(180deg, #28d5d5 0%, #16a8ad 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(8, 75, 80, 0.42),
+    0 1.5px 0 rgba(180, 250, 248, 0.65);
+}
+.kit-btn--teal:hover {
+  filter: brightness(1.05);
+}
+.kit-btn--teal:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #0a6569, 0 5px 8px rgba(10, 40, 50, 0.2);
+}

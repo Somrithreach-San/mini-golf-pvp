@@ -760,52 +760,72 @@ export default function App() {
             </div>
           </div>
 
-          {/* Menu Control Stack: Rendered inside the authentic Cartoon UI Panel from Mockup */}
-          <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center my-auto pointer-events-none">
-            <div className="w-full max-w-[340px] md:max-w-[380px] pointer-events-auto">
-              <div className="ui-panel pt-11 pb-5 px-5 md:pt-12 md:pb-6 md:px-6 flex flex-col items-center gap-3.5 shadow-2xl">
-                {/* Overlapping Purple Banner: "Home" */}
-                <div className="ui-panel-title">
-                  <span>Home</span>
-                </div>
+          {/* Menu Control Stack:
+              - Mobile (< md): Compact bottom half stack below floating island
+              - Tablet (md:): Spacious centered lower dock below large floating island
+              - PC (lg:): Right-half centered vertical stack */}
+          <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-end lg:items-end lg:justify-center pb-2 md:pb-5 lg:pb-0 lg:pr-[8%] xl:pr-[12%] pointer-events-none">
+            <div className="w-full max-w-[380px] md:max-w-[460px] lg:max-w-[490px] flex flex-col items-center pointer-events-auto">
+              {/* "Mini Golf PvP" Outlined Title (Yellow "Mini Golf" + White "PvP" with matching purple outline) */}
+              <h1 className="flex items-baseline justify-center gap-2.5 md:gap-3.5 text-[42px] sm:text-[50px] md:text-[58px] lg:text-[64px] leading-none tracking-normal select-none text-center whitespace-nowrap mb-5 md:mb-6 lg:mb-7">
+                <span className="title-logo-text">{t.gameTitle}</span>
+                <span className="title-logo-3d">PvP</span>
+              </h1>
 
-                {/* Squircle Close Button from Mockup */}
-                <button
-                  type="button"
-                  className="ui-panel-close"
-                  onClick={() => {
-                    soundEngine.playClick();
-                    setSettingsOpen(true);
-                  }}
-                  title="Settings"
-                >
-                  ✕
-                </button>
+              {/* Primary "Continue / Hole X" Wide Green 3D Button */}
+              {(() => {
+                const continueHole = isHoleUnlocked(currentHoleNumber, holeStars)
+                  ? currentHoleNumber
+                  : getHighestUnlockedHole(holeStars);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      soundEngine.startMusic();
+                      startHole(continueHole);
+                    }}
+                    className="kit-btn kit-btn--lg kit-btn--green w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] !h-[64px] md:!h-[72px] mb-2.5 md:mb-3 cursor-pointer"
+                  >
+                    <span className="kit-btn-label !justify-start w-full px-2">
+                      <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#1b9129] flex items-center justify-center text-white shrink-0 shadow-inner mr-2">
+                        <Play className="w-5 h-5 fill-white ml-0.5" />
+                      </div>
+                      <div className="flex flex-col items-start text-left leading-tight">
+                        <span className="font-display font-bold text-white text-[22px] md:text-[25px] tracking-wide">
+                          {t.continue}
+                        </span>
+                        <span className="font-bold text-[#eaffea] text-[13px] md:text-[14px]">
+                          {t.holeLabel(continueHole)}
+                        </span>
+                      </div>
+                    </span>
+                  </button>
+                );
+              })()}
 
-                {/* Primary "Play" Wide Gold 3D Button */}
-                {(() => {
-                  const continueHole = isHoleUnlocked(currentHoleNumber, holeStars)
-                    ? currentHoleNumber
-                    : getHighestUnlockedHole(holeStars);
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundEngine.playClick();
-                        soundEngine.startMusic();
-                        startHole(continueHole);
-                      }}
-                      className="btn-3d-orange w-full h-14 md:h-16 rounded-2xl flex items-center justify-center gap-3 text-white cursor-pointer shadow-md"
-                    >
-                      <Play className="w-6 h-6 fill-white ml-0.5" />
-                      <span className="font-display font-black text-2xl md:text-[26px] tracking-wide">
-                        Play
-                      </span>
-                    </button>
-                  );
-                })()}
+              {/* 2-Player Real-Time Online Match Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  setMultiplayerOpen(true);
+                }}
+                className="kit-btn kit-btn--lg kit-btn--purple w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] !h-[64px] md:!h-[72px] mb-3 md:mb-3.5 cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform"
+              >
+                <span className="kit-btn-label !justify-start w-full px-2">
+                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#6c14b5] flex items-center justify-center text-white shrink-0 shadow-inner mr-2">
+                    <Users className="w-5 h-5 fill-white/20 stroke-[2.5]" />
+                  </div>
+                  <span className="font-display font-bold text-white text-[19px] md:text-[22px] tracking-wide whitespace-nowrap">
+                    2-Player Online
+                  </span>
+                </span>
+              </button>
 
-                {/* Secondary "Levels" Wide Gold 3D Button */}
+              {/* 2 Square Rounded Action Buttons: Holes | Balls */}
+              <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] mb-4 md:mb-5">
+                {/* Holes Button (Gold) */}
                 <button
                   type="button"
                   onClick={() => {
@@ -813,70 +833,36 @@ export default function App() {
                     setSelectedWorldIndex(activeCourse.worldIndex);
                     setScreen('holes');
                   }}
-                  className="btn-3d-orange w-full h-14 md:h-16 rounded-2xl flex items-center justify-center gap-3 text-white cursor-pointer shadow-md"
+                  className="kit-btn kit-btn--md kit-btn--gold !h-[78px] md:!h-[88px] lg:!h-[86px] flex-col gap-1 cursor-pointer"
                 >
-                  <Grid className="w-5 h-5 fill-white/20 stroke-[2.75]" />
-                  <span className="font-display font-black text-2xl md:text-[26px] tracking-wide">
-                    Levels
+                  <span className="kit-btn-label flex-col gap-1">
+                    <Grid className="w-6 h-6 md:w-7 md:h-7 fill-white/20 stroke-[2.5]" />
+                    <span className="font-display font-bold text-[13px] md:text-[14px]">{t.holes}</span>
                   </span>
                 </button>
 
-                {/* 2-Player Real-Time Online Match Button */}
+                {/* Balls Button (Teal with Dotted Golf Ball SVG Icon) */}
                 <button
                   type="button"
                   onClick={() => {
                     soundEngine.playClick();
-                    setMultiplayerOpen(true);
+                    setBallsOpen(true);
                   }}
-                  className="btn-3d-purple w-full h-13 md:h-14 rounded-2xl flex items-center justify-center gap-2.5 text-white cursor-pointer shadow-md"
+                  className="kit-btn kit-btn--md kit-btn--teal !h-[78px] md:!h-[88px] lg:!h-[86px] flex-col gap-1 cursor-pointer"
                 >
-                  <Users className="w-5 h-5 fill-white/20 stroke-[2.5]" />
-                  <span className="font-display font-black text-xl md:text-2xl tracking-wide">
-                    2-Player PvP
+                  <span className="kit-btn-label flex-col gap-1">
+                    <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 32 32" fill="none">
+                      <circle cx="16" cy="16" r="13" fill="white" />
+                      <circle cx="13" cy="11" r="1.5" fill="#16b5c9" />
+                      <circle cx="18" cy="10" r="1.5" fill="#16b5c9" />
+                      <circle cx="11" cy="16" r="1.5" fill="#16b5c9" />
+                      <circle cx="16" cy="15" r="1.5" fill="#16b5c9" />
+                      <circle cx="21" cy="15" r="1.5" fill="#16b5c9" />
+                      <circle cx="14" cy="20" r="1.5" fill="#16b5c9" />
+                    </svg>
+                    <span className="font-display font-bold text-[13px] md:text-[14px]">{t.balls}</span>
                   </span>
                 </button>
-
-                {/* Bottom Row of 3 Round Gold Action Coins (Exact match to Home reference mockup!) */}
-                <div className="flex items-center justify-center gap-4 mt-1">
-                  {/* Coin 1: Golfer Profile */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setAccountOpen(true);
-                    }}
-                    className="btn-round-gold"
-                    title="Profile & Account"
-                  >
-                    <User className="w-6 h-6 stroke-[2.75]" />
-                  </button>
-
-                  {/* Coin 2: Golf Balls Shop */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setBallsOpen(true);
-                    }}
-                    className="btn-round-gold"
-                    title="Golf Balls Shop"
-                  >
-                    <ShoppingBag className="w-6 h-6 stroke-[2.75]" />
-                  </button>
-
-                  {/* Coin 3: Settings */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playClick();
-                      setSettingsOpen(true);
-                    }}
-                    className="btn-round-gold"
-                    title="Settings"
-                  >
-                    <Settings className="w-6 h-6 stroke-[2.75]" />
-                  </button>
-                </div>
               </div>
             </div>
           </div>

@@ -1,11 +1,13 @@
-import React, { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock, X } from 'lucide-react';
+import React, { useState, type CSSProperties, type ReactNode } from 'react';
+import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock } from 'lucide-react';
 import { GOLF_BALL_SKINS, GolfBallSkin } from '../data/balls';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { soundEngine } from '../audio/soundEngine';
+import { CornerHalftoneBackground, GoldStarSvg } from './UIKitShowcase';
+import '../ui-kit.css';
 
 // ==========================================
-// 0. REUSABLE CARTOON MODAL SHELL (Lavender / Purple Skin)
+// 0. REUSABLE CARTOON MODAL SHELL (Vector Multi-Layer Kit)
 // ==========================================
 export type GameModalProps = {
   title: string;
@@ -21,42 +23,64 @@ export function GameModal({
   onClose,
   children,
   footer,
-  maxWidth = '430px',
+  maxWidth = '420px',
   showClose = true,
 }: GameModalProps) {
   return (
-    <div className="ui-modal-backdrop" onClick={onClose}>
-      <section
-        className="ui-panel ui-modal-panel"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/55 backdrop-blur-[3px] select-none"
+      onClick={onClose}
+    >
+      <div
+        className="kit-window"
         style={{ maxWidth }}
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 className={`ui-panel-title ${!showClose ? 'ui-panel-title--solo' : ''}`}>{title}</h2>
+        {/* Overlapping Purple Header Ribbon */}
+        <div className={`kit-header-ribbon ${!showClose ? 'kit-header-ribbon--solo' : ''}`}>
+          <span className="kit-header-title">{title}</span>
+        </div>
 
+        {/* Overlapping Close Button */}
         {showClose && (
           <button
             type="button"
-            className="ui-panel-close"
+            className="kit-close-btn"
             aria-label={`Close ${title}`}
             onClick={onClose}
           >
-            ✕
+            <svg width="22" height="22" viewBox="0 0 24 24" style={{ position: 'relative', zIndex: 1 }}>
+              <path
+                d="M5 5l14 14M19 5L5 19"
+                stroke="#f5edff"
+                strokeWidth="5"
+                strokeLinecap="round"
+                style={{ filter: 'drop-shadow(0 2.5px 0 #481487)' }}
+              />
+            </svg>
           </button>
         )}
 
-        <div className="ui-modal-body">{children}</div>
-
-        {footer && <div className="ui-modal-footer">{footer}</div>}
-      </section>
+        {/* Inner Canvas with Corner Halftone Bubbles */}
+        <div className="kit-canvas">
+          <CornerHalftoneBackground />
+          <div className="kit-content">
+            <div className="max-h-[75vh] max-h-[75dvh] overflow-y-auto overscroll-contain pr-1">
+              {children}
+            </div>
+            {footer && <div className="mt-2">{footer}</div>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 // ==========================================
-// 0.5 PAUSED MODAL (Exact match to Reference Mockup)
+// 0.5 PAUSED MODAL
 // ==========================================
 interface PausedModalProps {
   isOpen: boolean;
@@ -74,7 +98,7 @@ export const PausedModal: React.FC<PausedModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <GameModal title="Paused" onClose={onResume} maxWidth="340px">
+    <GameModal title="Paused" onClose={onResume} maxWidth="350px">
       <div className="flex items-center justify-center gap-4 py-4">
         {/* Coin 1: Home */}
         <button
@@ -83,10 +107,10 @@ export const PausedModal: React.FC<PausedModalProps> = ({
             soundEngine.playClick();
             onHome();
           }}
-          className="btn-round-gold"
+          className="kit-round-btn kit-round-btn--gold"
           title="Home"
         >
-          <Home className="w-6 h-6 stroke-[2.75]" />
+          <Home className="w-7 h-7 relative z-10 stroke-[2.75]" />
         </button>
 
         {/* Coin 2: Retry */}
@@ -96,10 +120,10 @@ export const PausedModal: React.FC<PausedModalProps> = ({
             soundEngine.playClick();
             onRetry();
           }}
-          className="btn-round-gold"
+          className="kit-round-btn kit-round-btn--gold"
           title="Restart Hole"
         >
-          <RotateCcw className="w-6 h-6 stroke-[2.75]" />
+          <RotateCcw className="w-7 h-7 relative z-10 stroke-[2.75]" />
         </button>
 
         {/* Coin 3: Play / Resume */}
@@ -109,10 +133,10 @@ export const PausedModal: React.FC<PausedModalProps> = ({
             soundEngine.playClick();
             onResume();
           }}
-          className="btn-round-gold"
+          className="kit-round-btn kit-round-btn--gold"
           title="Resume"
         >
-          <Play className="w-6 h-6 fill-current ml-0.5" />
+          <Play className="w-7 h-7 relative z-10 fill-current ml-0.5" />
         </button>
       </div>
     </GameModal>
@@ -120,7 +144,7 @@ export const PausedModal: React.FC<PausedModalProps> = ({
 };
 
 // ==========================================
-// 1. SETTINGS MODAL (Exact match to Reference Mockup)
+// 1. SETTINGS MODAL
 // ==========================================
 interface SettingsModalProps {
   isOpen: boolean;
@@ -168,47 +192,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       title={t.settings}
       onClose={onClose}
       footer={
-        <div className="w-full flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => {
               soundEngine.playClick();
               onClose();
             }}
-            className="btn-3d-purple flex-1 h-12 rounded-2xl text-lg text-white font-display font-bold cursor-pointer"
+            className="kit-btn kit-btn--md kit-btn--purple flex-1"
           >
-            Cancel
+            <span className="kit-btn-label">Cancel</span>
           </button>
-
           <button
             type="button"
             onClick={() => {
               soundEngine.playClick();
               onClose();
             }}
-            className="btn-3d-orange flex-1 h-12 rounded-2xl text-lg text-white font-display font-bold cursor-pointer"
+            className="kit-btn kit-btn--md kit-btn--gold flex-1"
           >
-            Save
+            <span className="kit-btn-label">Save</span>
           </button>
         </div>
       }
     >
-      <div className="space-y-4 py-2 px-1 text-[#4e2978]">
-        {/* Section: Audio Settings */}
+      <div className="space-y-4 py-1 text-[#54317c]">
+        {/* Audio settings */}
         <div>
-          <h3 className="font-display font-black text-base text-[#7d36c8] mb-2.5">
-            Audio settings
+          <h3 className="font-display font-black text-sm text-[#7d35cd] mb-2 uppercase tracking-wider">
+            Audio Settings
           </h3>
-
           <div className="space-y-3">
-            {/* Music Toggle & Slider */}
-            <div className="ui-card p-3.5 rounded-2xl space-y-2">
+            {/* Music */}
+            <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-display font-bold text-sm text-[#4e2978]">
-                  Sound music
-                </span>
-                <div
-                  className={`ui-toggle-track ${musicEnabled ? 'is-checked' : ''}`}
+                <span className="font-display font-bold text-sm">Sound music</span>
+                <button
+                  type="button"
+                  className={`kit-toggle ${musicEnabled ? 'kit-toggle--amber' : 'kit-toggle--lavender'}`}
                   onClick={() => {
                     soundEngine.playClick();
                     onToggleMusic(!musicEnabled);
@@ -216,35 +237,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   role="switch"
                   aria-checked={musicEnabled}
                 >
-                  <div className="ui-toggle-thumb" />
-                </div>
+                  <span
+                    className="kit-toggle-thumb"
+                    style={{ left: musicEnabled ? '42px' : '-2px' }}
+                  />
+                </button>
               </div>
 
               {/* Music Volume Slider */}
-              <div className="flex items-center gap-3 pt-1">
-                <span className="text-xs font-bold text-[#8a68a8] w-12">Volume</span>
-                <div className="flex-1 relative flex items-center">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={musicEnabled ? musicVol : 0}
-                    disabled={!musicEnabled}
-                    onChange={(e) => setMusicVol(Number(e.target.value))}
-                    className="w-full h-3 rounded-full appearance-none bg-[#ded0ea] accent-[#ffa500] cursor-pointer disabled:opacity-40"
-                  />
+              <div className="kit-slider-wrap !h-8">
+                <div className="kit-slider-groove !h-4">
+                  <div className="kit-slider-track !h-2">
+                    <div
+                      className="kit-slider-fill"
+                      style={{ width: `${musicEnabled ? musicVol : 0}%` }}
+                    />
+                    <div
+                      className="kit-slider-thumb !w-7 !h-7"
+                      style={{ left: `${musicEnabled ? musicVol : 0}%` }}
+                    />
+                  </div>
                 </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={musicEnabled ? musicVol : 0}
+                  disabled={!musicEnabled}
+                  onChange={(e) => setMusicVol(Number(e.target.value))}
+                  className="kit-slider-input"
+                />
               </div>
             </div>
 
-            {/* Sound Effect Toggle & Slider */}
-            <div className="ui-card p-3.5 rounded-2xl space-y-2">
+            {/* SFX */}
+            <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] shadow-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-display font-bold text-sm text-[#4e2978]">
-                  Sound effect
-                </span>
-                <div
-                  className={`ui-toggle-track ${sfxEnabled ? 'is-checked' : ''}`}
+                <span className="font-display font-bold text-sm">Sound effect</span>
+                <button
+                  type="button"
+                  className={`kit-toggle ${sfxEnabled ? 'kit-toggle--amber' : 'kit-toggle--lavender'}`}
                   onClick={() => {
                     soundEngine.playClick();
                     onToggleSfx(!sfxEnabled);
@@ -252,32 +284,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   role="switch"
                   aria-checked={sfxEnabled}
                 >
-                  <div className="ui-toggle-thumb" />
-                </div>
+                  <span
+                    className="kit-toggle-thumb"
+                    style={{ left: sfxEnabled ? '42px' : '-2px' }}
+                  />
+                </button>
               </div>
 
               {/* SFX Volume Slider */}
-              <div className="flex items-center gap-3 pt-1">
-                <span className="text-xs font-bold text-[#8a68a8] w-12">Volume</span>
-                <div className="flex-1 relative flex items-center">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={sfxEnabled ? sfxVol : 0}
-                    disabled={!sfxEnabled}
-                    onChange={(e) => setSfxVol(Number(e.target.value))}
-                    className="w-full h-3 rounded-full appearance-none bg-[#ded0ea] accent-[#ffa500] cursor-pointer disabled:opacity-40"
-                  />
+              <div className="kit-slider-wrap !h-8">
+                <div className="kit-slider-groove !h-4">
+                  <div className="kit-slider-track !h-2">
+                    <div
+                      className="kit-slider-fill"
+                      style={{ width: `${sfxEnabled ? sfxVol : 0}%` }}
+                    />
+                    <div
+                      className="kit-slider-thumb !w-7 !h-7"
+                      style={{ left: `${sfxEnabled ? sfxVol : 0}%` }}
+                    />
+                  </div>
                 </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={sfxEnabled ? sfxVol : 0}
+                  disabled={!sfxEnabled}
+                  onChange={(e) => setSfxVol(Number(e.target.value))}
+                  className="kit-slider-input"
+                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Section: Language Selection */}
+        {/* Language */}
         <div>
-          <h3 className="font-display font-black text-base text-[#7d36c8] mb-2">
+          <h3 className="font-display font-black text-sm text-[#7d35cd] mb-2 uppercase tracking-wider">
             Language
           </h3>
           <div className="grid grid-cols-3 gap-2">
@@ -298,10 +342,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   soundEngine.playClick();
                   onChangeLanguage(item.id);
                 }}
-                className={`py-2 px-2 rounded-xl text-xs font-display font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                className={`py-2 px-1 rounded-xl text-xs font-display font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   language === item.id
-                    ? 'btn-3d-orange text-white shadow-sm'
-                    : 'ui-card text-[#51336d] hover:bg-white'
+                    ? 'kit-btn kit-btn--sm kit-btn--gold !h-10 !w-full'
+                    : 'bg-white/80 border border-[#d5c1ee] text-[#54317c] hover:bg-white'
                 }`}
               >
                 <span>{item.flag}</span>
@@ -311,7 +355,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* Section: Reset Progress */}
+        {/* Reset Progress */}
         <div className="pt-1">
           {!confirmReset ? (
             <button
@@ -320,9 +364,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 soundEngine.playClick();
                 setConfirmReset(true);
               }}
-              className="btn-3d-red w-full h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
+              className="kit-btn kit-btn--sm kit-btn--red w-full !h-11"
             >
-              {t.resetProgress}
+              <span className="kit-btn-label">{t.resetProgress}</span>
             </button>
           ) : (
             <div className="flex gap-2">
@@ -334,16 +378,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   setConfirmReset(false);
                   onClose();
                 }}
-                className="btn-3d-red flex-1 h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
+                className="kit-btn kit-btn--sm kit-btn--red flex-1 !h-11"
               >
-                Confirm Reset
+                <span className="kit-btn-label">Confirm Reset</span>
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
-                className="btn-3d-purple flex-1 h-10 rounded-xl text-xs font-display font-bold text-white cursor-pointer"
+                className="kit-btn kit-btn--sm kit-btn--purple flex-1 !h-11"
               >
-                Cancel
+                <span className="kit-btn-label">Cancel</span>
               </button>
             </div>
           )}
@@ -379,7 +423,7 @@ export const BallsModal: React.FC<BallsModalProps> = ({
 
   return (
     <GameModal
-      title={t.chooseBallTitle}
+      title={t.golfBalls}
       onClose={onClose}
       footer={
         <button
@@ -388,9 +432,9 @@ export const BallsModal: React.FC<BallsModalProps> = ({
             soundEngine.playClick();
             onClose();
           }}
-          className="btn-3d-green w-full h-12 rounded-2xl text-white font-display font-bold text-base cursor-pointer"
+          className="kit-btn kit-btn--md kit-btn--green w-full"
         >
-          {t.done}
+          <span className="kit-btn-label">{t.done}</span>
         </button>
       }
     >
@@ -398,7 +442,7 @@ export const BallsModal: React.FC<BallsModalProps> = ({
         {GOLF_BALL_SKINS.map((skin) => {
           const isSelected = skin.id === selectedBallId;
           const isUnlocked = totalStars >= skin.requiredStars;
-          const localized = t.balls[skin.id] || { name: skin.name, desc: skin.description };
+          const localized = t.ballSkins[skin.id] || { name: skin.name, subtitle: skin.description };
 
           return (
             <div
@@ -409,11 +453,11 @@ export const BallsModal: React.FC<BallsModalProps> = ({
                   onSelectBall(skin);
                 }
               }}
-              className={`ui-card p-3 rounded-2xl flex flex-col items-center text-center transition-all ${
+              className={`p-3 rounded-2xl bg-white/80 border-2 transition-all flex flex-col items-center text-center ${
                 isSelected
-                  ? 'border-[#ffaa00] shadow-[0_0_0_3px_rgba(255,170,0,0.35)]'
-                  : 'hover:scale-[1.02]'
-              } ${isUnlocked ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}`}
+                  ? 'border-[#fba919] shadow-[0_0_0_3px_rgba(251,169,25,0.35)]'
+                  : 'border-[#d5c1ee]'
+              } ${isUnlocked ? 'cursor-pointer hover:scale-[1.02]' : 'opacity-60 cursor-not-allowed'}`}
             >
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-inner border-2 border-white mb-2"
@@ -422,29 +466,29 @@ export const BallsModal: React.FC<BallsModalProps> = ({
                 {skin.icon}
               </div>
 
-              <div className="font-display font-black text-sm text-[#4e2978] leading-tight">
+              <div className="font-display font-black text-sm text-[#54317c] leading-tight">
                 {localized.name}
               </div>
 
               <div className="text-[11px] font-semibold text-[#8a68a8] mt-1 line-clamp-1">
-                {localized.desc}
+                {localized.subtitle || skin.description}
               </div>
 
               <div className="mt-2.5 w-full">
                 {isSelected ? (
-                  <div className="w-full py-1 rounded-xl bg-amber-100 text-amber-800 text-xs font-black flex items-center justify-center gap-1">
+                  <div className="w-full py-1.5 rounded-xl bg-amber-100 text-amber-800 text-xs font-black flex items-center justify-center gap-1">
                     <Check className="w-3.5 h-3.5 stroke-[3]" />
                     <span>Equipped</span>
                   </div>
                 ) : isUnlocked ? (
                   <button
                     type="button"
-                    className="btn-3d-purple w-full py-1 rounded-xl text-xs font-bold text-white cursor-pointer"
+                    className="kit-btn kit-btn--sm kit-btn--purple !h-8 w-full text-xs"
                   >
-                    Select
+                    <span className="kit-btn-label">Select</span>
                   </button>
                 ) : (
-                  <div className="w-full py-1 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center gap-1">
+                  <div className="w-full py-1.5 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center gap-1">
                     <Lock className="w-3.5 h-3.5" />
                     <span>{skin.requiredStars} ★</span>
                   </div>
@@ -483,35 +527,35 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, language, onClose 
             soundEngine.playClick();
             onClose();
           }}
-          className="btn-3d-green w-full h-12 rounded-2xl text-white font-display font-bold text-base cursor-pointer"
+          className="kit-btn kit-btn--md kit-btn--green w-full"
         >
-          {t.gotIt}
+          <span className="kit-btn-label">{t.gotIt}</span>
         </button>
       }
     >
       <div className="space-y-3 py-1">
-        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
-          <span className="w-7 h-7 rounded-full bg-[#7d36c8] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+        <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] flex items-start gap-3 shadow-xs">
+          <span className="w-7 h-7 rounded-full bg-[#7d35cd] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
             1
           </span>
-          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
-            <strong className="text-[#7d36c8] font-bold">{t.helpStep1Bold}</strong> {t.helpStep1Text}
+          <p className="text-xs text-[#54317c] font-semibold leading-relaxed">
+            <strong className="text-[#7d35cd] font-bold">{t.helpStep1Bold}</strong> {t.helpStep1Text}
           </p>
         </div>
-        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
-          <span className="w-7 h-7 rounded-full bg-[#2ba93c] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+        <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] flex items-start gap-3 shadow-xs">
+          <span className="w-7 h-7 rounded-full bg-[#2ed13c] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
             2
           </span>
-          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
-            <strong className="text-[#2ba93c] font-bold">{t.helpStep2Bold}</strong> {t.helpStep2Text}
+          <p className="text-xs text-[#54317c] font-semibold leading-relaxed">
+            <strong className="text-[#2ed13c] font-bold">{t.helpStep2Bold}</strong> {t.helpStep2Text}
           </p>
         </div>
-        <div className="ui-card p-3 rounded-2xl flex items-start gap-3">
-          <span className="w-7 h-7 rounded-full bg-[#f2930a] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
+        <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] flex items-start gap-3 shadow-xs">
+          <span className="w-7 h-7 rounded-full bg-[#fba919] text-white font-black flex items-center justify-center shrink-0 text-sm shadow-sm">
             3
           </span>
-          <p className="text-xs text-[#51336d] font-semibold leading-relaxed">
-            <strong className="text-[#f2930a] font-bold">{t.helpStep3Bold}</strong> {t.helpStep3Text}
+          <p className="text-xs text-[#54317c] font-semibold leading-relaxed">
+            <strong className="text-[#fba919] font-bold">{t.helpStep3Bold}</strong> {t.helpStep3Text}
           </p>
         </div>
       </div>
@@ -520,100 +564,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, language, onClose 
 };
 
 // ==========================================
-// 4. CARTOON 3D GOLDEN STARS & VICTORY MODAL (Exact match to Reference Level 01 Mockup)
+// 4. HOLE COMPLETE VICTORY MODAL (Preserves all user data & logic)
 // ==========================================
-
-const Cartoon3DStar: React.FC<{
-  earned: boolean;
-  size: number;
-  rotationDeg: number;
-  translateY: number;
-  delayMs: number;
-}> = ({ earned, size, rotationDeg, translateY, delayMs }) => {
-  const [visible, setVisible] = useState(!earned);
-
-  useEffect(() => {
-    if (earned) {
-      const timer = window.setTimeout(() => {
-        setVisible(true);
-        soundEngine.playClick();
-      }, delayMs);
-      return () => clearTimeout(timer);
-    }
-  }, [earned, delayMs]);
-
-  return (
-    <div
-      style={{
-        width: `${size}px`,
-        height: `${size}px`,
-        transform: `translateY(${translateY}px) rotate(${rotationDeg}deg)`,
-        transition: 'transform 0.3s ease',
-      }}
-      className={`relative flex items-center justify-center ${
-        earned && visible ? 'animate-cartoon-star' : ''
-      }`}
-    >
-      <svg
-        viewBox="0 0 100 100"
-        className={`w-full h-full overflow-visible ${
-          earned ? 'animate-star-glow' : 'opacity-55'
-        }`}
-      >
-        <defs>
-          {/* Gold Star Face Gradient */}
-          <linearGradient id="goldStarFace" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ffef7a" />
-            <stop offset="42%" stopColor="#ffc01e" />
-            <stop offset="100%" stopColor="#f58800" />
-          </linearGradient>
-
-          {/* Gold Star Highlight Emboss */}
-          <linearGradient id="goldStarHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-            <stop offset="60%" stopColor="#ffe66b" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#ffa000" stopOpacity="0.1" />
-          </linearGradient>
-
-          {/* Silver/Gray Star Face Gradient */}
-          <linearGradient id="silverStarFace" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#e4e7eb" />
-            <stop offset="50%" stopColor="#b4bac2" />
-            <stop offset="100%" stopColor="#8d949e" />
-          </linearGradient>
-        </defs>
-
-        {/* 1. 3D Bottom Depth Shelf (Orange or Dark Gray) */}
-        <path
-          d="M 50,7 L 62,33 L 90,36 L 69,56 L 75,84 L 50,70 L 25,84 L 31,56 L 10,36 L 38,33 Z"
-          fill={earned ? '#b85400' : '#555b63'}
-          transform="translate(0, 6)"
-        />
-
-        {/* 2. Main 3D Cartoon Star Face with crisp outline */}
-        <path
-          d="M 50,7 L 62,33 L 90,36 L 69,56 L 75,84 L 50,70 L 25,84 L 31,56 L 10,36 L 38,33 Z"
-          fill={earned ? 'url(#goldStarFace)' : 'url(#silverStarFace)'}
-          stroke="#ffffff"
-          strokeWidth="3.5"
-          strokeLinejoin="round"
-        />
-
-        {/* 3. Embossed Inner Star Core with warm glow */}
-        {earned && (
-          <path
-            d="M 50,18 L 58,37 L 78,39 L 63,54 L 67,74 L 50,64 L 33,74 L 37,54 L 22,39 L 42,37 Z"
-            fill="url(#goldStarHighlight)"
-            stroke="#ffda44"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
-    </div>
-  );
-};
-
 interface HoleCompleteModalProps {
   isOpen: boolean;
   language: Language;
@@ -650,12 +602,11 @@ export const HoleCompleteModal: React.FC<HoleCompleteModalProps> = ({
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[language];
-  const levelTitle = `Level ${holeNumber < 10 ? '0' + holeNumber : holeNumber}`;
 
-  // Authentic casual game calculated score: 120,000 baseline!
-  const strokeBonus = Math.max(0, (par - strokes) * 15000);
-  const timeDeduction = Math.min(25000, Math.floor(timeMs / 1000) * 120);
-  const calculatedScore = Math.max(10000, 120000 + strokeBonus - timeDeduction);
+  let bannerTitle = t.holeComplete;
+  if (strokes === 1) bannerTitle = t.holeInOne;
+  else if (strokes < par) bannerTitle = t.birdie;
+  else if (strokes === par) bannerTitle = t.parBanner;
 
   const totalSeconds = Math.max(1, Math.floor(Math.max(0, timeMs) / 1000));
   const formattedSecs = `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(
@@ -663,125 +614,184 @@ export const HoleCompleteModal: React.FC<HoleCompleteModalProps> = ({
   ).padStart(2, '0')}`;
 
   return (
-    <div className="ui-modal-backdrop">
-      <section
-        className="ui-panel ui-modal-panel text-center"
-        style={{ maxWidth: '400px' }}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 bg-black/55 backdrop-blur-[3px] select-none">
+      <div
+        className="kit-window text-center"
+        style={{ maxWidth: '420px' }}
         role="dialog"
         aria-modal="true"
-        aria-label={levelTitle}
+        aria-label={bannerTitle}
       >
-        {/* Title tab: "Level 01" */}
-        <h2 className="ui-panel-title">{levelTitle}</h2>
+        {/* Overlapping Title Ribbon */}
+        <div className="kit-header-ribbon">
+          <span className="kit-header-title">{bannerTitle}</span>
+        </div>
 
         {/* Close Button '✕' */}
         <button
           type="button"
-          className="ui-panel-close"
+          className="kit-close-btn"
           aria-label="Close"
           onClick={onHome}
         >
-          ✕
+          <svg width="22" height="22" viewBox="0 0 24 24" style={{ position: 'relative', zIndex: 1 }}>
+            <path
+              d="M5 5l14 14M19 5L5 19"
+              stroke="#f5edff"
+              strokeWidth="5"
+              strokeLinecap="round"
+              style={{ filter: 'drop-shadow(0 2.5px 0 #481487)' }}
+            />
+          </svg>
         </button>
 
-        <div className="ui-modal-body flex flex-col items-center">
-          {/* 3 Arched Cartoon 3D Golden Stars (Exact match to Level 01 mockup!) */}
-          <div className="w-full flex items-center justify-center gap-2 my-2 h-[105px]">
-            {/* Left Star: tilted -12° */}
-            <Cartoon3DStar
-              earned={starsEarned >= 1}
-              size={68}
-              rotationDeg={-12}
-              translateY={6}
-              delayMs={150}
-            />
+        <div className="kit-canvas">
+          <CornerHalftoneBackground />
+          <div className="kit-content items-center">
+            {/* Hole Label */}
+            <div className="text-xs font-black uppercase tracking-wider text-[#7d35cd] mt-1">
+              {t.holeLabel(holeNumber)}
+            </div>
 
-            {/* Center Star: larger (88px), elevated */}
-            <Cartoon3DStar
-              earned={starsEarned >= 2}
-              size={88}
-              rotationDeg={0}
-              translateY={-8}
-              delayMs={400}
-            />
+            {/* Top 10 Record Badge if achieved */}
+            {bestRank !== null && (
+              <div className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-300 text-amber-900 text-xs font-black px-3.5 py-1 rounded-full shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>{t.top10Record(bestRank)}</span>
+              </div>
+            )}
 
-            {/* Right Star: tilted +12° */}
-            <Cartoon3DStar
-              earned={starsEarned >= 3}
-              size={68}
-              rotationDeg={12}
-              translateY={6}
-              delayMs={650}
-            />
+            {/* 3 Plump 3D Golden Stars */}
+            <div className="flex items-center justify-center gap-2.5 my-2 h-[80px]">
+              <div style={{ transform: 'translateY(6px) rotate(-12deg)' }}>
+                <GoldStarSvg size={64} unearned={starsEarned < 1} />
+              </div>
+              <div style={{ transform: 'translateY(-6px) scale(1.2)' }}>
+                <GoldStarSvg size={68} unearned={starsEarned < 2} />
+              </div>
+              <div style={{ transform: 'translateY(6px) rotate(12deg)' }}>
+                <GoldStarSvg size={64} unearned={starsEarned < 3} />
+              </div>
+            </div>
+
+            {/* Player Performance Stats Row */}
+            <div className="grid grid-cols-3 gap-2 w-full my-1">
+              <div className="p-2 rounded-2xl bg-white/80 border border-[#d5c1ee] flex flex-col items-center">
+                <span className="text-[10px] font-bold text-[#8a68a8] uppercase">{t.strokes}</span>
+                <span className="text-xl font-black text-[#54317c]">{strokes}</span>
+              </div>
+              <div className="p-2 rounded-2xl bg-white/80 border border-[#d5c1ee] flex flex-col items-center">
+                <span className="text-[10px] font-bold text-[#8a68a8] uppercase">{t.par}</span>
+                <span className="text-xl font-black text-[#2ed13c]">{par}</span>
+              </div>
+              <div className="p-2 rounded-2xl bg-white/80 border border-[#d5c1ee] flex flex-col items-center">
+                <span className="text-[10px] font-bold text-[#8a68a8] uppercase">{t.time}</span>
+                <span className="text-lg font-black text-[#ee8406]">{formattedSecs}</span>
+              </div>
+            </div>
+
+            {/* Next Hole Locked Notice */}
+            {!isNextHoleUnlocked && (
+              <div className="w-full p-2 bg-amber-50 border border-amber-200/90 rounded-2xl flex items-center justify-center gap-2 text-amber-900 text-xs font-black text-center">
+                <Lock className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                <span>
+                  {starsEarned < 2
+                    ? 'Get at least 2★ to unlock the next level!'
+                    : (nextHoleLockReason || 'Chapter locked: Max out 3★ on all holes!')}
+                </span>
+              </div>
+            )}
+
+            {/* Action Buttons: Home | Holes Menu | Retry | Next Hole */}
+            <div className="flex items-center justify-center gap-2 w-full mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onHome();
+                }}
+                className="kit-btn kit-btn--md kit-btn--blue !w-13 !h-13 !p-0"
+                title={t.homeTooltip}
+              >
+                <span className="kit-btn-label">
+                  <Home className="w-5 h-5 stroke-[2.5]" />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onHolesMenu();
+                }}
+                className="kit-btn kit-btn--md kit-btn--purple !w-13 !h-13 !p-0"
+                title={t.holesMenuTooltip}
+              >
+                <span className="kit-btn-label">
+                  <Grid className="w-5 h-5 stroke-[2.5]" />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playClick();
+                  onRetry();
+                }}
+                className="kit-btn kit-btn--md kit-btn--red !w-13 !h-13 !p-0"
+                title={t.retryTooltip}
+              >
+                <span className="kit-btn-label">
+                  <RotateCcw className="w-5 h-5 stroke-[2.5]" />
+                </span>
+              </button>
+
+              {isNextHoleUnlocked ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    onNextHole();
+                  }}
+                  className="kit-btn kit-btn--md kit-btn--gold flex-1 !h-13"
+                >
+                  <span className="kit-btn-label">
+                    <span>{t.nextHole}</span>
+                    <Play className="w-4 h-4 fill-white shrink-0" />
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    if (starsEarned < 2) {
+                      onRetry();
+                    } else {
+                      onHolesMenu();
+                    }
+                  }}
+                  className="kit-btn kit-btn--md kit-btn--gold flex-1 !h-13"
+                >
+                  <span className="kit-btn-label">
+                    {starsEarned < 2 ? (
+                      <>
+                        <RotateCcw className="w-4 h-4 stroke-[2.5]" />
+                        <span>Retry for 2★</span>
+                      </>
+                    ) : (
+                      <>
+                        <Grid className="w-4 h-4 stroke-[2.5]" />
+                        <span>Select Holes</span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
-
-          {/* Stadium Score Container ("120000 Score" from mockup!) */}
-          <div className="ui-score-pill w-full max-w-[280px] my-3">
-            <span className="font-display font-black text-3xl md:text-4xl text-[#512185] tracking-tight leading-none">
-              {calculatedScore.toLocaleString()}
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#7e53a3] mt-1">
-              Score
-            </span>
-          </div>
-
-          {/* Golf Stats Details (Strokes, Par, Time) */}
-          <div className="w-full grid grid-cols-3 gap-2 my-2">
-            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
-              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Strokes</span>
-              <span className="text-base font-black text-[#512185]">{strokes}</span>
-            </div>
-            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
-              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Par</span>
-              <span className="text-base font-black text-[#2ba93c]">{par}</span>
-            </div>
-            <div className="ui-chip py-1.5 px-2 rounded-2xl flex flex-col items-center">
-              <span className="text-[10px] font-bold text-[#8a68a8] uppercase">Time</span>
-              <span className="text-base font-black text-[#ed7c08]">{formattedSecs}</span>
-            </div>
-          </div>
-
-          {/* Locked warning if level not unlocked */}
-          {!isNextHoleUnlocked && (
-            <div className="w-full mt-2 p-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-bold text-center">
-              {starsEarned < 2
-                ? 'Get at least 2★ to unlock the next level!'
-                : (nextHoleLockReason || 'Need 3★ on all holes to unlock next chapter!')}
-            </div>
-          )}
         </div>
-
-        {/* Footer: Side-by-Side "Retry" (Purple 3D) and "Next" (Orange 3D) */}
-        <div className="ui-modal-footer w-full flex items-center justify-between gap-3 mt-3">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onRetry();
-            }}
-            className="btn-3d-purple flex-1 h-13 rounded-2xl text-xl text-white font-display font-bold cursor-pointer"
-          >
-            Retry
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              if (isNextHoleUnlocked) {
-                onNextHole();
-              } else if (starsEarned < 2) {
-                onRetry();
-              } else {
-                onHolesMenu();
-              }
-            }}
-            className="btn-3d-orange flex-1 h-13 rounded-2xl text-xl text-white font-display font-bold cursor-pointer"
-          >
-            Next
-          </button>
-        </div>
-      </section>
+      </div>
     </div>
   );
 };
