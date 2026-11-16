@@ -10,6 +10,7 @@ import { soundEngine } from '../audio/soundEngine';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { UserAvatar } from './UserAvatar';
 import { getSavedAvatarSeed } from '../data/userProfile';
+import { TOTAL_GAME_STARS } from '../data/courses';
 import { firebaseSync, GlobalStarRankingUser } from '../services/firebaseSync';
 
 export interface LeaderboardModalProps {
@@ -216,7 +217,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                         <div className="inline-flex items-center gap-1 bg-amber-50 border border-amber-300 rounded-full px-2.5 py-0.5 text-amber-700 font-display font-bold text-xs">
                           <Star className="w-3 h-3 fill-amber-400 text-amber-500 shrink-0" />
                           <span>{user.totalStars}</span>
-                          <span className="text-[10px] text-amber-500/80 font-normal">/ 90</span>
+                          <span className="text-[10px] text-amber-500/80 font-normal">/ {TOTAL_GAME_STARS}</span>
                         </div>
                       </td>
                     </tr>

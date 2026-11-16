@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { UserAvatar } from './UserAvatar';
 import { generateRandomAvatarSeed } from '../data/userProfile';
+import { TOTAL_GAME_STARS } from '../data/courses';
 import { firebaseSync, CloudSyncStatus, CloudUserProfile } from '../services/firebaseSync';
 import { soundEngine } from '../audio/soundEngine';
 
@@ -191,7 +192,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                 </div>
                 <div className="text-left leading-tight">
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Stars</div>
-                  <div className="text-sm font-black text-slate-800">{totalStars} / 90</div>
+                  <div className="text-sm font-black text-slate-800">{totalStars} / {TOTAL_GAME_STARS}</div>
                 </div>
               </div>
 

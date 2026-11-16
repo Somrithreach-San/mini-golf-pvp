@@ -24,6 +24,7 @@ import {
   ALL_HOLES,
   GOLF_WORLDS,
   HoleCourse,
+  TOTAL_GAME_STARS,
   isHoleUnlocked,
   getHoleLockReason,
   getHighestUnlockedHole,
@@ -727,7 +728,7 @@ export default function App() {
               <div className="bg-white/95 rounded-full px-3 py-1 sm:px-3.5 sm:py-1.5 md:px-4 md:py-2 shadow-[0_4px_0_rgba(143,192,235,0.65)] flex items-center gap-1.5 shrink-0">
                 <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#ffc82c] text-[#d97706] shrink-0" />
                 <span className="text-[13px] sm:text-[14px] md:text-[16px] font-extrabold text-[#163a5f] tabular-nums whitespace-nowrap">
-                  {totalStars} / 90
+                  {totalStars} / {TOTAL_GAME_STARS}
                 </span>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock, Database, Cloud } from 'lucide-react';
 import { GOLF_BALL_SKINS, GolfBallSkin } from '../data/balls';
+import { TOTAL_GAME_STARS } from '../data/courses';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { soundEngine } from '../audio/soundEngine';
 
@@ -258,7 +259,7 @@ export const BallsModal: React.FC<BallsModalProps> = ({
           <div className="flex items-center gap-1.5 bg-amber-50 border-2 border-amber-200 px-3 py-1 rounded-full">
             <Star className="w-4 h-4 fill-[#ffb800] text-[#d97706]" />
             <span className="font-extrabold text-[#163a5f] text-sm tabular-nums">
-              {totalStars} / 90
+              {totalStars} / {TOTAL_GAME_STARS}
             </span>
           </div>
         </div>
