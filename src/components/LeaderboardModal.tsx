@@ -33,18 +33,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   playerName,
   avatarSeed,
   totalStars = 0,
-  onChangePlayerName,
+  onChangePlayerName: _onChangePlayerName,
   onClose,
 }) => {
-  const t = TRANSLATIONS[language];
-  const [editingName, setEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState(playerName);
   const [globalRankings, setGlobalRankings] = useState<GlobalStarRankingUser[]>([]);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
-
-  useEffect(() => {
-    setNameDraft(playerName);
-  }, [playerName]);
 
   // Fetch registered players ranked by total stars
   useEffect(() => {
@@ -77,52 +70,17 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
   if (!isOpen) return null;
 
-  const commitName = () => {
-    const trimmed = nameDraft.trim() || 'Golfer';
-    setNameDraft(trimmed);
-    onChangePlayerName(trimmed);
-    setEditingName(false);
-  };
-
   return (
     <GameModal
       title="Leaderboards"
       onClose={onClose}
       maxWidth="480px"
     >
-      {/* Subheader info & Golfer Name Pill */}
+      {/* Subheader info */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <p className="text-[12px] font-extrabold text-amber-600 flex items-center gap-1">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 inline" /> Ranked by Most Stars
         </p>
-
-        {/* Golfer Name Pill */}
-        <div className="ui-chip rounded-full pl-1.5 pr-2.5 py-0.5 flex items-center gap-1.5 shrink-0">
-          <UserAvatar seed={avatarSeed || getSavedAvatarSeed()} size={20} showBorder={false} />
-          {editingName ? (
-            <input
-              type="text"
-              value={nameDraft}
-              maxLength={14}
-              autoFocus
-              onChange={(e) => setNameDraft(e.target.value)}
-              onBlur={commitName}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') commitName();
-              }}
-              className="w-20 text-[11px] font-extrabold text-[#51336d] bg-white px-1.5 py-0.5 rounded border border-purple-300 outline-none"
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setEditingName(true)}
-              className="text-[11px] font-extrabold text-[#51336d] cursor-pointer max-w-[85px] truncate"
-              title={t.editGolferNameTooltip}
-            >
-              {playerName} ✎
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Global Rankings Table */}
