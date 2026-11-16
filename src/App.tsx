@@ -40,7 +40,7 @@ import {
   savePlayerName,
   formatGolfTime,
 } from './data/leaderboard';
-import { Language, TRANSLATIONS, getSavedLanguage, saveLanguage } from './data/i18n';
+import { Language, TRANSLATIONS } from './data/i18n';
 import { GolfSceneCanvas } from './three/GolfSceneCanvas';
 import { HolesSelectScreen } from './components/HolesSelectScreen';
 import { LeaderboardModal } from './components/LeaderboardModal';
@@ -71,9 +71,9 @@ export default function App() {
   // Game Screen State: 'menu' | 'holes' | 'play'
   const [screen, setScreen] = useState<'menu' | 'holes' | 'play'>('menu');
 
-  // Language State: 'en' | 'zh'
-  const [language, setLanguage] = useState<Language>(() => getSavedLanguage());
-  const t = TRANSLATIONS[language];
+  // Default English Language
+  const language: Language = 'en';
+  const t = TRANSLATIONS.en;
 
   // Persistent Hole Stars (1..30 -> 0..3)
   const [holeStars, setHoleStars] = useState<Record<number, number>>(() => {
@@ -588,11 +588,6 @@ export default function App() {
   const handleToggleSfx = (val: boolean) => {
     setSfxEnabled(val);
     soundEngine.setSfxEnabled(val);
-  };
-
-  const handleChangeLanguage = (lang: Language) => {
-    setLanguage(lang);
-    saveLanguage(lang);
   };
 
   const openLeaderboardForHole = useCallback((holeNum: number) => {
@@ -1342,7 +1337,6 @@ export default function App() {
         language={language}
         musicEnabled={musicEnabled}
         sfxEnabled={sfxEnabled}
-        onChangeLanguage={handleChangeLanguage}
         onToggleMusic={handleToggleMusic}
         onToggleSfx={handleToggleSfx}
         onResetProgress={handleResetProgress}

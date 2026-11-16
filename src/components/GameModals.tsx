@@ -1,5 +1,5 @@
 import React, { useState, type CSSProperties, type ReactNode } from 'react';
-import { Home, Music, Volume2, Globe, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock } from 'lucide-react';
+import { Home, Music, Volume2, RotateCcw, Play, Grid, Star, Sparkles, Check, Lock } from 'lucide-react';
 import { GOLF_BALL_SKINS, GolfBallSkin } from '../data/balls';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { soundEngine } from '../audio/soundEngine';
@@ -148,13 +148,13 @@ export const PausedModal: React.FC<PausedModalProps> = ({
 // ==========================================
 interface SettingsModalProps {
   isOpen: boolean;
-  language: Language;
+  language?: Language;
   musicEnabled: boolean;
   sfxEnabled: boolean;
-  onChangeLanguage: (lang: Language) => void;
+  onChangeLanguage?: (lang: Language) => void;
   onToggleMusic: (val: boolean) => void;
   onToggleSfx: (val: boolean) => void;
-  onResetProgress: () => void;
+  onResetProgress?: () => void;
   onClose: () => void;
   syncStatus?: {
     configured: boolean;
@@ -170,10 +170,10 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
-  language,
+  language = 'en',
   musicEnabled,
   sfxEnabled,
-  onChangeLanguage,
+  onChangeLanguage: _onChangeLanguage,
   onToggleMusic,
   onToggleSfx,
   onResetProgress: _onResetProgress,
@@ -298,43 +298,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="kit-slider-input"
                 />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Language Row (English | 中文) */}
-        <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-display font-bold text-sm">{t.language}</span>
-            <div className="inline-flex bg-white/80 p-1 rounded-full border border-[#d5c1ee] shadow-inner">
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onChangeLanguage('en');
-                }}
-                className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
-                  language === 'en'
-                    ? 'bg-[#2ed13c] text-white shadow-xs'
-                    : 'text-[#54317c] hover:text-[#2ed13c]'
-                }`}
-              >
-                English
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onChangeLanguage('zh');
-                }}
-                className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
-                  language === 'zh'
-                    ? 'bg-[#2ed13c] text-white shadow-xs'
-                    : 'text-[#54317c] hover:text-[#2ed13c]'
-                }`}
-              >
-                中文
-              </button>
             </div>
           </div>
         </div>
