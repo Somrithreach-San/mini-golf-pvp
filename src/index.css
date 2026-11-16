@@ -1,485 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@700;800&display=swap');
 @import "tailwindcss";
-@import "./ui-kit.css";
 
 @layer base {
   body {
-    font-family: 'Fredoka', 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
     user-select: none;
     -webkit-user-select: none;
     overflow: hidden;
     background: linear-gradient(180deg, #96d1ff 0%, #d8f0ff 60%, #f2faff 100%);
   }
 
-  h1, h2, h3, h4, .font-display {
+  h1, h2, h3, .font-display {
     font-family: 'Fredoka', 'Nunito', sans-serif;
   }
 }
 
-/* ==========================================================================
-   CARTOON PURPLE / LAVENDER UI SYSTEM (Authentic Match to Reference UI Kit)
-   ========================================================================== */
-:root {
-  --ui-purple: #8435dd;
-  --ui-purple-dark: #4f1585;
-  --ui-purple-light: #c993f7;
-  --ui-panel-text: #4e2978;
-}
-
-/* 1. Main Dotted Lavender Panel with Raised Purple Frame & Halftone Polka Dots */
-.ui-panel {
-  position: relative;
-  color: var(--ui-panel-text);
-  border: 7px solid var(--ui-purple);
-  border-radius: 34px;
-  background-color: #ffffff;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.95),
-    0 8px 0 var(--ui-purple-dark),
-    0 16px 32px rgba(35, 10, 60, 0.32);
-}
-
-/* Comic halftone polka-dot vignette radiating from perimeter & corners */
-.ui-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 26px;
-  pointer-events: none;
-  background-image: radial-gradient(circle, #cca8f7 2.4px, transparent 2.8px);
-  background-size: 13px 13px;
-  mask-image: radial-gradient(ellipse at 50% 50%, transparent 38%, black 86%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, transparent 38%, black 86%);
-  opacity: 0.75;
-  z-index: 0;
-}
-
-/* 2. Overlapping Purple Title Banner */
-.ui-panel-title {
-  position: absolute;
-  z-index: 20;
-  top: -24px;
-  left: 20px;
-  right: 68px;
-  height: 52px;
-  margin: 0;
-  padding: 4px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 3.5px solid #c993f7;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #aa5af0 0%, #8432d8 55%, #6e24b8 100%);
-  box-shadow:
-    inset 0 2.5px 0 rgba(255, 255, 255, 0.65),
-    0 5px 0 var(--ui-purple-dark),
-    0 8px 16px rgba(45, 12, 75, 0.28);
-
-  color: #ffffff;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-size: clamp(20px, 5.8vw, 26px);
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  text-shadow: 0 2px 0 #4c1182, 0 3px 2px rgba(40, 10, 70, 0.35);
-}
-
-.ui-panel-title--solo {
-  left: 20px;
-  right: 20px;
-}
-
-/* 3. Floating Squircle Purple Close Button */
-.ui-panel-close {
-  position: absolute;
-  z-index: 30;
-  top: -24px;
-  right: 12px;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-
-  border: 3.5px solid #c993f7;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #aa5af0 0%, #8432d8 55%, #6e24b8 100%);
-  box-shadow:
-    inset 0 2.5px 0 rgba(255, 255, 255, 0.65),
-    0 5px 0 var(--ui-purple-dark),
-    0 8px 16px rgba(45, 12, 75, 0.28);
-
-  color: #ffffff;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  text-shadow: 0 2px 0 #4c1182;
-  transition: transform 0.08s ease, filter 0.12s ease;
-}
-
-.ui-panel-close:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-}
-
-.ui-panel-close:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 2px 0 var(--ui-purple-dark),
-    0 4px 6px rgba(45, 12, 75, 0.2);
-}
-
-/* 4. Modal Backdrop & Body Layout */
-.ui-modal-backdrop {
-  position: fixed;
-  z-index: 50;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  background: rgba(18, 12, 32, 0.52);
-  backdrop-filter: blur(4px);
-}
-
-.ui-modal-panel {
-  width: min(100%, 430px);
-  max-height: 92vh;
-  max-height: 92dvh;
-  padding: 50px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
-}
-
-.ui-modal-body {
-  position: relative;
-  z-index: 2;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 6px 2px;
-}
-
-.ui-modal-footer {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  display: flex;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-/* 5. Stadium Score Container (Level Victory Mockup) */
-.ui-score-pill {
-  border-radius: 9999px;
-  background: #f0e8f8;
-  border: 2px solid #e2d2f2;
-  box-shadow: inset 0 2.5px 5px rgba(85, 25, 130, 0.12);
-  padding: 10px 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 6. Form Controls: Stadium Pill Inputs, Checkbox & Toggles */
-.ui-field {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 20px;
-  border: 2.5px solid #d4bee8;
-  border-radius: 9999px;
-  outline: none;
-  background: #ffffff;
-  color: #4e2978;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  box-shadow: inset 0 3px 6px rgba(80, 25, 120, 0.12);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ui-field::placeholder {
-  color: #a795b8;
-  font-weight: 500;
-}
-
-.ui-field:focus {
-  border-color: #9f53e6;
-  box-shadow:
-    inset 0 3px 6px rgba(80, 25, 120, 0.12),
-    0 0 0 3.5px rgba(159, 83, 230, 0.25);
-}
-
-/* Cute purple checkbox with golden checkmark */
-.ui-checkbox {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  border: 2px solid #ffffff;
-  background: #8435dd;
-  box-shadow: 0 2.5px 0 #4f1585, inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #ffdc36;
-  transition: transform 0.08s ease;
-}
-
-.ui-checkbox:active {
-  transform: translateY(1.5px);
-  box-shadow: 0 1px 0 #4f1585;
-}
-
-/* 3D Cartoon Toggle Switch */
-.ui-toggle-track {
-  width: 54px;
-  height: 30px;
-  border-radius: 9999px;
-  background: #e7ddf2;
-  border: 2.5px solid #ffffff;
-  box-shadow: inset 0 2px 4px rgba(70, 20, 110, 0.15), 0 2.5px 0 #cfbde0;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  display: inline-block;
-  shrink: 0;
-}
-
-.ui-toggle-track.is-checked {
-  background: #a858f0;
-}
-
-.ui-toggle-thumb {
-  width: 26px;
-  height: 26px;
-  border-radius: 9999px;
-  border: 2px solid #ffffff;
-  background: linear-gradient(180deg, #ffdc36 0%, #ffa500 50%, #f78d00 100%);
-  box-shadow: 0 3px 0 #b35200, inset 0 1.5px 0 rgba(255, 255, 255, 0.85);
-  position: absolute;
-  top: -0.5px;
-  left: 0px;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.ui-toggle-track.is-checked .ui-toggle-thumb {
-  transform: translateX(24px);
-}
-
-/* 7. Rounded Card Containers */
-.ui-card {
-  position: relative;
-  z-index: 1;
-  border: 2.5px solid #e7dbf2;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #ffffff 0%, #faf6fd 100%);
-  box-shadow: 0 4px 0 #d9c8e8;
-}
-
-/* 8. White Raised Pills (Profile, Star Counter, In-Game HUD) */
-.ui-chip,
-.ui-status-pill {
-  border: 2.5px solid #ffffff;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f1fc 100%);
-  box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
-    0 3.5px 0 #cfb8e3,
-    0 6px 12px rgba(45, 15, 65, 0.12);
-  color: #4e2978;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-}
-
-/* 9. Multiplayer Player Cards */
-.ui-player-card {
-  border: 2.5px solid #e4d3f2;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 3.5px 0 #cfb8e3;
-  transition: all 0.15s ease;
-}
-
-.ui-player-card.is-active {
-  border-color: #ffaa00;
-  box-shadow:
-    0 3.5px 0 #cfb8e3,
-    0 0 0 3px rgba(255, 170, 0, 0.28);
-}
-
-/* ==========================================================================
-   HERO 3D CARTOON BUTTONS (Authentic Colors, Extrusions & Text Shadows)
-   ========================================================================== */
-.btn-3d-orange,
-.btn-3d-yellow,
-.btn-3d-purple,
-.btn-3d-green,
-.btn-3d-blue,
-.btn-3d-teal,
-.btn-3d-red {
-  position: relative;
-  border: 3.5px solid #ffffff;
-  border-radius: 22px;
-  background: linear-gradient(180deg, var(--btn-face-top) 0%, var(--btn-face-mid) 50%, var(--btn-face-bot) 100%);
-  box-shadow:
-    inset 0 3.5px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.12),
-    0 7px 0 var(--btn-depth),
-    0 12px 20px rgba(35, 10, 60, 0.25);
-  color: #ffffff;
-  font-family: 'Fredoka', 'Nunito', sans-serif;
-  font-weight: 800;
-  text-shadow: var(--btn-shadow);
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.1s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Orange / Gold Button (Hero primary: "Play", "Levels", "Login", "Next", "Large button") */
-.btn-3d-orange,
-.btn-3d-yellow {
-  --btn-face-top: #ffdc36;
-  --btn-face-mid: #ffa500;
-  --btn-face-bot: #f78d00;
-  --btn-depth: #b35200;
-  --btn-shadow: 0 2.5px 0 #8f3b00, 0 3.5px 3px rgba(80, 20, 0, 0.45);
-}
-
-/* Purple Button (Hero secondary: "Cancel", "Retry", "Caption", "2-Player PvP") */
-.btn-3d-purple {
-  --btn-face-top: #d35aff;
-  --btn-face-mid: #9e23eb;
-  --btn-face-bot: #7d11c7;
-  --btn-depth: #4f0d7e;
-  --btn-shadow: 0 2.5px 0 #3c0663, 0 3.5px 3px rgba(40, 5, 70, 0.45);
-}
-
-/* Green Button (Success: "Caption", "Done", "Buy") */
-.btn-3d-green {
-  --btn-face-top: #62f562;
-  --btn-face-mid: #30cf3c;
-  --btn-face-bot: #1ea529;
-  --btn-depth: #0f6217;
-  --btn-shadow: 0 2.5px 0 #0b4711, 0 3.5px 3px rgba(0, 25, 5, 0.45);
-}
-
-/* Red Button (Destructive: "Leave", "Surrender", "Reset") */
-.btn-3d-red {
-  --btn-face-top: #ff858a;
-  --btn-face-mid: #f35560;
-  --btn-face-bot: #da3844;
-  --btn-depth: #961c25;
-  --btn-shadow: 0 2.5px 0 #731219, 0 3.5px 3px rgba(70, 10, 20, 0.45);
-}
-
-/* Blue Button (Navigation / World Select) */
-.btn-3d-blue {
-  --btn-face-top: #5cb5ff;
-  --btn-face-mid: #2f8bee;
-  --btn-face-bot: #196ed1;
-  --btn-depth: #104b91;
-  --btn-shadow: 0 2.5px 0 #0b3466, 0 3.5px 3px rgba(10, 30, 60, 0.45);
-}
-
-/* Teal Button (Camera Rotate / Balls) */
-.btn-3d-teal {
-  --btn-face-top: #5be6e2;
-  --btn-face-mid: #1fc7c7;
-  --btn-face-bot: #129ea3;
-  --btn-depth: #0b686d;
-  --btn-shadow: 0 2.5px 0 #08494d, 0 3.5px 3px rgba(8, 40, 45, 0.45);
-}
-
-.btn-3d-green:hover,
-.btn-3d-purple:hover,
-.btn-3d-blue:hover,
-.btn-3d-yellow:hover,
-.btn-3d-teal:hover,
-.btn-3d-orange:hover,
-.btn-3d-red:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}
-
-.btn-3d-green:active,
-.btn-3d-purple:active,
-.btn-3d-blue:active,
-.btn-3d-yellow:active,
-.btn-3d-teal:active,
-.btn-3d-orange:active,
-.btn-3d-red:active {
-  transform: translateY(4px);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.5),
-    0 3px 0 var(--btn-depth),
-    0 5px 10px rgba(35, 10, 60, 0.2);
-}
-
-.btn-3d-green:disabled,
-.btn-3d-purple:disabled,
-.btn-3d-blue:disabled,
-.btn-3d-yellow:disabled,
-.btn-3d-teal:disabled,
-.btn-3d-orange:disabled,
-.btn-3d-red:disabled {
-  cursor: not-allowed;
-  filter: grayscale(0.25);
-  opacity: 0.65;
-}
-
-/* 10. Circular 3D Gold Action Coins (Bottom row of Home screen: Profile, Shop, Settings) */
-.btn-round-gold {
-  width: 60px;
-  height: 60px;
-  border-radius: 9999px;
-  border: 3.5px solid #ffffff;
-  background: linear-gradient(180deg, #ffdc36 0%, #ffa500 50%, #f78d00 100%);
-  box-shadow:
-    inset 0 3.5px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -2.5px 0 rgba(0, 0, 0, 0.12),
-    0 6px 0 #b35200,
-    0 10px 16px rgba(50, 15, 0, 0.25);
-  color: #7d3400;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.08s ease, filter 0.1s ease;
-}
-
-.btn-round-gold:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}
-
-.btn-round-gold:active {
-  transform: translateY(4px);
-  box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.4),
-    0 2px 0 #b35200,
-    0 4px 8px rgba(50, 15, 0, 0.2);
-}
-
-/* Title logo 3D cartoon text effect */
+/* Title logo 3D cartoon text effect (uses radial text-shadow outline to avoid WebKit variable-font stroke notches on '3') */
 .title-logo-text,
 .title-logo-3d {
   font-family: 'Fredoka', sans-serif;
   font-weight: 700;
-  -webkit-text-stroke: 1.5px #521990;
+  -webkit-text-stroke: 0px transparent;
   text-shadow:
-    0 2px 0 #7931d4,
-    0 5px 0 #521990,
-    0 8px 16px rgba(45, 12, 75, 0.35);
+    /* Inner seal ring (2.5px) */
+    0 -2.5px 0 #1b3b5c,
+    1.8px -1.8px 0 #1b3b5c,
+    2.5px 0 0 #1b3b5c,
+    1.8px 1.8px 0 #1b3b5c,
+    0 2.5px 0 #1b3b5c,
+    -1.8px 1.8px 0 #1b3b5c,
+    -2.5px 0 0 #1b3b5c,
+    -1.8px -1.8px 0 #1b3b5c,
+    /* Outer 5px rounded outline ring (16 directions) */
+    0 -5px 0 #1b3b5c,
+    1.9px -4.6px 0 #1b3b5c,
+    3.5px -3.5px 0 #1b3b5c,
+    4.6px -1.9px 0 #1b3b5c,
+    5px 0 0 #1b3b5c,
+    4.6px 1.9px 0 #1b3b5c,
+    3.5px 3.5px 0 #1b3b5c,
+    1.9px 4.6px 0 #1b3b5c,
+    0 5px 0 #1b3b5c,
+    -1.9px 4.6px 0 #1b3b5c,
+    -3.5px 3.5px 0 #1b3b5c,
+    -4.6px 1.9px 0 #1b3b5c,
+    -5px 0 0 #1b3b5c,
+    -4.6px -1.9px 0 #1b3b5c,
+    -3.5px -3.5px 0 #1b3b5c,
+    -1.9px -4.6px 0 #1b3b5c,
+    /* 3D bottom extrusion layer */
+    -5px 3px 0 #122840,
+    5px 3px 0 #122840,
+    -4.6px 5px 0 #122840,
+    4.6px 5px 0 #122840,
+    -3.5px 6.5px 0 #122840,
+    3.5px 6.5px 0 #122840,
+    -1.9px 7.6px 0 #122840,
+    1.9px 7.6px 0 #122840,
+    0 8px 0 #122840,
+    /* Soft ambient drop shadow */
+    0 12px 20px rgba(18, 40, 64, 0.28);
+  letter-spacing: 0.02em;
 }
 
 .title-logo-text {
@@ -490,20 +70,161 @@
   color: #ffffff;
 }
 
+/* Glossy 3D cartoon buttons matching the exact reference UI */
+.btn-3d-green {
+  background: linear-gradient(180deg, #5ce664 0%, #37b848 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #1f7a30, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-green:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-green:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #1f7a30, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-orange {
+  background: linear-gradient(180deg, #ffba52 0%, #f39122 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #b85d09, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-orange:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-orange:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b85d09, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-pink {
+  background: linear-gradient(180deg, #ff85b3 0%, #f3538c 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #ad2155, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-pink:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-pink:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #ad2155, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-teal {
+  background: linear-gradient(180deg, #48dbfb 0%, #16b5c9 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #0b7385, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-teal:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-teal:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0b7385, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-yellow {
+  background: linear-gradient(180deg, #ffe066 0%, #f5b727 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #b87e08, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-yellow:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-yellow:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b87e08, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-red {
+  background: linear-gradient(180deg, #ff7e85 0%, #f0505c 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #a31d28, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-red:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-red:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #a31d28, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-blue {
+  background: linear-gradient(180deg, #54a8ff 0%, #2f80ed 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 4px 0 #19529c, 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-blue:hover {
+  filter: brightness(1.05);
+}
+.btn-3d-blue:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #19529c, 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-purple {
+  background: linear-gradient(180deg, #a76bff 0%, #8338ec 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 4px 0 #53169e, 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-purple:hover {
+  filter: brightness(1.05);
+}
+.btn-3d-purple:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #53169e, 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
 /* ==========================================================================
-   CARTOON 3D GOLDEN STARS (Level Victory Modal Mockup)
+   Magical Crystal & Golden Star Bounce Animation (Sarah Carmody "Stars!" Style)
    ========================================================================== */
-@keyframes cartoonStarPop {
+@keyframes starBaseRise {
   0% {
     opacity: 0;
-    transform: scale(0.2) rotate(-15deg);
+    transform: translateY(34px) scale(0.18, 1.32);
   }
-  55% {
+  48% {
     opacity: 1;
-    transform: scale(1.22) rotate(4deg);
+    transform: translateY(-9px) scale(1.18, 0.88);
   }
-  75% {
+  72% {
+    opacity: 1;
+    transform: translateY(3px) scale(0.93, 1.06);
+  }
+  88% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.03, 0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes starCrystalShellPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.15) rotate(-14deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25) rotate(4deg);
+  }
+  74% {
+    opacity: 1;
     transform: scale(0.92) rotate(-2deg);
+  }
+  88% {
+    opacity: 1;
+    transform: scale(1.05) rotate(1deg);
   }
   100% {
     opacity: 1;
@@ -511,19 +232,80 @@
   }
 }
 
-@keyframes cartoonStarGlow {
+@keyframes starInnerCorePop {
+  0% {
+    transform: scale(0.82);
+  }
+  42% {
+    transform: scale(1.22, 0.86);
+  }
+  68% {
+    transform: scale(0.92, 1.08);
+  }
+  86% {
+    transform: scale(1.04, 0.98);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes starSwirlFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.1) rotate(-45deg);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scale(1.15) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45) rotate(55deg);
+  }
+}
+
+@keyframes starSparkleRay {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx, 0px) * 1.35), calc(var(--ty, 0px) * 1.35)) scale(0);
+  }
+}
+
+@keyframes starIdleBob {
   0%, 100% {
-    filter: drop-shadow(0 6px 14px rgba(255, 165, 0, 0.45));
+    transform: translateY(0px) scale(1);
   }
   50% {
-    filter: drop-shadow(0 8px 22px rgba(255, 200, 0, 0.75));
+    transform: translateY(-3.5px) scale(1.025);
   }
 }
 
-.animate-cartoon-star {
-  animation: cartoonStarPop 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+.animate-star-base-rise {
+  animation: starBaseRise 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.animate-star-glow {
-  animation: cartoonStarGlow 2s ease-in-out infinite;
+.animate-star-crystal-pop {
+  animation: starCrystalShellPop 0.54s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+.animate-star-inner-pop {
+  animation: starInnerCorePop 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-star-swirl {
+  animation: starSwirlFlash 0.46s ease-out both;
+}
+
+.animate-star-idle {
+  animation: starIdleBob 2.4s ease-in-out infinite;
+}
+
