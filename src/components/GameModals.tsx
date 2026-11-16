@@ -214,24 +214,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: musicEnabled ? '22px' : '-2px' }}
+                    style={{ left: musicEnabled ? '22px' : '0px' }}
                   />
                 </button>
               </div>
 
               {/* Music Volume Slider */}
-              <div className="kit-slider-wrap !h-8">
-                <div className="kit-slider-groove !h-4">
-                  <div className="kit-slider-track !h-2">
+              <div className="kit-slider-wrap">
+                <div className="kit-slider-groove">
+                  <div className="kit-slider-track">
                     <div
                       className="kit-slider-fill"
-                      style={{ width: `${musicEnabled ? musicVol : 0}%` }}
-                    />
-                    <div
-                      className="kit-slider-thumb !w-7 !h-7"
-                      style={{ left: `${musicEnabled ? musicVol : 0}%` }}
+                      style={{
+                        width: musicEnabled && musicVol > 0 ? `calc(${musicVol}% * (100% - 32px) / 100 + 16px)` : '0%',
+                      }}
                     />
                   </div>
+                  <div
+                    className="kit-slider-thumb"
+                    style={{
+                      left: musicEnabled ? `calc(${musicVol}% * (100% - 32px) / 100)` : '0px',
+                    }}
+                  />
                 </div>
                 <input
                   type="range"
@@ -261,24 +265,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: sfxEnabled ? '22px' : '-2px' }}
+                    style={{ left: sfxEnabled ? '22px' : '0px' }}
                   />
                 </button>
               </div>
 
               {/* SFX Volume Slider */}
-              <div className="kit-slider-wrap !h-8">
-                <div className="kit-slider-groove !h-4">
-                  <div className="kit-slider-track !h-2">
+              <div className="kit-slider-wrap">
+                <div className="kit-slider-groove">
+                  <div className="kit-slider-track">
                     <div
                       className="kit-slider-fill"
-                      style={{ width: `${sfxEnabled ? sfxVol : 0}%` }}
-                    />
-                    <div
-                      className="kit-slider-thumb !w-7 !h-7"
-                      style={{ left: `${sfxEnabled ? sfxVol : 0}%` }}
+                      style={{
+                        width: sfxEnabled && sfxVol > 0 ? `calc(${sfxVol}% * (100% - 32px) / 100 + 16px)` : '0%',
+                      }}
                     />
                   </div>
+                  <div
+                    className="kit-slider-thumb"
+                    style={{
+                      left: sfxEnabled ? `calc(${sfxVol}% * (100% - 32px) / 100)` : '0px',
+                    }}
+                  />
                 </div>
                 <input
                   type="range"

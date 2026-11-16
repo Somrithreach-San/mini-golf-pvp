@@ -230,7 +230,7 @@ export function UIKitShowcase({
             >
               <span
                 className="kit-toggle-thumb"
-                style={{ left: toggleLeft ? '22px' : '-2px' }}
+                style={{ left: toggleLeft ? '22px' : '0px' }}
               />
             </button>
 
@@ -242,7 +242,7 @@ export function UIKitShowcase({
             >
               <span
                 className="kit-toggle-thumb"
-                style={{ left: toggleRight ? '22px' : '-2px' }}
+                style={{ left: toggleRight ? '22px' : '0px' }}
               />
             </button>
 
@@ -271,9 +271,19 @@ export function UIKitShowcase({
           <div className="kit-slider-wrap">
             <div className="kit-slider-groove">
               <div className="kit-slider-track">
-                <div className="kit-slider-fill" style={{ width: `${sliderValue}%` }} />
-                <div className="kit-slider-thumb" style={{ left: `${sliderValue}%` }} />
+                <div
+                  className="kit-slider-fill"
+                  style={{
+                    width: sliderValue > 0 ? `calc(${sliderValue}% * (100% - 32px) / 100 + 16px)` : '0%',
+                  }}
+                />
               </div>
+              <div
+                className="kit-slider-thumb"
+                style={{
+                  left: `calc(${sliderValue}% * (100% - 32px) / 100)`,
+                }}
+              />
             </div>
             <input
               type="range"
