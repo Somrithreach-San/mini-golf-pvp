@@ -190,18 +190,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     <GameModal
       title={t.settings}
       onClose={onClose}
-      footer={
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            onClose();
-          }}
-          className="kit-btn kit-btn--md kit-btn--gold w-full"
-        >
-          <span className="kit-btn-label">Save</span>
-        </button>
-      }
     >
       <div className="space-y-4 py-1 text-[#54317c]">
         {/* Audio settings */}
