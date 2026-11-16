@@ -729,7 +729,7 @@ export default function App() {
                 title={t.top10LeaderboardsTitle}
               >
                 <span className="kit-round-icon">
-                  <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                  <Trophy className="w-5 h-5 stroke-[2.75]" />
                 </span>
               </button>
               <button
@@ -1059,7 +1059,7 @@ export default function App() {
                       title={t.top10LeaderboardsTitle}
                     >
                       <span className="kit-round-icon">
-                        <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                        <Trophy className="w-5 h-5 stroke-[2.75]" />
                       </span>
                     </button>
                     <button

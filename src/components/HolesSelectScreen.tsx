@@ -105,7 +105,7 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               title={t.top10LeaderboardsTitle}
             >
               <span className="kit-round-icon">
-                <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                <Trophy className="w-5 h-5 stroke-[2.75]" />
               </span>
             </button>
           </div>
@@ -197,7 +197,7 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               title={t.top10LeaderboardsTitle}
             >
               <span className="kit-round-icon">
-                <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                <Trophy className="w-5 h-5 stroke-[2.75]" />
               </span>
             </button>
           </div>

@@ -186,11 +186,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const t = TRANSLATIONS[language];
 
-  const musicVal = musicEnabled ? musicVol : 0;
+  const musicVal = musicVol;
   const musicThumbLeft = `calc(${musicVal}% - ${(musicVal * 0.32).toFixed(2)}px)`;
   const musicFillWidth = `${musicVal}%`;
 
-  const sfxVal = sfxEnabled ? sfxVol : 0;
+  const sfxVal = sfxVol;
   const sfxThumbLeft = `calc(${sfxVal}% - ${(sfxVal * 0.32).toFixed(2)}px)`;
   const sfxFillWidth = `${sfxVal}%`;
 
@@ -238,7 +238,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               {/* Music Volume Slider */}
-              <div className="kit-slider-wrap">
+              <div
+                className={`kit-slider-wrap transition-opacity duration-200 ${
+                  !musicEnabled ? 'opacity-40 pointer-events-none' : ''
+                }`}
+              >
                 <div className="kit-slider-groove">
                   <div className="kit-slider-track">
                     <div
@@ -289,7 +293,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               {/* SFX Volume Slider */}
-              <div className="kit-slider-wrap">
+              <div
+                className={`kit-slider-wrap transition-opacity duration-200 ${
+                  !sfxEnabled ? 'opacity-40 pointer-events-none' : ''
+                }`}
+              >
                 <div className="kit-slider-groove">
                   <div className="kit-slider-track">
                     <div
