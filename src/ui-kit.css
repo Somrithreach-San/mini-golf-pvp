@@ -21,13 +21,11 @@
   position: relative;
   overflow: hidden;
   border-radius: 20px;
-  padding: 40px 20px 22px;
+  padding: 36px 18px 20px;
   background-color: #ffffff;
   background-image:
-    radial-gradient(circle at 0% 0%, #ebdff6 0%, #f4ecfb 35%, transparent 65%),
-    radial-gradient(circle at 100% 0%, #ebdff6 0%, #f4ecfb 35%, transparent 65%),
-    radial-gradient(circle at 50% 100%, #f6eefc 0%, #fbf7fe 45%, transparent 75%),
-    linear-gradient(180deg, #f7effd 0%, #ffffff 35%, #ffffff 75%, #f7effd 100%);
+    radial-gradient(circle at 0% 0%, #ede2f8 0%, #f8f2fc 30%, transparent 55%),
+    radial-gradient(circle at 100% 0%, #ede2f8 0%, #f8f2fc 30%, transparent 55%);
   box-shadow:
     inset 0 2px 0 #ffffff,
     0 5px 0 #d5c2ec,
@@ -598,7 +596,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 20px;
+  border-radius: 18px;
   font-family: 'Fredoka', 'Nunito', system-ui, -apple-system, sans-serif;
   font-weight: 800;
   color: #ffffff;
@@ -615,23 +613,9 @@
 .kit-btn::before {
   content: '';
   position: absolute;
-  inset: 5.5px;
-  border-radius: 14.5px;
+  inset: 5px;
+  border-radius: 13px;
   pointer-events: none;
-}
-
-/* Iconic top-left glossy shoulder glint */
-.kit-btn::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 8px;
-  width: 40px;
-  height: 9px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.12) 100%);
-  pointer-events: none;
-  z-index: 2;
 }
 
 .kit-btn-label {
@@ -649,257 +633,202 @@
 /* Sizes */
 .kit-btn--sm {
   height: 48px;
-  border-radius: 17px;
+  border-radius: 16px;
   font-size: 16px;
   padding: 0 16px;
 }
 .kit-btn--sm::before {
-  inset: 4.5px;
-  border-radius: 12.5px;
-}
-.kit-btn--sm::after {
-  top: 2.5px;
-  left: 6px;
-  width: 32px;
-  height: 7px;
+  inset: 4px;
+  border-radius: 12px;
 }
 
 .kit-btn--md {
-  height: 58px;
-  border-radius: 20px;
-  font-size: 22px;
-  padding: 0 22px;
+  height: 56px;
+  border-radius: 18px;
+  font-size: 21px;
+  padding: 0 20px;
 }
 .kit-btn--md::before {
-  inset: 5.5px;
-  border-radius: 14.5px;
-}
-.kit-btn--md::after {
-  top: 3px;
-  left: 8px;
-  width: 44px;
-  height: 9px;
+  inset: 5px;
+  border-radius: 13px;
 }
 
 .kit-btn--lg {
   width: 100%;
-  height: 66px;
-  border-radius: 24px;
-  font-size: 26px;
-  padding: 0 26px;
+  height: 64px;
+  border-radius: 20px;
+  font-size: 24px;
+  padding: 0 24px;
 }
 .kit-btn--lg::before {
-  inset: 6.5px;
-  border-radius: 17.5px;
-}
-.kit-btn--lg::after {
-  top: 3.5px;
-  left: 10px;
-  width: 56px;
-  height: 11px;
+  inset: 5.5px;
+  border-radius: 14.5px;
 }
 
 /* Color Variant: Gold / Amber */
 .kit-btn--gold {
   background: linear-gradient(180deg, #ffde43 0%, #faa612 50%, #eb7c00 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #b34e00,
-    0 11px 16px rgba(45, 20, 75, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #b34e00,
+    0 10px 14px rgba(45, 20, 75, 0.25);
   text-shadow:
-    0 3px 0 #ab4600,
-    0 4px 6px rgba(90, 30, 0, 0.45);
+    0 2.5px 0 #ab4600,
+    0 3px 5px rgba(90, 30, 0, 0.4);
 }
 .kit-btn--gold::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(255, 240, 180, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(255, 240, 180, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(255, 240, 180, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(255, 240, 180, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #ffbe18 0%, #f6950a 50%, #ea7800 100%);
-  background-size: 100% 100%;
+  background: linear-gradient(180deg, #ffbe18 0%, #f6950a 50%, #ea7800 100%);
   box-shadow:
-    inset 0 3px 4px rgba(135, 48, 0, 0.45),
-    0 1.5px 0 rgba(255, 245, 175, 0.5);
+    inset 0 2.5px 3px rgba(135, 48, 0, 0.4),
+    0 1px 0 rgba(255, 245, 175, 0.5);
 }
 .kit-btn--gold:hover {
   filter: brightness(1.05);
 }
 .kit-btn--gold:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #b34e00,
-    0 5px 8px rgba(45, 20, 75, 0.22);
+    0 5px 8px rgba(45, 20, 75, 0.2);
 }
 
 /* Color Variant: Vibrant Purple / Magenta */
 .kit-btn--purple {
   background: linear-gradient(180deg, #d84aff 0%, #b024f8 50%, #870cd4 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #4c0088,
-    0 11px 16px rgba(45, 20, 75, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #4c0088,
+    0 10px 14px rgba(45, 20, 75, 0.25);
   text-shadow:
-    0 3px 0 #460980,
-    0 4px 6px rgba(40, 0, 80, 0.5);
+    0 2.5px 0 #460980,
+    0 3px 5px rgba(40, 0, 80, 0.45);
 }
 .kit-btn--purple::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(255, 200, 255, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(255, 200, 255, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(255, 200, 255, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(255, 200, 255, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #b929f6 0%, #9914dc 50%, #800bb8 100%);
+  background: linear-gradient(180deg, #b929f6 0%, #9914dc 50%, #800bb8 100%);
   box-shadow:
-    inset 0 3px 4px rgba(60, 0, 110, 0.5),
-    0 1.5px 0 rgba(255, 200, 255, 0.45);
+    inset 0 2.5px 3px rgba(60, 0, 110, 0.45),
+    0 1px 0 rgba(255, 200, 255, 0.45);
 }
 .kit-btn--purple:hover {
   filter: brightness(1.05);
 }
 .kit-btn--purple:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #4c0088,
-    0 5px 8px rgba(45, 20, 75, 0.22);
+    0 5px 8px rgba(45, 20, 75, 0.2);
 }
 
 /* Color Variant: Emerald Green */
 .kit-btn--green {
   background: linear-gradient(180deg, #64f86a 0%, #29d839 50%, #15b525 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #0f7518,
-    0 11px 16px rgba(45, 20, 75, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #0f7518,
+    0 10px 14px rgba(45, 20, 75, 0.25);
   text-shadow:
-    0 3px 0 #0d6b15,
-    0 4px 6px rgba(0, 45, 10, 0.45);
+    0 2.5px 0 #0d6b15,
+    0 3px 5px rgba(0, 45, 10, 0.4);
 }
 .kit-btn--green::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(220, 255, 220, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(220, 255, 220, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(220, 255, 220, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(220, 255, 220, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #32df41 0%, #1dc22d 50%, #14a022 100%);
+  background: linear-gradient(180deg, #32df41 0%, #1dc22d 50%, #14a022 100%);
   box-shadow:
-    inset 0 3px 4px rgba(10, 85, 20, 0.48),
-    0 1.5px 0 rgba(210, 255, 215, 0.45);
+    inset 0 2.5px 3px rgba(10, 85, 20, 0.42),
+    0 1px 0 rgba(210, 255, 215, 0.45);
 }
 .kit-btn--green:hover {
   filter: brightness(1.05);
 }
 .kit-btn--green:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #0f7518,
-    0 5px 8px rgba(45, 20, 75, 0.22);
+    0 5px 8px rgba(45, 20, 75, 0.2);
 }
 
 /* Color Variant: Crimson Red */
 .kit-btn--red {
   background: linear-gradient(180deg, #ff7a82 0%, #f43846 50%, #d41e2c 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #880e17,
-    0 11px 16px rgba(45, 20, 75, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #880e17,
+    0 10px 14px rgba(45, 20, 75, 0.25);
   text-shadow:
-    0 3px 0 #7a0c14,
-    0 4px 6px rgba(50, 0, 10, 0.45);
+    0 2.5px 0 #7a0c14,
+    0 3px 5px rgba(50, 0, 10, 0.4);
 }
 .kit-btn--red::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(255, 220, 220, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(255, 220, 220, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(255, 220, 220, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(255, 220, 220, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #f74552 0%, #db2231 50%, #bf1624 100%);
+  background: linear-gradient(180deg, #f74552 0%, #db2231 50%, #bf1624 100%);
   box-shadow:
-    inset 0 3px 4px rgba(100, 10, 20, 0.48),
-    0 1.5px 0 rgba(255, 200, 205, 0.45);
+    inset 0 2.5px 3px rgba(100, 10, 20, 0.42),
+    0 1px 0 rgba(255, 200, 205, 0.45);
 }
 .kit-btn--red:hover {
   filter: brightness(1.05);
 }
 .kit-btn--red:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #880e17,
-    0 5px 8px rgba(45, 20, 75, 0.22);
+    0 5px 8px rgba(45, 20, 75, 0.2);
 }
 
 /* Color Variant: Sky Blue */
 .kit-btn--blue {
   background: linear-gradient(180deg, #68c0ff 0%, #248bf0 50%, #116ad1 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #084386,
-    0 11px 16px rgba(20, 30, 60, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #084386,
+    0 10px 14px rgba(20, 30, 60, 0.25);
   text-shadow:
-    0 3px 0 #083c79,
-    0 4px 6px rgba(0, 25, 60, 0.45);
+    0 2.5px 0 #083c79,
+    0 3px 5px rgba(0, 25, 60, 0.4);
 }
 .kit-btn--blue::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(220, 240, 255, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(220, 240, 255, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(220, 240, 255, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(220, 240, 255, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #3296f8 0%, #1975dd 50%, #0e5dbb 100%);
+  background: linear-gradient(180deg, #3296f8 0%, #1975dd 50%, #0e5dbb 100%);
   box-shadow:
-    inset 0 3px 4px rgba(10, 50, 105, 0.48),
-    0 1.5px 0 rgba(200, 235, 255, 0.45);
+    inset 0 2.5px 3px rgba(10, 50, 105, 0.42),
+    0 1px 0 rgba(200, 235, 255, 0.45);
 }
 .kit-btn--blue:hover {
   filter: brightness(1.05);
 }
 .kit-btn--blue:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #084386,
-    0 5px 8px rgba(20, 30, 60, 0.22);
+    0 5px 8px rgba(20, 30, 60, 0.2);
 }
 
 /* Color Variant: Bright Teal */
 .kit-btn--teal {
   background: linear-gradient(180deg, #5feae5 0%, #1cc5c5 50%, #0fa0a5 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.25),
-    0 7px 0 #095f63,
-    0 11px 16px rgba(10, 40, 50, 0.28);
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    0 6px 0 #095f63,
+    0 10px 14px rgba(10, 40, 50, 0.25);
   text-shadow:
-    0 3px 0 #085558,
-    0 4px 6px rgba(0, 25, 30, 0.45);
+    0 2.5px 0 #085558,
+    0 3px 5px rgba(0, 25, 30, 0.4);
 }
 .kit-btn--teal::before {
-  background:
-    radial-gradient(circle at 92% 28%, rgba(220, 255, 253, 0.3) 1.5px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(220, 255, 253, 0.25) 1.5px, transparent 2px),
-    radial-gradient(circle at 94% 48%, rgba(220, 255, 253, 0.22) 1.5px, transparent 2px),
-    radial-gradient(circle at 86% 58%, rgba(220, 255, 253, 0.18) 1.5px, transparent 2px),
-    linear-gradient(180deg, #24d2d2 0%, #14abae 50%, #0c8a8d 100%);
+  background: linear-gradient(180deg, #24d2d2 0%, #14abae 50%, #0c8a8d 100%);
   box-shadow:
-    inset 0 3px 4px rgba(8, 70, 75, 0.48),
-    0 1.5px 0 rgba(200, 255, 253, 0.45);
+    inset 0 2.5px 3px rgba(8, 70, 75, 0.42),
+    0 1px 0 rgba(200, 255, 253, 0.45);
 }
 .kit-btn--teal:hover {
   filter: brightness(1.05);
 }
 .kit-btn--teal:active {
-  transform: translateY(5px);
+  transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.8),
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
     0 2px 0 #095f63,
-    0 5px 8px rgba(10, 40, 50, 0.22);
+    0 5px 8px rgba(10, 40, 50, 0.2);
 }

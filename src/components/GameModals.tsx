@@ -208,6 +208,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     <GameModal
       title={t.settings}
       onClose={onClose}
+      maxWidth="370px"
     >
       <div className="space-y-4 py-1 text-[#54317c]">
         {/* Audio settings */}
