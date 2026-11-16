@@ -274,14 +274,14 @@ export function UIKitShowcase({
                 <div
                   className="kit-slider-fill"
                   style={{
-                    width: sliderValue > 0 ? `calc(${sliderValue}% * (100% - 32px) / 100 + 16px)` : '0%',
+                    width: sliderValue > 0 ? `calc(${sliderValue}% - ${(sliderValue * 0.32).toFixed(2)}px + 16px)` : '0%',
                   }}
                 />
               </div>
               <div
                 className="kit-slider-thumb"
                 style={{
-                  left: `calc(${sliderValue}% * (100% - 32px) / 100)`,
+                  left: `calc(${sliderValue}% - ${(sliderValue * 0.32).toFixed(2)}px)`,
                 }}
               />
             </div>
@@ -291,6 +291,7 @@ export function UIKitShowcase({
               max={100}
               value={sliderValue}
               onChange={(e) => setSliderValue(Number(e.target.value))}
+              onInput={(e) => setSliderValue(Number((e.target as HTMLInputElement).value))}
               className="kit-slider-input"
               aria-label="Volume slider"
             />

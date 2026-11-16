@@ -179,12 +179,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onResetProgress: _onResetProgress,
   onClose,
 }) => {
-  const [musicVol, setMusicVol] = useState(80);
-  const [sfxVol, setSfxVol] = useState(90);
+  const [musicVol, setMusicVol] = useState<number>(() => soundEngine.musicVolume ?? 80);
+  const [sfxVol, setSfxVol] = useState<number>(() => soundEngine.sfxVolume ?? 90);
 
   if (!isOpen) return null;
 
   const t = TRANSLATIONS[language];
+
+  const musicVal = musicEnabled ? musicVol : 0;
+  const musicThumbLeft = `calc(${musicVal}% - ${(musicVal * 0.32).toFixed(2)}px)`;
+  const musicFillWidth = musicVal > 0 ? `calc(${musicVal}% - ${(musicVal * 0.32).toFixed(2)}px + 16px)` : '0%';
+
+  const sfxVal = sfxEnabled ? sfxVol : 0;
+  const sfxThumbLeft = `calc(${sfxVal}% - ${(sfxVal * 0.32).toFixed(2)}px)`;
+  const sfxFillWidth = sfxVal > 0 ? `calc(${sfxVal}% - ${(sfxVal * 0.32).toFixed(2)}px + 16px)` : '0%';
+
+  const handleMusicChange = (val: number) => {
+    setMusicVol(val);
+    soundEngine.setMusicVolume(val);
+  };
+
+  const handleSfxChange = (val: number) => {
+    setSfxVol(val);
+    soundEngine.setSfxVolume(val);
+  };
 
   return (
     <GameModal
@@ -214,7 +232,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: musicEnabled ? '22px' : '0px' }}
+                    style={{ left: musicEnabled ? '25px' : '-1px' }}
                   />
                 </button>
               </div>
@@ -225,25 +243,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="kit-slider-track">
                     <div
                       className="kit-slider-fill"
-                      style={{
-                        width: musicEnabled && musicVol > 0 ? `calc(${musicVol}% * (100% - 32px) / 100 + 16px)` : '0%',
-                      }}
+                      style={{ width: musicFillWidth }}
                     />
                   </div>
                   <div
                     className="kit-slider-thumb"
-                    style={{
-                      left: musicEnabled ? `calc(${musicVol}% * (100% - 32px) / 100)` : '0px',
-                    }}
+                    style={{ left: musicThumbLeft }}
                   />
                 </div>
                 <input
                   type="range"
                   min={0}
                   max={100}
-                  value={musicEnabled ? musicVol : 0}
+                  value={musicVal}
                   disabled={!musicEnabled}
-                  onChange={(e) => setMusicVol(Number(e.target.value))}
+                  onChange={(e) => handleMusicChange(Number(e.target.value))}
+                  onInput={(e) => handleMusicChange(Number((e.target as HTMLInputElement).value))}
                   className="kit-slider-input"
                 />
               </div>
@@ -265,7 +280,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: sfxEnabled ? '22px' : '0px' }}
+                    style={{ left: sfxEnabled ? '25px' : '-1px' }}
                   />
                 </button>
               </div>
@@ -276,25 +291,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="kit-slider-track">
                     <div
                       className="kit-slider-fill"
-                      style={{
-                        width: sfxEnabled && sfxVol > 0 ? `calc(${sfxVol}% * (100% - 32px) / 100 + 16px)` : '0%',
-                      }}
+                      style={{ width: sfxFillWidth }}
                     />
                   </div>
                   <div
                     className="kit-slider-thumb"
-                    style={{
-                      left: sfxEnabled ? `calc(${sfxVol}% * (100% - 32px) / 100)` : '0px',
-                    }}
+                    style={{ left: sfxThumbLeft }}
                   />
                 </div>
                 <input
                   type="range"
                   min={0}
                   max={100}
-                  value={sfxEnabled ? sfxVol : 0}
+                  value={sfxVal}
                   disabled={!sfxEnabled}
-                  onChange={(e) => setSfxVol(Number(e.target.value))}
+                  onChange={(e) => handleSfxChange(Number(e.target.value))}
+                  onInput={(e) => handleSfxChange(Number((e.target as HTMLInputElement).value))}
                   className="kit-slider-input"
                 />
               </div>

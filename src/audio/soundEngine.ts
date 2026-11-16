@@ -4,6 +4,8 @@ class SoundEngine {
   private ctx: AudioContext | null = null;
   public musicEnabled: boolean = true;
   public sfxEnabled: boolean = true;
+  public musicVolume: number = 80;
+  public sfxVolume: number = 90;
   private musicInterval: number | null = null;
   private isPlayingMusic: boolean = false;
   private stepIndex: number = 0;
@@ -23,10 +25,32 @@ class SoundEngine {
     try {
       const savedMusic = localStorage.getItem('minigolf_music');
       const savedSfx = localStorage.getItem('minigolf_sfx');
+      const savedMusicVol = localStorage.getItem('minigolf_music_vol');
+      const savedSfxVol = localStorage.getItem('minigolf_sfx_vol');
       if (savedMusic !== null) this.musicEnabled = JSON.parse(savedMusic);
       if (savedSfx !== null) this.sfxEnabled = JSON.parse(savedSfx);
+      if (savedMusicVol !== null) this.musicVolume = Number(savedMusicVol) || 80;
+      if (savedSfxVol !== null) this.sfxVolume = Number(savedSfxVol) || 90;
     } catch {
       // ignore storage errors
+    }
+  }
+
+  public setMusicVolume(vol: number) {
+    this.musicVolume = Math.max(0, Math.min(100, Math.round(vol)));
+    try {
+      localStorage.setItem('minigolf_music_vol', String(this.musicVolume));
+    } catch {
+      // ignore
+    }
+  }
+
+  public setSfxVolume(vol: number) {
+    this.sfxVolume = Math.max(0, Math.min(100, Math.round(vol)));
+    try {
+      localStorage.setItem('minigolf_sfx_vol', String(this.sfxVolume));
+    } catch {
+      // ignore
     }
   }
 
