@@ -230,7 +230,7 @@ export function UIKitShowcase({
             >
               <span
                 className="kit-toggle-thumb"
-                style={{ left: toggleLeft ? '42px' : '-2px' }}
+                style={{ left: toggleLeft ? '22px' : '-2px' }}
               />
             </button>
 
@@ -242,7 +242,7 @@ export function UIKitShowcase({
             >
               <span
                 className="kit-toggle-thumb"
-                style={{ left: toggleRight ? '42px' : '-2px' }}
+                style={{ left: toggleRight ? '22px' : '-2px' }}
               />
             </button>
 

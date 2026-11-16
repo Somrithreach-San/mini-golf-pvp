@@ -176,10 +176,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onChangeLanguage,
   onToggleMusic,
   onToggleSfx,
-  onResetProgress,
+  onResetProgress: _onResetProgress,
   onClose,
 }) => {
-  const [confirmReset, setConfirmReset] = useState(false);
   const [musicVol, setMusicVol] = useState(80);
   const [sfxVol, setSfxVol] = useState(90);
 
@@ -192,28 +191,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       title={t.settings}
       onClose={onClose}
       footer={
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onClose();
-            }}
-            className="kit-btn kit-btn--md kit-btn--purple flex-1"
-          >
-            <span className="kit-btn-label">Cancel</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onClose();
-            }}
-            className="kit-btn kit-btn--md kit-btn--gold flex-1"
-          >
-            <span className="kit-btn-label">Save</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onClose();
+          }}
+          className="kit-btn kit-btn--md kit-btn--gold w-full"
+        >
+          <span className="kit-btn-label">Save</span>
+        </button>
       }
     >
       <div className="space-y-4 py-1 text-[#54317c]">
@@ -239,7 +226,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: musicEnabled ? '42px' : '-2px' }}
+                    style={{ left: musicEnabled ? '22px' : '-2px' }}
                   />
                 </button>
               </div>
@@ -286,7 +273,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   <span
                     className="kit-toggle-thumb"
-                    style={{ left: sfxEnabled ? '42px' : '-2px' }}
+                    style={{ left: sfxEnabled ? '22px' : '-2px' }}
                   />
                 </button>
               </div>
@@ -357,44 +344,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               中文
             </button>
           </div>
-        </div>
-
-        {/* Reset Progress */}
-        <div className="pt-1">
-          {!confirmReset ? (
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playClick();
-                setConfirmReset(true);
-              }}
-              className="kit-btn kit-btn--sm kit-btn--red w-full !h-11"
-            >
-              <span className="kit-btn-label">{t.resetProgress}</span>
-            </button>
-          ) : (
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onResetProgress();
-                  setConfirmReset(false);
-                  onClose();
-                }}
-                className="kit-btn kit-btn--sm kit-btn--red flex-1 !h-11"
-              >
-                <span className="kit-btn-label">Confirm Reset</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmReset(false)}
-                className="kit-btn kit-btn--sm kit-btn--purple flex-1 !h-11"
-              >
-                <span className="kit-btn-label">Cancel</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </GameModal>
