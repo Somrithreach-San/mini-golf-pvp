@@ -319,39 +319,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* Language */}
-        <div>
-          <h3 className="font-display font-black text-sm text-[#7d35cd] mb-2 uppercase tracking-wider">
-            Language
-          </h3>
-          <div className="grid grid-cols-3 gap-2">
-            {(
-              [
-                { id: 'en', label: 'English', flag: '🇺🇸' },
-                { id: 'es', label: 'Español', flag: '🇪🇸' },
-                { id: 'fr', label: 'Français', flag: '🇫🇷' },
-                { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
-                { id: 'ja', label: '日本語', flag: '🇯🇵' },
-                { id: 'zh', label: '中文', flag: '🇨🇳' },
-              ] as const
-            ).map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  onChangeLanguage(item.id);
-                }}
-                className={`py-2 px-1 rounded-xl text-xs font-display font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  language === item.id
-                    ? 'kit-btn kit-btn--sm kit-btn--gold !h-10 !w-full'
-                    : 'bg-white/80 border border-[#d5c1ee] text-[#54317c] hover:bg-white'
-                }`}
-              >
-                <span>{item.flag}</span>
-                <span>{item.label}</span>
-              </button>
-            ))}
+        {/* Language Row (English | 中文) */}
+        <div className="flex items-center justify-between py-2 border-t border-b border-[#e6d9f0]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#7d35cd] flex items-center justify-center text-white shadow-xs">
+              <Globe className="w-4 h-4 stroke-[2.5]" />
+            </div>
+            <span className="text-sm font-extrabold text-[#54317c]">{t.language}</span>
+          </div>
+          <div className="inline-flex bg-white/80 p-1 rounded-full border border-[#d5c1ee] shadow-inner">
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                onChangeLanguage('en');
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                language === 'en'
+                  ? 'bg-[#2ed13c] text-white shadow-xs'
+                  : 'text-[#54317c] hover:text-[#2ed13c]'
+              }`}
+            >
+              English
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                soundEngine.playClick();
+                onChangeLanguage('zh');
+              }}
+              className={`px-3 py-1 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                language === 'zh'
+                  ? 'bg-[#2ed13c] text-white shadow-xs'
+                  : 'text-[#54317c] hover:text-[#2ed13c]'
+              }`}
+            >
+              中文
+            </button>
           </div>
         </div>
 
@@ -425,18 +429,6 @@ export const BallsModal: React.FC<BallsModalProps> = ({
     <GameModal
       title={t.golfBalls}
       onClose={onClose}
-      footer={
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            onClose();
-          }}
-          className="kit-btn kit-btn--md kit-btn--green w-full"
-        >
-          <span className="kit-btn-label">{t.done}</span>
-        </button>
-      }
     >
       <div className="grid grid-cols-2 gap-3 py-1">
         {GOLF_BALL_SKINS.map((skin) => {
@@ -520,18 +512,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, language, onClose 
     <GameModal
       title={t.howToPlay}
       onClose={onClose}
-      footer={
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            onClose();
-          }}
-          className="kit-btn kit-btn--md kit-btn--green w-full"
-        >
-          <span className="kit-btn-label">{t.gotIt}</span>
-        </button>
-      }
     >
       <div className="space-y-3 py-1">
         <div className="p-3 rounded-2xl bg-white/80 border border-[#d5c1ee] flex items-start gap-3 shadow-xs">

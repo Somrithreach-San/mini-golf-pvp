@@ -89,18 +89,6 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
       title="Leaderboards"
       onClose={onClose}
       maxWidth="480px"
-      footer={
-        <button
-          type="button"
-          onClick={() => {
-            soundEngine.playClick();
-            onClose();
-          }}
-          className="btn-3d-green rounded-xl w-full py-2.5 text-white font-display font-bold text-base whitespace-nowrap cursor-pointer shadow-md"
-        >
-          {t.done}
-        </button>
-      }
     >
       {/* Subheader info & Golfer Name Pill */}
       <div className="flex items-center justify-between gap-2 mb-3">

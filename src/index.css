@@ -58,24 +58,23 @@
 .ui-panel-title {
   position: absolute;
   z-index: 20;
-  top: -22px;
+  top: -24px;
   left: 20px;
-  right: 74px;
+  right: 68px;
   height: 52px;
   margin: 0;
-  padding: 4px 22px;
+  padding: 4px 18px;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border: 3px solid #b77bf7;
-  border-radius: 9999px;
-  background: linear-gradient(180deg, #9b50eb 0%, #8334db 52%, #6f26c9 100%);
+  border: 3.5px solid #c993f7;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #aa5af0 0%, #8432d8 55%, #6e24b8 100%);
   box-shadow:
-    inset 0 2.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.22),
+    inset 0 2.5px 0 rgba(255, 255, 255, 0.65),
     0 5px 0 var(--ui-purple-dark),
-    0 8px 14px rgba(35, 8, 65, 0.3);
+    0 8px 16px rgba(45, 12, 75, 0.28);
 
   color: #ffffff;
   font-family: 'Fredoka', 'Nunito', sans-serif;
@@ -83,8 +82,7 @@
   font-weight: 700;
   line-height: 1;
   text-align: center;
-  text-shadow: 0 2.5px 0 #4c148c, 0 3px 2px rgba(40, 10, 70, 0.35);
-  white-space: nowrap;
+  text-shadow: 0 2px 0 #4c1182, 0 3px 2px rgba(40, 10, 70, 0.35);
 }
 
 .ui-panel-title--solo {
