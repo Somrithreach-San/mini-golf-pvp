@@ -615,8 +615,7 @@ export default function App() {
         <AccountModal
           isOpen={true}
           onClose={() => {
-            // Guest play
-            setIsAuthenticated(true);
+            // Guest mode disabled - only Google login accepted
           }}
           playerName={playerName}
           onUpdatePlayerName={(name) => {
