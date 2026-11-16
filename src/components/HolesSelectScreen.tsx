@@ -80,10 +80,12 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
                 soundEngine.playClick();
                 onBackHome();
               }}
-              className="btn-3d-blue w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0 cursor-pointer"
+              className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
               title={t.homeTooltip}
             >
-              <Home className="w-5 h-5 stroke-[2.5]" />
+              <span className="kit-round-icon">
+                <Home className="w-5 h-5 stroke-[2.75]" />
+              </span>
             </button>
 
             <div className="ui-chip rounded-full px-4 py-1.5 flex items-center gap-1.5">
@@ -99,10 +101,12 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
                 soundEngine.playClick();
                 onOpenLeaderboard(worldHoles[0]?.holeNumber || 1);
               }}
-              className="btn-3d-yellow w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0 cursor-pointer"
+              className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
               title={t.top10LeaderboardsTitle}
             >
-              <Trophy className="w-5 h-5 stroke-[2.5]" />
+              <span className="kit-round-icon">
+                <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+              </span>
             </button>
           </div>
 
@@ -113,10 +117,12 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               soundEngine.playClick();
               onBackHome();
             }}
-            className="hidden md:flex btn-3d-blue w-11 h-11 lg:w-12 lg:h-12 rounded-full items-center justify-center text-white shrink-0 cursor-pointer"
+            className="hidden md:flex kit-round-btn kit-round-btn--gold kit-round-btn--sm"
             title={t.homeTooltip}
           >
-            <Home className="w-5 h-5 lg:w-6 lg:h-6 stroke-[2.5]" />
+            <span className="kit-round-icon">
+              <Home className="w-5 h-5 lg:w-5.5 lg:h-5.5 stroke-[2.75]" />
+            </span>
           </button>
 
           {/* World Selector Pill Bar (Full width on Mobile, Flex-1 Center on Tablet & PC) */}
@@ -187,10 +193,12 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
                 soundEngine.playClick();
                 onOpenLeaderboard(worldHoles[0]?.holeNumber || 1);
               }}
-              className="btn-3d-yellow w-11 h-11 lg:w-12 lg:h-12 rounded-full flex items-center justify-center text-white shrink-0 cursor-pointer"
+              className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
               title={t.top10LeaderboardsTitle}
             >
-              <Trophy className="w-5 h-5 stroke-[2.5]" />
+              <span className="kit-round-icon">
+                <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+              </span>
             </button>
           </div>
         </div>

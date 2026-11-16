@@ -730,10 +730,12 @@ export default function App() {
                   soundEngine.playClick();
                   openLeaderboardForHole(currentHoleNumber);
                 }}
-                className="btn-3d-yellow w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white cursor-pointer"
+                className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                 title={t.top10LeaderboardsTitle}
               >
-                <Trophy className="w-5 h-5 stroke-[2.5]" />
+                <span className="kit-round-icon">
+                  <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                </span>
               </button>
               <button
                 type="button"
@@ -741,10 +743,12 @@ export default function App() {
                   soundEngine.playClick();
                   setHelpOpen(true);
                 }}
-                className="btn-3d-blue w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-display font-bold text-xl md:text-2xl cursor-pointer"
+                className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                 title={t.howToPlay}
               >
-                ?
+                <span className="kit-round-icon font-display font-black text-xl md:text-2xl leading-none">
+                  ?
+                </span>
               </button>
               <button
                 type="button"
@@ -752,10 +756,12 @@ export default function App() {
                   soundEngine.playClick();
                   setSettingsOpen(true);
                 }}
-                className="btn-3d-purple w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white cursor-pointer"
+                className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                 title={t.settings}
               >
-                <Settings className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
+                <span className="kit-round-icon">
+                  <Settings className="w-5 h-5 md:w-5.5 md:h-5.5 stroke-[2.75]" />
+                </span>
               </button>
             </div>
           </div>
@@ -1054,10 +1060,12 @@ export default function App() {
                         soundEngine.playClick();
                         openLeaderboardForHole(activeCourse.holeNumber);
                       }}
-                      className="btn-3d-yellow w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white cursor-pointer"
+                      className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                       title={t.top10LeaderboardsTitle}
                     >
-                      <Trophy className="w-5 h-5 stroke-[2.5]" />
+                      <span className="kit-round-icon">
+                        <Trophy className="w-5 h-5 stroke-[2.75] fill-current" />
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -1065,10 +1073,12 @@ export default function App() {
                         soundEngine.playClick();
                         setPausedOpen(true);
                       }}
-                      className="btn-round-gold !w-11 !h-11 md:!w-12 md:!h-12"
+                      className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                       title="Pause Game"
                     >
-                      <Pause className="w-5 h-5 fill-current stroke-[2]" />
+                      <span className="kit-round-icon">
+                        <Pause className="w-5 h-5 fill-current stroke-[2]" />
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -1076,10 +1086,12 @@ export default function App() {
                         soundEngine.playClick();
                         setSettingsOpen(true);
                       }}
-                      className="btn-3d-purple w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white cursor-pointer"
+                      className="kit-round-btn kit-round-btn--gold kit-round-btn--sm"
                       title={t.settings}
                     >
-                      <Settings className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
+                      <span className="kit-round-icon">
+                        <Settings className="w-5 h-5 md:w-5.5 md:h-5.5 stroke-[2.75]" />
+                      </span>
                     </button>
                   </div>
                 </div>

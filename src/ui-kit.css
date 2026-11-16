@@ -203,6 +203,36 @@
   box-shadow: 0 2px 0 #b85404, 0 5px 8px rgba(45, 25, 75, 0.22);
 }
 
+/* Compact / Header size for 3D round buttons (46px - 48px) */
+.kit-round-btn--sm {
+  width: 46px;
+  height: 46px;
+}
+.kit-round-btn--sm::before {
+  inset: 5.5px;
+}
+.kit-round-btn--sm.kit-round-btn--gold {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.65),
+    0 4px 0 #b85404,
+    0 6px 10px rgba(45, 25, 75, 0.25);
+}
+.kit-round-btn--sm.kit-round-btn--gold:active {
+  transform: translateY(2.5px);
+  box-shadow: 0 1.5px 0 #b85404, 0 3px 5px rgba(45, 25, 75, 0.2);
+}
+
+/* Debossed icon carved into the gold coin */
+.kit-round-icon {
+  position: relative;
+  z-index: 2;
+  color: #963800;
+  filter: drop-shadow(0 1px 0 rgba(255, 238, 140, 0.85));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .kit-pause-icon {
   position: relative;
   z-index: 1;
