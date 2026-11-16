@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    background: linear-gradient(180deg, #96d1ff 0%, #d8f0ff 60%, #f2faff 100%);
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Fredoka', 'Nunito', sans-serif;
+  }
+}
+
+/* Title logo 3D cartoon text effect (uses radial text-shadow outline to avoid WebKit variable-font stroke notches on '3') */
+.title-logo-text,
+.title-logo-3d {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  -webkit-text-stroke: 0px transparent;
+  text-shadow:
+    /* Inner seal ring (2.5px) */
+    0 -2.5px 0 #1b3b5c,
+    1.8px -1.8px 0 #1b3b5c,
+    2.5px 0 0 #1b3b5c,
+    1.8px 1.8px 0 #1b3b5c,
+    0 2.5px 0 #1b3b5c,
+    -1.8px 1.8px 0 #1b3b5c,
+    -2.5px 0 0 #1b3b5c,
+    -1.8px -1.8px 0 #1b3b5c,
+    /* Outer 5px rounded outline ring (16 directions) */
+    0 -5px 0 #1b3b5c,
+    1.9px -4.6px 0 #1b3b5c,
+    3.5px -3.5px 0 #1b3b5c,
+    4.6px -1.9px 0 #1b3b5c,
+    5px 0 0 #1b3b5c,
+    4.6px 1.9px 0 #1b3b5c,
+    3.5px 3.5px 0 #1b3b5c,
+    1.9px 4.6px 0 #1b3b5c,
+    0 5px 0 #1b3b5c,
+    -1.9px 4.6px 0 #1b3b5c,
+    -3.5px 3.5px 0 #1b3b5c,
+    -4.6px 1.9px 0 #1b3b5c,
+    -5px 0 0 #1b3b5c,
+    -4.6px -1.9px 0 #1b3b5c,
+    -3.5px -3.5px 0 #1b3b5c,
+    -1.9px -4.6px 0 #1b3b5c,
+    /* 3D bottom extrusion layer */
+    -5px 3px 0 #122840,
+    5px 3px 0 #122840,
+    -4.6px 5px 0 #122840,
+    4.6px 5px 0 #122840,
+    -3.5px 6.5px 0 #122840,
+    3.5px 6.5px 0 #122840,
+    -1.9px 7.6px 0 #122840,
+    1.9px 7.6px 0 #122840,
+    0 8px 0 #122840,
+    /* Soft ambient drop shadow */
+    0 12px 20px rgba(18, 40, 64, 0.28);
+  letter-spacing: 0.02em;
+}
+
+.title-logo-text {
+  color: #ffd43b;
+}
+
+.title-logo-3d {
+  color: #ffffff;
+}
+
+/* Glossy 3D cartoon buttons matching the exact reference UI */
+.btn-3d-green {
+  background: linear-gradient(180deg, #5ce664 0%, #37b848 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #1f7a30, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-green:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-green:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #1f7a30, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-orange {
+  background: linear-gradient(180deg, #ffba52 0%, #f39122 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #b85d09, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-orange:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-orange:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b85d09, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-pink {
+  background: linear-gradient(180deg, #ff85b3 0%, #f3538c 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #ad2155, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-pink:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-pink:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #ad2155, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-teal {
+  background: linear-gradient(180deg, #48dbfb 0%, #16b5c9 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #0b7385, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-teal:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-teal:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0b7385, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-yellow {
+  background: linear-gradient(180deg, #ffe066 0%, #f5b727 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #b87e08, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-yellow:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-yellow:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b87e08, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-red {
+  background: linear-gradient(180deg, #ff7e85 0%, #f0505c 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 5px 0 #a31d28, 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-red:hover {
+  filter: brightness(1.04);
+}
+.btn-3d-red:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #a31d28, 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-blue {
+  background: linear-gradient(180deg, #54a8ff 0%, #2f80ed 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 4px 0 #19529c, 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-blue:hover {
+  filter: brightness(1.05);
+}
+.btn-3d-blue:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #19529c, 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-3d-purple {
+  background: linear-gradient(180deg, #a76bff 0%, #8338ec 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 4px 0 #53169e, 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+.btn-3d-purple:hover {
+  filter: brightness(1.05);
+}
+.btn-3d-purple:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #53169e, 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   Magical Crystal & Golden Star Bounce Animation (Sarah Carmody "Stars!" Style)
+   ========================================================================== */
+@keyframes starBaseRise {
+  0% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.18, 1.32);
+  }
+  48% {
+    opacity: 1;
+    transform: translateY(-9px) scale(1.18, 0.88);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(3px) scale(0.93, 1.06);
+  }
+  88% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.03, 0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes starCrystalShellPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.15) rotate(-14deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25) rotate(4deg);
+  }
+  74% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-2deg);
+  }
+  88% {
+    opacity: 1;
+    transform: scale(1.05) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes starInnerCorePop {
+  0% {
+    transform: scale(0.82);
+  }
+  42% {
+    transform: scale(1.22, 0.86);
+  }
+  68% {
+    transform: scale(0.92, 1.08);
+  }
+  86% {
+    transform: scale(1.04, 0.98);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes starSwirlFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.1) rotate(-45deg);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scale(1.15) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45) rotate(55deg);
+  }
+}
+
+@keyframes starSparkleRay {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx, 0px) * 1.35), calc(var(--ty, 0px) * 1.35)) scale(0);
+  }
+}
+
+@keyframes starIdleBob {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-3.5px) scale(1.025);
+  }
+}
+
+.animate-star-base-rise {
+  animation: starBaseRise 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-star-crystal-pop {
+  animation: starCrystalShellPop 0.54s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-star-inner-pop {
+  animation: starInnerCorePop 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-star-swirl {
+  animation: starSwirlFlash 0.46s ease-out both;
+}
+
+.animate-star-idle {
+  animation: starIdleBob 2.4s ease-in-out infinite;
+}
+

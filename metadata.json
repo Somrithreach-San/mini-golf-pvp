@@ -1,0 +1,6 @@
+{
+  "name": "Mini Golf 3D",
+  "description": "A charming 3D mini golf HTML5 game featuring stylized floating island courses, responsive drag-to-aim physics, multiple worlds, and unlockable golf balls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

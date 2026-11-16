@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build
+dist/
+build/
+coverage/
+
+# Environment and secrets (Keep .env.example tracked)
+.env*
+!.env.example
+
+# Logs and OS files
+*.log
+*.zip
+.DS_Store
+Thumbs.db
+
+# Large raw 3D authoring files & downloaded assets
+Downloaded Assets/
+scratch/
+*.blend
+*.blend1
+*.crdownload
+preview_golf*.png

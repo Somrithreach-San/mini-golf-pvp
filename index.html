@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script>
+      (function () {
+        try {
+          var desc = Object.getOwnPropertyDescriptor(window, 'fetch') ||
+                     Object.getOwnPropertyDescriptor(Window.prototype, 'fetch');
+          if (desc && desc.get && !desc.set && desc.configurable) {
+            var currentFetch = desc.get.call(window);
+            Object.defineProperty(window, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function () { return currentFetch; },
+              set: function (fn) { if (typeof fn === 'function') currentFetch = fn; }
+            });
+          }
+        } catch (e) {}
+
+        window.addEventListener('error', function (event) {
+          var msg = String((event && event.message) || '');
+          var file = String((event && event.filename) || '');
+          if (
+            msg.indexOf('Cannot set property fetch') !== -1 ||
+            file.indexOf('chrome-extension://') !== -1
+          ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+    <title>Mini Golf PvP</title>
+    <link rel="icon" type="image/png" href="/assets/balls/golf_3d.png" />
+    <link rel="apple-touch-icon" href="/assets/balls/golf_3d.png" />
+    <meta name="description" content="A charming 3D mini golf HTML5 game featuring stylized floating island courses, responsive drag-to-aim physics, multiple worlds, unlockable golf balls, and real-time 2-player PvP." />
+    <meta property="og:title" content="Mini Golf PvP" />
+    <meta property="og:description" content="A charming 3D mini golf HTML5 game featuring stylized floating island courses, responsive drag-to-aim physics, multiple worlds, unlockable golf balls, and real-time 2-player PvP." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  </head>
+  <body class="overflow-hidden select-none">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
