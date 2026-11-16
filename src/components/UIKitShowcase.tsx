@@ -314,13 +314,13 @@ export function UIKitShowcase({
             </button>
           </div>
 
-          {/* ROW 6: Two Medium Buttons */}
+          {/* ROW 6: Two Medium Buttons (Retry & Next matching reference) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             <button type="button" className="kit-btn kit-btn--md kit-btn--purple">
-              <span className="kit-btn-label">Caption</span>
+              <span className="kit-btn-label">Retry</span>
             </button>
             <button type="button" className="kit-btn kit-btn--md kit-btn--gold">
-              <span className="kit-btn-label">Caption</span>
+              <span className="kit-btn-label">Next</span>
             </button>
           </div>
 
