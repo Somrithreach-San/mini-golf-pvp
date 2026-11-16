@@ -270,14 +270,7 @@ export function UIKitShowcase({
           {/* ROW 4: Candy-Striped Slider Bar */}
           <div className="kit-slider-wrap">
             <div className="kit-slider-groove">
-              <div className="kit-slider-track">
-                <div
-                  className="kit-slider-fill"
-                  style={{
-                    width: sliderValue > 0 ? `calc(${sliderValue}% - ${(sliderValue * 0.32).toFixed(2)}px + 16px)` : '0%',
-                  }}
-                />
-              </div>
+              <div className="kit-slider-track" />
               <div
                 className="kit-slider-thumb"
                 style={{

@@ -523,7 +523,7 @@
 .kit-slider-thumb {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% - 3px));
   width: 32px;
   height: 32px;
   border-radius: 999px;

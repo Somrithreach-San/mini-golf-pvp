@@ -188,11 +188,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const musicVal = musicEnabled ? musicVol : 0;
   const musicThumbLeft = `calc(${musicVal}% - ${(musicVal * 0.32).toFixed(2)}px)`;
-  const musicFillWidth = musicVal > 0 ? `calc(${musicVal}% - ${(musicVal * 0.32).toFixed(2)}px + 16px)` : '0%';
 
   const sfxVal = sfxEnabled ? sfxVol : 0;
   const sfxThumbLeft = `calc(${sfxVal}% - ${(sfxVal * 0.32).toFixed(2)}px)`;
-  const sfxFillWidth = sfxVal > 0 ? `calc(${sfxVal}% - ${(sfxVal * 0.32).toFixed(2)}px + 16px)` : '0%';
 
   const handleMusicChange = (val: number) => {
     setMusicVol(val);
@@ -240,12 +238,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Music Volume Slider */}
               <div className="kit-slider-wrap">
                 <div className="kit-slider-groove">
-                  <div className="kit-slider-track">
-                    <div
-                      className="kit-slider-fill"
-                      style={{ width: musicFillWidth }}
-                    />
-                  </div>
+                  <div className="kit-slider-track" />
                   <div
                     className="kit-slider-thumb"
                     style={{ left: musicThumbLeft }}
@@ -288,12 +281,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* SFX Volume Slider */}
               <div className="kit-slider-wrap">
                 <div className="kit-slider-groove">
-                  <div className="kit-slider-track">
-                    <div
-                      className="kit-slider-fill"
-                      style={{ width: sfxFillWidth }}
-                    />
-                  </div>
+                  <div className="kit-slider-track" />
                   <div
                     className="kit-slider-thumb"
                     style={{ left: sfxThumbLeft }}
