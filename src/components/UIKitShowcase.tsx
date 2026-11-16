@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../ui-kit.css';
 
 /* ---------------------------------------------------------
-   1. Corner Halftone Bubble Pattern SVG (Matches Reference)
+   1. Corner Halftone Bubble Pattern SVG (Matches Reference Image 2)
    --------------------------------------------------------- */
 export function CornerHalftoneBackground() {
   return (
@@ -13,78 +13,169 @@ export function CornerHalftoneBackground() {
       aria-hidden="true"
     >
       <defs>
-        <radialGradient id="cornerHoleTL" cx="0%" cy="0%" r="50%">
-          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.8" />
-          <stop offset="60%" stopColor="#f8f2fc" stopOpacity="0.4" />
+        <radialGradient id="cornerHoleTL" cx="0%" cy="0%" r="65%">
+          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.85" />
+          <stop offset="50%" stopColor="#f7f2fc" stopOpacity="0.45" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="cornerHoleTR" cx="100%" cy="0%" r="50%">
-          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.8" />
-          <stop offset="60%" stopColor="#f8f2fc" stopOpacity="0.4" />
+        <radialGradient id="cornerHoleTR" cx="100%" cy="0%" r="65%">
+          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.85" />
+          <stop offset="50%" stopColor="#f7f2fc" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="cornerHoleBL" cx="0%" cy="100%" r="55%">
+          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="cornerHoleBR" cx="100%" cy="100%" r="55%">
+          <stop offset="0%" stopColor="#ede2f8" stopOpacity="0.75" />
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
       </defs>
 
       {/* Soft Corner Vignettes */}
-      <rect x="0" y="0" width="180" height="160" fill="url(#cornerHoleTL)" />
-      <rect x="180" y="0" width="180" height="160" fill="url(#cornerHoleTR)" />
+      <rect x="0" y="0" width="200" height="200" fill="url(#cornerHoleTL)" />
+      <rect x="160" y="0" width="200" height="200" fill="url(#cornerHoleTR)" />
+      <rect x="0" y="320" width="180" height="160" fill="url(#cornerHoleBL)" />
+      <rect x="180" y="320" width="180" height="160" fill="url(#cornerHoleBR)" />
 
-      {/* Top-Left Crisp White Comic Bubbles */}
-      <g fill="#ffffff">
-        <circle cx="12" cy="14" r="18" opacity="0.95" />
-        <circle cx="38" cy="12" r="13" opacity="0.95" />
-        <circle cx="65" cy="14" r="10" opacity="0.9" />
-        <circle cx="12" cy="42" r="13" opacity="0.95" />
-        <circle cx="36" cy="38" r="10" opacity="0.9" />
-        <circle cx="60" cy="34" r="8" opacity="0.85" />
-        <circle cx="85" cy="28" r="6.5" opacity="0.75" />
-        <circle cx="14" cy="68" r="9.5" opacity="0.9" />
-        <circle cx="36" cy="62" r="7.5" opacity="0.8" />
-        <circle cx="58" cy="54" r="6" opacity="0.7" />
-        <circle cx="80" cy="48" r="5" opacity="0.65" />
-        <circle cx="102" cy="40" r="4" opacity="0.55" />
-        <circle cx="16" cy="94" r="7" opacity="0.8" />
-        <circle cx="36" cy="84" r="5.5" opacity="0.7" />
-        <circle cx="55" cy="74" r="4.5" opacity="0.6" />
-        <circle cx="74" cy="66" r="3.5" opacity="0.5" />
-        <circle cx="18" cy="118" r="5" opacity="0.65" />
-        <circle cx="34" cy="104" r="4" opacity="0.55" />
-        <circle cx="50" cy="92" r="3" opacity="0.45" />
+      {/* Top-Left Radial Halftone Circles (Soft Lavender) */}
+      <g fill="#c8abf4">
+        {/* Ring 1 (r=12) */}
+        <circle cx="20" cy="12" r="12" opacity="0.95" />
+        <circle cx="12" cy="24" r="12" opacity="0.95" />
 
-        {/* Top-Right Crisp White Comic Bubbles (Mirrored) */}
-        <circle cx="348" cy="14" r="18" opacity="0.95" />
-        <circle cx="322" cy="12" r="13" opacity="0.95" />
-        <circle cx="295" cy="14" r="10" opacity="0.9" />
-        <circle cx="348" cy="42" r="13" opacity="0.95" />
-        <circle cx="324" cy="38" r="10" opacity="0.9" />
-        <circle cx="300" cy="34" r="8" opacity="0.85" />
-        <circle cx="275" cy="28" r="6.5" opacity="0.75" />
-        <circle cx="346" cy="68" r="9.5" opacity="0.9" />
-        <circle cx="324" cy="62" r="7.5" opacity="0.8" />
-        <circle cx="302" cy="54" r="6" opacity="0.7" />
-        <circle cx="280" cy="48" r="5" opacity="0.65" />
-        <circle cx="258" cy="40" r="4" opacity="0.55" />
-        <circle cx="344" cy="94" r="7" opacity="0.8" />
-        <circle cx="324" cy="84" r="5.5" opacity="0.7" />
-        <circle cx="305" cy="74" r="4.5" opacity="0.6" />
-        <circle cx="286" cy="66" r="3.5" opacity="0.5" />
-        <circle cx="342" cy="118" r="5" opacity="0.65" />
-        <circle cx="326" cy="104" r="4" opacity="0.55" />
-        <circle cx="310" cy="92" r="3" opacity="0.45" />
+        {/* Ring 2 (r=9.5) */}
+        <circle cx="48" cy="14" r="9.5" opacity="0.92" />
+        <circle cx="38" cy="32" r="9.5" opacity="0.92" />
+        <circle cx="22" cy="48" r="9.5" opacity="0.92" />
+        <circle cx="8" cy="56" r="9" opacity="0.9" />
 
-        {/* Subtle Bottom Bokeh Bubbles */}
-        <circle cx="24" cy="465" r="16" opacity="0.85" />
-        <circle cx="58" cy="470" r="12" opacity="0.75" />
-        <circle cx="18" cy="438" r="10" opacity="0.65" />
-        <circle cx="336" cy="465" r="16" opacity="0.85" />
-        <circle cx="302" cy="470" r="12" opacity="0.75" />
-        <circle cx="342" cy="438" r="10" opacity="0.65" />
+        {/* Ring 3 (r=7.5) */}
+        <circle cx="78" cy="16" r="7.5" opacity="0.88" />
+        <circle cx="68" cy="38" r="7.5" opacity="0.88" />
+        <circle cx="52" cy="56" r="7.5" opacity="0.88" />
+        <circle cx="34" cy="72" r="7.5" opacity="0.88" />
+        <circle cx="14" cy="84" r="7.5" opacity="0.88" />
 
-        {/* Tiny Whimsical Diamond Sparkles */}
-        <polygon points="90,75 93,79 90,83 87,79" opacity="0.6" />
-        <polygon points="270,75 273,79 270,83 267,79" opacity="0.6" />
-        <polygon points="40,430 43,434 40,438 37,434" opacity="0.55" />
-        <polygon points="320,430 323,434 320,438 317,434" opacity="0.55" />
+        {/* Ring 4 (r=5.5) */}
+        <circle cx="108" cy="20" r="5.5" opacity="0.82" />
+        <circle cx="96" cy="44" r="5.5" opacity="0.82" />
+        <circle cx="80" cy="68" r="5.5" opacity="0.82" />
+        <circle cx="60" cy="88" r="5.5" opacity="0.82" />
+        <circle cx="38" cy="104" r="5.5" opacity="0.82" />
+        <circle cx="16" cy="116" r="5.5" opacity="0.82" />
+
+        {/* Ring 5 (r=4) */}
+        <circle cx="138" cy="24" r="4" opacity="0.75" />
+        <circle cx="124" cy="50" r="4" opacity="0.75" />
+        <circle cx="106" cy="76" r="4" opacity="0.75" />
+        <circle cx="84" cy="100" r="4" opacity="0.75" />
+        <circle cx="60" cy="122" r="4" opacity="0.75" />
+        <circle cx="34" cy="138" r="4" opacity="0.75" />
+        <circle cx="12" cy="148" r="4" opacity="0.7" />
+
+        {/* Ring 6 (r=2.8) */}
+        <circle cx="166" cy="28" r="2.8" opacity="0.65" />
+        <circle cx="150" cy="56" r="2.8" opacity="0.65" />
+        <circle cx="130" cy="84" r="2.8" opacity="0.65" />
+        <circle cx="108" cy="110" r="2.8" opacity="0.65" />
+        <circle cx="82" cy="134" r="2.8" opacity="0.65" />
+        <circle cx="54" cy="154" r="2.8" opacity="0.65" />
+        <circle cx="26" cy="170" r="2.8" opacity="0.6" />
+
+        {/* Ring 7 (r=2) */}
+        <circle cx="192" cy="34" r="2" opacity="0.5" />
+        <circle cx="174" cy="64" r="2" opacity="0.5" />
+        <circle cx="152" cy="94" r="2" opacity="0.5" />
+        <circle cx="128" cy="122" r="2" opacity="0.5" />
+        <circle cx="100" cy="148" r="2" opacity="0.5" />
+        <circle cx="70" cy="170" r="2" opacity="0.5" />
+        <circle cx="40" cy="188" r="2" opacity="0.45" />
+      </g>
+
+      {/* Top-Right Radial Halftone Circles (Mirrored Soft Lavender) */}
+      <g fill="#c8abf4">
+        {/* Ring 1 (r=12) */}
+        <circle cx="340" cy="12" r="12" opacity="0.95" />
+        <circle cx="348" cy="24" r="12" opacity="0.95" />
+
+        {/* Ring 2 (r=9.5) */}
+        <circle cx="312" cy="14" r="9.5" opacity="0.92" />
+        <circle cx="322" cy="32" r="9.5" opacity="0.92" />
+        <circle cx="338" cy="48" r="9.5" opacity="0.92" />
+        <circle cx="352" cy="56" r="9" opacity="0.9" />
+
+        {/* Ring 3 (r=7.5) */}
+        <circle cx="282" cy="16" r="7.5" opacity="0.88" />
+        <circle cx="292" cy="38" r="7.5" opacity="0.88" />
+        <circle cx="308" cy="56" r="7.5" opacity="0.88" />
+        <circle cx="326" cy="72" r="7.5" opacity="0.88" />
+        <circle cx="346" cy="84" r="7.5" opacity="0.88" />
+
+        {/* Ring 4 (r=5.5) */}
+        <circle cx="252" cy="20" r="5.5" opacity="0.82" />
+        <circle cx="264" cy="44" r="5.5" opacity="0.82" />
+        <circle cx="280" cy="68" r="5.5" opacity="0.82" />
+        <circle cx="300" cy="88" r="5.5" opacity="0.82" />
+        <circle cx="322" cy="104" r="5.5" opacity="0.82" />
+        <circle cx="344" cy="116" r="5.5" opacity="0.82" />
+
+        {/* Ring 5 (r=4) */}
+        <circle cx="222" cy="24" r="4" opacity="0.75" />
+        <circle cx="236" cy="50" r="4" opacity="0.75" />
+        <circle cx="254" cy="76" r="4" opacity="0.75" />
+        <circle cx="276" cy="100" r="4" opacity="0.75" />
+        <circle cx="300" cy="122" r="4" opacity="0.75" />
+        <circle cx="326" cy="138" r="4" opacity="0.75" />
+        <circle cx="348" cy="148" r="4" opacity="0.7" />
+
+        {/* Ring 6 (r=2.8) */}
+        <circle cx="194" cy="28" r="2.8" opacity="0.65" />
+        <circle cx="210" cy="56" r="2.8" opacity="0.65" />
+        <circle cx="230" cy="84" r="2.8" opacity="0.65" />
+        <circle cx="252" cy="110" r="2.8" opacity="0.65" />
+        <circle cx="278" cy="134" r="2.8" opacity="0.65" />
+        <circle cx="306" cy="154" r="2.8" opacity="0.65" />
+        <circle cx="334" cy="170" r="2.8" opacity="0.6" />
+
+        {/* Ring 7 (r=2) */}
+        <circle cx="168" cy="34" r="2" opacity="0.5" />
+        <circle cx="186" cy="64" r="2" opacity="0.5" />
+        <circle cx="208" cy="94" r="2" opacity="0.5" />
+        <circle cx="232" cy="122" r="2" opacity="0.5" />
+        <circle cx="260" cy="148" r="2" opacity="0.5" />
+        <circle cx="290" cy="170" r="2" opacity="0.5" />
+        <circle cx="320" cy="188" r="2" opacity="0.45" />
+      </g>
+
+      {/* Bottom Subtle Lavender Bokeh & Halftone Dots */}
+      <g fill="#c8abf4">
+        {/* Bottom-Left */}
+        <circle cx="14" cy="466" r="14" opacity="0.7" />
+        <circle cx="42" cy="470" r="10" opacity="0.65" />
+        <circle cx="22" cy="440" r="8.5" opacity="0.6" />
+        <circle cx="54" cy="444" r="6.5" opacity="0.55" />
+        <circle cx="34" cy="418" r="5" opacity="0.5" />
+        <circle cx="68" cy="422" r="4" opacity="0.45" />
+
+        {/* Bottom-Right */}
+        <circle cx="346" cy="466" r="14" opacity="0.7" />
+        <circle cx="318" cy="470" r="10" opacity="0.65" />
+        <circle cx="338" cy="440" r="8.5" opacity="0.6" />
+        <circle cx="306" cy="444" r="6.5" opacity="0.55" />
+        <circle cx="326" cy="418" r="5" opacity="0.5" />
+        <circle cx="292" cy="422" r="4" opacity="0.45" />
+      </g>
+
+      {/* Whimsical 4-Point Diamond Sparkles */}
+      <g fill="#b993ef">
+        <polygon points="120,40 123,46 120,52 117,46" opacity="0.75" />
+        <polygon points="240,40 243,46 240,52 237,46" opacity="0.75" />
+        <polygon points="50,165 52,169 50,173 48,169" opacity="0.65" />
+        <polygon points="310,165 312,169 310,173 308,169" opacity="0.65" />
+        <polygon points="45,410 47,414 45,418 43,414" opacity="0.6" />
+        <polygon points="315,410 317,414 315,418 313,414" opacity="0.6" />
       </g>
     </svg>
   );
@@ -353,7 +444,7 @@ export function UIKitShowcase({
             </button>
           </div>
 
-          {/* ROW 6: Two Medium Buttons (Retry & Next matching reference) */}
+          {/* ROW 6: Two Medium Buttons (Retry & Next matching Image 1) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             <button type="button" className="kit-btn kit-btn--md kit-btn--purple">
               <span className="kit-btn-label">Retry</span>
@@ -363,7 +454,17 @@ export function UIKitShowcase({
             </button>
           </div>
 
-          {/* ROW 7: Full-Width Large Gold Button */}
+          {/* ROW 6b: Caption Buttons (Matching Image 3) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+            <button type="button" className="kit-btn kit-btn--md kit-btn--purple">
+              <span className="kit-btn-label">Caption</span>
+            </button>
+            <button type="button" className="kit-btn kit-btn--md kit-btn--gold">
+              <span className="kit-btn-label">Caption</span>
+            </button>
+          </div>
+
+          {/* ROW 7: Full-Width Large Gold Button (Matching Image 3) */}
           <button type="button" className="kit-btn kit-btn--lg kit-btn--gold">
             <span className="kit-btn-label">Large button</span>
           </button>

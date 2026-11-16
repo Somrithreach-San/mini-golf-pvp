@@ -54,6 +54,7 @@ import {
 } from './components/GameModals';
 import { MultiplayerModal } from './components/MultiplayerModal';
 import { AccountModal } from './components/AccountModal';
+import { UIKitShowcase } from './components/UIKitShowcase';
 import { UserAvatar } from './components/UserAvatar';
 import { CardTimerBorder } from './components/CardTimerBorder';
 import { getSavedAvatarSeed, saveAvatarSeed, generateRandomAvatarSeed } from './data/userProfile';
@@ -73,6 +74,12 @@ export default function App() {
 
   // Default English Language
   const language: Language = 'en';
+
+  // UI Kit Showcase Viewer (Dev / Design Preview)
+  const [showcaseOpen, setShowcaseOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.location.search.includes('ui') || window.location.search.includes('showcase');
+  });
   const t = TRANSLATIONS.en;
 
   // Persistent Hole Stars (1..30 -> 0..3)
@@ -610,6 +617,23 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
+    if (showcaseOpen) {
+      return (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#f3eafc] via-[#ede0f7] to-[#e4d3f5] overflow-y-auto p-4 select-none">
+          <div className="relative my-auto flex flex-col items-center py-6">
+            <UIKitShowcase onClose={() => setShowcaseOpen(false)} />
+            <button
+              type="button"
+              onClick={() => setShowcaseOpen(false)}
+              className="mt-4 kit-btn kit-btn--md kit-btn--purple !h-12 !text-base cursor-pointer shadow-md"
+            >
+              <span className="kit-btn-label">Back to Sign In</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#96d1ff] via-[#d8f0ff] to-[#f2faff] overflow-hidden p-4 select-none">
         <AccountModal
@@ -645,6 +669,13 @@ export default function App() {
           }}
           isAuthGate={true}
         />
+        <button
+          type="button"
+          onClick={() => setShowcaseOpen(true)}
+          className="mt-3 px-4 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#7d35cd] text-xs font-black tracking-wide border border-[#d5c1ee] shadow-sm cursor-pointer transition-all hover:scale-105 active:scale-95"
+        >
+          ✨ Preview UI Kit Showcase
+        </button>
       </div>
     );
   }

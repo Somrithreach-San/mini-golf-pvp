@@ -596,7 +596,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
+  border-radius: 20px;
   font-family: 'Fredoka', 'Nunito', system-ui, -apple-system, sans-serif;
   font-weight: 800;
   color: #ffffff;
@@ -613,16 +613,17 @@
 .kit-btn::before {
   content: '';
   position: absolute;
-  inset: 5px;
-  border-radius: 13px;
+  inset: 5px 6px 7px 6px;
+  border-radius: 14px;
   pointer-events: none;
+  z-index: 0;
 }
 
 .kit-btn-label {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   line-height: 1;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -638,49 +639,77 @@
   padding: 0 16px;
 }
 .kit-btn--sm::before {
-  inset: 4px;
-  border-radius: 12px;
+  inset: 4px 5px 6px 5px;
+  border-radius: 11px;
 }
 
 .kit-btn--md {
   height: 56px;
-  border-radius: 18px;
-  font-size: 21px;
-  padding: 0 20px;
+  border-radius: 20px;
+  font-size: 22px;
+  padding: 0 22px;
 }
 .kit-btn--md::before {
-  inset: 5px;
-  border-radius: 13px;
+  inset: 5px 6px 7px 6px;
+  border-radius: 14px;
 }
 
 .kit-btn--lg {
   width: 100%;
   height: 64px;
-  border-radius: 20px;
-  font-size: 24px;
+  border-radius: 24px;
+  font-size: 25px;
   padding: 0 24px;
 }
 .kit-btn--lg::before {
-  inset: 5.5px;
-  border-radius: 14.5px;
+  inset: 5.5px 6.5px 7.5px 6.5px;
+  border-radius: 17px;
 }
 
-/* Color Variant: Gold / Amber */
+/* Color Variant: Gold / Amber (with top-right halftone dots) */
 .kit-btn--gold {
-  background: linear-gradient(180deg, #ffde43 0%, #faa612 50%, #eb7c00 100%);
+  background: linear-gradient(180deg, #ffd330 0%, #fa9e0b 45%, #ea7300 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 6px 0 #b34e00,
-    0 10px 14px rgba(45, 20, 75, 0.25);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.75),
+    0 6px 0 #ad4800,
+    0 10px 18px rgba(45, 12, 75, 0.28);
   text-shadow:
-    0 2.5px 0 #ab4600,
-    0 3px 5px rgba(90, 30, 0, 0.4);
+    0 1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 0 #a33f00,
+    0 4px 5px rgba(70, 20, 0, 0.4);
 }
 .kit-btn--gold::before {
-  background: linear-gradient(180deg, #ffbe18 0%, #f6950a 50%, #ea7800 100%);
+  background: linear-gradient(180deg, #ffc720 0%, #fa9e0b 45%, #ec7600 100%);
   box-shadow:
-    inset 0 2.5px 3px rgba(135, 48, 0, 0.4),
-    0 1px 0 rgba(255, 245, 175, 0.5);
+    inset 0 3.5px 3.5px rgba(115, 38, 0, 0.45),
+    0 1.5px 0 rgba(255, 255, 255, 0.5);
+}
+/* Halftone dot texture in top-right corner of gold buttons */
+.kit-btn--gold::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 58%;
+  height: 72%;
+  border-top-right-radius: 14px;
+  background-image: radial-gradient(circle, rgba(160, 55, 0, 0.38) 1.5px, transparent 1.7px);
+  background-size: 7px 7px;
+  background-position: top right;
+  mask-image: radial-gradient(circle at 100% 0%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.65) 45%, transparent 85%);
+  -webkit-mask-image: radial-gradient(circle at 100% 0%, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.65) 45%, transparent 85%);
+  pointer-events: none;
+  z-index: 1;
+}
+.kit-btn--lg.kit-btn--gold::after {
+  width: 45%;
+  height: 72%;
+  border-top-right-radius: 17px;
+}
+.kit-btn--sm.kit-btn--gold::after {
+  top: 4px;
+  right: 5px;
+  border-top-right-radius: 11px;
 }
 .kit-btn--gold:hover {
   filter: brightness(1.05);
@@ -688,27 +717,42 @@
 .kit-btn--gold:active {
   transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 2px 0 #b34e00,
-    0 5px 8px rgba(45, 20, 75, 0.2);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.75),
+    0 2px 0 #ad4800,
+    0 5px 8px rgba(45, 12, 75, 0.22);
 }
 
-/* Color Variant: Vibrant Purple / Magenta */
+/* Color Variant: Vibrant Purple / Magenta (with smooth top-left specular sheen) */
 .kit-btn--purple {
-  background: linear-gradient(180deg, #d84aff 0%, #b024f8 50%, #870cd4 100%);
+  background: linear-gradient(180deg, #d33fff 0%, #a21fe0 45%, #7e0bb8 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 6px 0 #4c0088,
-    0 10px 14px rgba(45, 20, 75, 0.25);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 6px 0 #48057d,
+    0 10px 18px rgba(45, 12, 75, 0.28);
   text-shadow:
-    0 2.5px 0 #460980,
-    0 3px 5px rgba(40, 0, 80, 0.45);
+    0 1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 0 #400574,
+    0 4px 5px rgba(25, 0, 55, 0.45);
 }
 .kit-btn--purple::before {
-  background: linear-gradient(180deg, #b929f6 0%, #9914dc 50%, #800bb8 100%);
+  background: linear-gradient(180deg, #bf26ff 0%, #9c12e8 45%, #7e07c2 100%);
   box-shadow:
-    inset 0 2.5px 3px rgba(60, 0, 110, 0.45),
-    0 1px 0 rgba(255, 200, 255, 0.45);
+    inset 0 3.5px 3.5px rgba(35, 0, 70, 0.5),
+    0 1.5px 0 rgba(255, 255, 255, 0.45);
+}
+/* Organic specular glint on the top-left shoulder of purple button */
+.kit-btn--purple::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  width: 38px;
+  height: 20px;
+  border-top-left-radius: 12px;
+  border-bottom-right-radius: 16px;
+  background: radial-gradient(ellipse at 25% 25%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.12) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
 }
 .kit-btn--purple:hover {
   filter: brightness(1.05);
@@ -716,27 +760,41 @@
 .kit-btn--purple:active {
   transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 2px 0 #4c0088,
-    0 5px 8px rgba(45, 20, 75, 0.2);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 2px 0 #48057d,
+    0 5px 8px rgba(45, 12, 75, 0.22);
 }
 
 /* Color Variant: Emerald Green */
 .kit-btn--green {
-  background: linear-gradient(180deg, #64f86a 0%, #29d839 50%, #15b525 100%);
+  background: linear-gradient(180deg, #5fe868 0%, #20ce31 45%, #13a822 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 6px 0 #0f7518,
-    0 10px 14px rgba(45, 20, 75, 0.25);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 6px 0 #0d6e15,
+    0 10px 18px rgba(20, 60, 25, 0.25);
   text-shadow:
-    0 2.5px 0 #0d6b15,
-    0 3px 5px rgba(0, 45, 10, 0.4);
+    0 1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 0 #0a5f12,
+    0 4px 5px rgba(0, 45, 10, 0.4);
 }
 .kit-btn--green::before {
-  background: linear-gradient(180deg, #32df41 0%, #1dc22d 50%, #14a022 100%);
+  background: linear-gradient(180deg, #37dc46 0%, #17c128 45%, #129d20 100%);
   box-shadow:
-    inset 0 2.5px 3px rgba(10, 85, 20, 0.42),
-    0 1px 0 rgba(210, 255, 215, 0.45);
+    inset 0 3.5px 3.5px rgba(8, 75, 16, 0.45),
+    0 1.5px 0 rgba(255, 255, 255, 0.45);
+}
+.kit-btn--green::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  width: 38px;
+  height: 20px;
+  border-top-left-radius: 12px;
+  border-bottom-right-radius: 16px;
+  background: radial-gradient(ellipse at 25% 25%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
 }
 .kit-btn--green:hover {
   filter: brightness(1.05);
@@ -744,27 +802,41 @@
 .kit-btn--green:active {
   transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 2px 0 #0f7518,
-    0 5px 8px rgba(45, 20, 75, 0.2);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 2px 0 #0d6e15,
+    0 5px 8px rgba(20, 60, 25, 0.2);
 }
 
 /* Color Variant: Crimson Red */
 .kit-btn--red {
-  background: linear-gradient(180deg, #ff7a82 0%, #f43846 50%, #d41e2c 100%);
+  background: linear-gradient(180deg, #ff6b74 0%, #f0303f 45%, #cf1927 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 6px 0 #880e17,
-    0 10px 14px rgba(45, 20, 75, 0.25);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 6px 0 #820b14,
+    0 10px 18px rgba(60, 15, 20, 0.28);
   text-shadow:
-    0 2.5px 0 #7a0c14,
-    0 3px 5px rgba(50, 0, 10, 0.4);
+    0 1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 0 #73070f,
+    0 4px 5px rgba(50, 0, 10, 0.4);
 }
 .kit-btn--red::before {
-  background: linear-gradient(180deg, #f74552 0%, #db2231 50%, #bf1624 100%);
+  background: linear-gradient(180deg, #f7404e 0%, #da1e2d 45%, #bc1321 100%);
   box-shadow:
-    inset 0 2.5px 3px rgba(100, 10, 20, 0.42),
-    0 1px 0 rgba(255, 200, 205, 0.45);
+    inset 0 3.5px 3.5px rgba(95, 8, 16, 0.48),
+    0 1.5px 0 rgba(255, 255, 255, 0.45);
+}
+.kit-btn--red::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  width: 38px;
+  height: 20px;
+  border-top-left-radius: 12px;
+  border-bottom-right-radius: 16px;
+  background: radial-gradient(ellipse at 25% 25%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 80%);
+  pointer-events: none;
+  z-index: 1;
 }
 .kit-btn--red:hover {
   filter: brightness(1.05);
@@ -772,21 +844,22 @@
 .kit-btn--red:active {
   transform: translateY(4px);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 2px 0 #880e17,
-    0 5px 8px rgba(45, 20, 75, 0.2);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 2px 0 #820b14,
+    0 5px 8px rgba(60, 15, 20, 0.2);
 }
 
 /* Color Variant: Sky Blue */
 .kit-btn--blue {
-  background: linear-gradient(180deg, #68c0ff 0%, #248bf0 50%, #116ad1 100%);
+  background: linear-gradient(180deg, #5bbaff 0%, #1f85ec 45%, #1066cc 100%);
   box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.75),
-    0 6px 0 #084386,
-    0 10px 14px rgba(20, 30, 60, 0.25);
+    inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+    0 6px 0 #073f7e,
+    0 10px 18px rgba(20, 30, 60, 0.25);
   text-shadow:
-    0 2.5px 0 #083c79,
-    0 3px 5px rgba(0, 25, 60, 0.4);
+    0 1px 0 rgba(0, 0, 0, 0.15),
+    0 3px 0 #07376e,
+    0 4px 5px rgba(0, 25, 60, 0.4);
 }
 .kit-btn--blue::before {
   background: linear-gradient(180deg, #3296f8 0%, #1975dd 50%, #0e5dbb 100%);
