@@ -2060,13 +2060,11 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         cellSet.add(`${c},${r}`);
       }
 
-      // Solve exact cell boundaries for all cells so every corridor has:
-      // 1. Equal width (3.40 = CELL_SIZE + 2 * FAIRWAY_PAD)
-      // 2. Corner cells are symmetric 3.40 x 3.40 squares centered at (cx, cz)
-      // 3. Straight segments seamlessly connect between corners and ends without lopsided sub-tiles or gaps
-      const cellBoundsMap = new Map<string, { x1: number; x2: number; z1: number; z2: number; isCorner: boolean }>();
+      // Solve exact, non-overlapping cell boundaries for all fairway cells.
+      // Every cell meets its neighbors edge-to-edge with 0.00 overlap.
+      // Outer edges expand cleanly by FAIRWAY_PAD to meet the outer perimeter walls.
+      const cellBoundsMap = new Map<string, { x1: number; x2: number; z1: number; z2: number }>();
 
-      // Step 1: Identify all corner intersection cells
       for (const [col, row] of activeCourse.cells) {
         const key = `${col},${row}`;
         const cx = col * CELL_SIZE;
@@ -2075,123 +2073,13 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         const hasE = cellSet.has(`${col + 1},${row}`);
         const hasN = cellSet.has(`${col},${row - 1}`);
         const hasS = cellSet.has(`${col},${row + 1}`);
-        const isCorner = (hasN || hasS) && (hasE || hasW);
 
-        if (isCorner) {
-          cellBoundsMap.set(key, {
-            x1: cx - 1.0 - FAIRWAY_PAD,
-            x2: cx + 1.0 + FAIRWAY_PAD,
-            z1: cz - 1.0 - FAIRWAY_PAD,
-            z2: cz + 1.0 + FAIRWAY_PAD,
-            isCorner: true,
-          });
-        }
-      }
+        const x1 = hasW ? cx - 1.0 : cx - 1.0 - FAIRWAY_PAD;
+        const x2 = hasE ? cx + 1.0 : cx + 1.0 + FAIRWAY_PAD;
+        const z1 = hasN ? cz - 1.0 : cz - 1.0 - FAIRWAY_PAD;
+        const z2 = hasS ? cz + 1.0 : cz + 1.0 + FAIRWAY_PAD;
 
-      // Step 2: Solve straight corridor segments between ends and corners
-      const visitedCells = new Set<string>();
-      for (const [col, row] of activeCourse.cells) {
-        const key = `${col},${row}`;
-        if (cellBoundsMap.has(key) || visitedCells.has(key)) continue;
-
-        const hasN = cellSet.has(`${col},${row - 1}`);
-        const hasS = cellSet.has(`${col},${row + 1}`);
-        const hasW = cellSet.has(`${col - 1},${row}`);
-        const hasE = cellSet.has(`${col + 1},${row}`);
-
-        const isVert = (hasN || hasS) || (!hasW && !hasE);
-
-        if (isVert) {
-          let minR = row;
-          while (cellSet.has(`${col},${minR - 1}`) && !cellBoundsMap.has(`${col},${minR - 1}`)) {
-            minR--;
-          }
-          let maxR = row;
-          while (cellSet.has(`${col},${maxR + 1}`) && !cellBoundsMap.has(`${col},${maxR + 1}`)) {
-            maxR++;
-          }
-
-          for (let r = minR; r <= maxR; r++) visitedCells.add(`${col},${r}`);
-
-          const cx = col * CELL_SIZE;
-          const x1 = cx - 1.0 - FAIRWAY_PAD;
-          const x2 = cx + 1.0 + FAIRWAY_PAD;
-
-          let zStart: number;
-          const northNeighborKey = `${col},${minR - 1}`;
-          if (cellBoundsMap.has(northNeighborKey)) {
-            zStart = cellBoundsMap.get(northNeighborKey)!.z2;
-          } else {
-            zStart = minR * CELL_SIZE - 1.0 - FAIRWAY_PAD;
-          }
-
-          let zEnd: number;
-          const southNeighborKey = `${col},${maxR + 1}`;
-          if (cellBoundsMap.has(southNeighborKey)) {
-            zEnd = cellBoundsMap.get(southNeighborKey)!.z1;
-          } else {
-            zEnd = maxR * CELL_SIZE + 1.0 + FAIRWAY_PAD;
-          }
-
-          const numCells = maxR - minR + 1;
-          const cellLen = (zEnd - zStart) / numCells;
-
-          for (let i = 0; i < numCells; i++) {
-            const r = minR + i;
-            cellBoundsMap.set(`${col},${r}`, {
-              x1,
-              x2,
-              z1: zStart + i * cellLen,
-              z2: zStart + (i + 1) * cellLen,
-              isCorner: false,
-            });
-          }
-        } else {
-          let minC = col;
-          while (cellSet.has(`${minC - 1},${row}`) && !cellBoundsMap.has(`${minC - 1},${row}`)) {
-            minC--;
-          }
-          let maxC = col;
-          while (cellSet.has(`${maxC + 1},${row}`) && !cellBoundsMap.has(`${maxC + 1},${row}`)) {
-            maxC++;
-          }
-
-          for (let c = minC; c <= maxC; c++) visitedCells.add(`${c},${row}`);
-
-          const cz = row * CELL_SIZE;
-          const z1 = cz - 1.0 - FAIRWAY_PAD;
-          const z2 = cz + 1.0 + FAIRWAY_PAD;
-
-          let xStart: number;
-          const westNeighborKey = `${minC - 1},${row}`;
-          if (cellBoundsMap.has(westNeighborKey)) {
-            xStart = cellBoundsMap.get(westNeighborKey)!.x2;
-          } else {
-            xStart = minC * CELL_SIZE - 1.0 - FAIRWAY_PAD;
-          }
-
-          let xEnd: number;
-          const eastNeighborKey = `${maxC + 1},${row}`;
-          if (cellBoundsMap.has(eastNeighborKey)) {
-            xEnd = cellBoundsMap.get(eastNeighborKey)!.x1;
-          } else {
-            xEnd = maxC * CELL_SIZE + 1.0 + FAIRWAY_PAD;
-          }
-
-          const numCells = maxC - minC + 1;
-          const cellLen = (xEnd - xStart) / numCells;
-
-          for (let i = 0; i < numCells; i++) {
-            const c = minC + i;
-            cellBoundsMap.set(`${c},${row}`, {
-              x1: xStart + i * cellLen,
-              x2: xStart + (i + 1) * cellLen,
-              z1,
-              z2,
-              isCorner: false,
-            });
-          }
-        }
+        cellBoundsMap.set(key, { x1, x2, z1, z2 });
       }
 
       // Sub-tiles have height 0.06, centered at y = 0.145 -> top surface is at y = 0.175
@@ -2200,25 +2088,23 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         const bounds = cellBoundsMap.get(`${col},${row}`);
         if (!bounds) continue;
 
-        const hasW = cellSet.has(`${col - 1},${row}`);
-        const hasE = cellSet.has(`${col + 1},${row}`);
-        const hasN = cellSet.has(`${col},${row - 1}`);
-        const hasS = cellSet.has(`${col},${row + 1}`);
+        const cx = col * CELL_SIZE;
+        const cz = row * CELL_SIZE;
 
-        // Base foundation box: extends 0.28 under outer walls and corner turns
-        const bx1 = bounds.isCorner ? bounds.x1 - 0.28 : bounds.x1 - (hasW ? 0.01 : 0.28);
-        const bx2 = bounds.isCorner ? bounds.x2 + 0.28 : bounds.x2 + (hasE ? 0.01 : 0.28);
-        const bz1 = bounds.isCorner ? bounds.z1 - 0.28 : bounds.z1 - (hasN ? 0.01 : 0.28);
-        const bz2 = bounds.isCorner ? bounds.z2 + 0.28 : bounds.z2 + (hasS ? 0.01 : 0.28);
+        // Base foundation box: matches top tiles bounds exactly so cream base never sticks out
+        const bx1 = bounds.x1;
+        const bx2 = bounds.x2;
+        const bz1 = bounds.z1;
+        const bz2 = bounds.z2;
 
         _dummyPos.set((bx1 + bx2) * 0.5, 0.065, (bz1 + bz2) * 0.5);
         _dummyScale.set(bx2 - bx1, 1, bz2 - bz1);
         _dummyMatrix.compose(_dummyPos, _dummyQuat, _dummyScale);
         baseInstanced.setMatrixAt(baseIdx++, _dummyMatrix);
 
-        // Sub-tiles: 2x2 grid split exactly at the cell midpoints
-        const midX = (bounds.x1 + bounds.x2) * 0.5;
-        const midZ = (bounds.z1 + bounds.z2) * 0.5;
+        // Sub-tiles: 2x2 grid split cleanly at the cell core center (cx, cz)
+        const midX = cx;
+        const midZ = cz;
 
         for (let sx = 0; sx < 2; sx++) {
           for (let sz = 0; sz < 2; sz++) {
