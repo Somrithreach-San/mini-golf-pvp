@@ -231,7 +231,7 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
       <div className="w-full max-w-[430px] md:max-w-[680px] lg:max-w-[780px] grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-5 my-auto py-2 md:py-3 lg:py-4">
         {worldHoles.map((hole) => {
           const stars = holeStars[hole.holeNumber] || 0;
-          const displayIndex = ((hole.holeNumber - 1) % 6) + 1;
+          const displayIndex = hole.holeNumber;
           const unlocked = isHoleUnlocked(hole.holeNumber, holeStars);
           const lockReason = getHoleLockReason(hole.holeNumber, holeStars);
 

@@ -66,7 +66,14 @@ const ENABLE_EMOTES = false;
 
 export default function App() {
   // Game Screen State: 'menu' | 'holes' | 'play'
-  const [screen, setScreen] = useState<'menu' | 'holes' | 'play'>('menu');
+  const [screen, setScreen] = useState<'menu' | 'holes' | 'play'>(() => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const s = p.get('screen');
+      if (s === 'play' || s === 'holes') return s;
+    } catch {}
+    return 'menu';
+  });
 
   // Language State: 'en' | 'zh'
   const [language, setLanguage] = useState<Language>(() => getSavedLanguage());
@@ -92,6 +99,9 @@ export default function App() {
   // Current active hole (defaults to Hole 1)
   const [currentHoleNumber, setCurrentHoleNumber] = useState<number>(() => {
     try {
+      const p = new URLSearchParams(window.location.search);
+      const h = p.get('hole');
+      if (h) return Math.min(Math.max(Number(h) || 1, 1), ALL_HOLES.length);
       const saved = localStorage.getItem('minigolf_current_hole_v2');
       if (saved) return Number(saved) || 1;
     } catch {}

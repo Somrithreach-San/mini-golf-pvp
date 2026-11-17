@@ -2618,7 +2618,9 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       if (activeCourse.sweepers) {
         for (const sw of activeCourse.sweepers) {
           const swGroup = new THREE.Group();
-          swGroup.position.set(sw.pivot[0], 0.182, sw.pivot[1]);
+          const swX = sw.x ?? (sw as any).pivot?.[0] ?? 0;
+          const swZ = sw.z ?? (sw as any).pivot?.[1] ?? 0;
+          swGroup.position.set(swX, 0.182, swZ);
 
           const hubGeo = new THREE.CylinderGeometry(0.26, 0.30, 0.42, 20);
           hubGeo.translate(0, 0.21, 0);
@@ -2631,7 +2633,7 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           const capMesh = new THREE.Mesh(hubCapGeo, sharedMats.goldAccent);
           swGroup.add(hubMesh, capMesh);
 
-          const bladeThick = sw.bladeThickness ?? 0.28;
+          const bladeThick = sw.bladeWidth ?? sw.bladeThickness ?? 0.28;
           const bladeH = sw.bladeHeight ?? 0.32;
           for (let b = 0; b < sw.bladeCount; b++) {
             const angle = (b / sw.bladeCount) * Math.PI * 2;
@@ -2745,15 +2747,20 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       if (activeCourse.portals) {
         for (const pair of activeCourse.portals) {
           const portalGroup = new THREE.Group();
-          const r = pair.radius ?? 0.42;
+          const nodeA = pair.a || (pair as any).portalA;
+          const nodeB = pair.b || (pair as any).portalB;
+          if (!nodeA || !nodeB) continue;
+
+          const rA = nodeA.radius ?? pair.radius ?? 0.42;
+          const rB = nodeB.radius ?? pair.radius ?? 0.42;
 
           // Node A
           const groupA = new THREE.Group();
-          groupA.position.set(pair.portalA.x, 0.188, pair.portalA.z);
+          groupA.position.set(nodeA.x, 0.188, nodeA.z);
 
-          const discGeoA = new THREE.CylinderGeometry(r, r, 0.018, 24);
+          const discGeoA = new THREE.CylinderGeometry(rA, rA, 0.018, 24);
           discGeoA.translate(0, 0.009, 0);
-          const ringGeoA = new THREE.TorusGeometry(r * 0.85, 0.04, 16, 28);
+          const ringGeoA = new THREE.TorusGeometry(rA * 0.85, 0.04, 16, 28);
           ringGeoA.translate(0, 0.36, 0);
           disposableCourseGeos.push(discGeoA, ringGeoA);
 
@@ -2763,11 +2770,11 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
 
           // Node B
           const groupB = new THREE.Group();
-          groupB.position.set(pair.portalB.x, 0.188, pair.portalB.z);
+          groupB.position.set(nodeB.x, 0.188, nodeB.z);
 
-          const discGeoB = new THREE.CylinderGeometry(r, r, 0.018, 24);
+          const discGeoB = new THREE.CylinderGeometry(rB, rB, 0.018, 24);
           discGeoB.translate(0, 0.009, 0);
-          const ringGeoB = new THREE.TorusGeometry(r * 0.85, 0.04, 16, 28);
+          const ringGeoB = new THREE.TorusGeometry(rB * 0.85, 0.04, 16, 28);
           ringGeoB.translate(0, 0.36, 0);
           disposableCourseGeos.push(discGeoB, ringGeoB);
 
