@@ -380,28 +380,18 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       hintCupBeacon: new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide }),
       iceSurface: new THREE.MeshStandardMaterial({
         color: 0x93e6fb,
-        roughness: 0.08,
-        metalness: 0.2,
-        transparent: true,
-        opacity: 0.88,
-        polygonOffset: true,
-        polygonOffsetFactor: -1,
-        polygonOffsetUnits: -1,
+        roughness: 0.05,
+        metalness: 0.25,
       }),
       slimeSurface: new THREE.MeshStandardMaterial({
         color: 0x4ade80,
         roughness: 0.35,
         metalness: 0.05,
-        transparent: true,
-        opacity: 0.90,
-        polygonOffset: true,
-        polygonOffsetFactor: -1,
-        polygonOffsetUnits: -1,
       }),
       boostPadBase: new THREE.MeshStandardMaterial({
         color: 0x1e293b,
-        roughness: 0.6,
-        metalness: 0.3,
+        roughness: 0.5,
+        metalness: 0.4,
       }),
       boostChevronMat: new THREE.MeshBasicMaterial({
         color: 0xfef08a,
@@ -409,26 +399,26 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       portalRingA: new THREE.MeshStandardMaterial({
         color: 0xa855f7,
         emissive: 0x9333ea,
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 0.9,
         roughness: 0.2,
       }),
       portalRingB: new THREE.MeshStandardMaterial({
         color: 0x06b6d4,
         emissive: 0x0891b2,
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 0.9,
         roughness: 0.2,
       }),
-      portalCenterA: new THREE.MeshBasicMaterial({
-        color: 0xc084fc,
-        transparent: true,
-        opacity: 0.7,
-        side: THREE.DoubleSide,
+      portalCenterA: new THREE.MeshStandardMaterial({
+        color: 0x8b5cf6,
+        emissive: 0x7c3aed,
+        emissiveIntensity: 0.85,
+        roughness: 0.3,
       }),
-      portalCenterB: new THREE.MeshBasicMaterial({
-        color: 0x67e8f9,
-        transparent: true,
-        opacity: 0.7,
-        side: THREE.DoubleSide,
+      portalCenterB: new THREE.MeshStandardMaterial({
+        color: 0x06b6d4,
+        emissive: 0x0891b2,
+        emissiveIntensity: 0.85,
+        roughness: 0.3,
       }),
       sweeperHubMat: new THREE.MeshStandardMaterial({
         color: 0x1e293b,
@@ -2287,10 +2277,10 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         }
       }
 
-      // 3b. Special Surface Zones: Sand, Ice, Slime
+      // 3b. Special Surface Zones: Sand, Ice, Slime (elevated cleanly above y = 0.175 grass top)
       if (activeCourse.surfaceZones) {
         for (const zone of activeCourse.surfaceZones) {
-          const zGeo = new THREE.BoxGeometry(zone.width, 0.016, zone.depth);
+          const zGeo = new THREE.BoxGeometry(zone.width, 0.02, zone.depth);
           disposableCourseGeos.push(zGeo);
 
           let zoneMat = sharedMats.sand;
@@ -2301,7 +2291,7 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           }
 
           const zMesh = new THREE.Mesh(zGeo, zoneMat);
-          zMesh.position.set(zone.x, 0.181, zone.z);
+          zMesh.position.set(zone.x, 0.186, zone.z);
           zMesh.receiveShadow = !isSoftwareGl;
           courseGroup.add(zMesh);
         }
@@ -2723,9 +2713,10 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           const bpGroup = new THREE.Group();
           bpGroup.position.set(bp.x, 0.182, bp.z);
 
-          const baseGeo = new THREE.BoxGeometry(bp.width, 0.014, bp.depth);
+          const baseGeo = new THREE.BoxGeometry(bp.width, 0.018, bp.depth);
           disposableCourseGeos.push(baseGeo);
           const baseMesh = new THREE.Mesh(baseGeo, sharedMats.boostPadBase);
+          baseMesh.position.y = 0.009;
           baseMesh.receiveShadow = !isSoftwareGl;
           bpGroup.add(baseMesh);
 
@@ -2734,15 +2725,13 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
 
           const numChevrons = 3;
           for (let c = 0; c < numChevrons; c++) {
-            const chevGeo = new THREE.ConeGeometry(0.18, 0.32, 3);
-            chevGeo.rotateX(Math.PI / 2);
-            chevGeo.rotateY(angle);
-            chevGeo.scale(1, 0.15, 1);
+            const chevGeo = new THREE.BoxGeometry(0.36, 0.008, 0.16);
             disposableCourseGeos.push(chevGeo);
 
             const chevMesh = new THREE.Mesh(chevGeo, sharedMats.boostChevronMat);
-            const offsetDist = (c - (numChevrons - 1) / 2) * 0.45;
-            chevMesh.position.set(bp.dirX * offsetDist, 0.012, bp.dirZ * offsetDist);
+            chevMesh.rotation.y = angle;
+            const offsetDist = (c - (numChevrons - 1) / 2) * 0.42;
+            chevMesh.position.set(bp.dirX * offsetDist, 0.022, bp.dirZ * offsetDist);
             bpGroup.add(chevMesh);
             chevrons.push(chevMesh);
           }
@@ -2758,24 +2747,28 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           const portalGroup = new THREE.Group();
           const r = pair.radius ?? 0.42;
 
+          // Node A
           const groupA = new THREE.Group();
-          groupA.position.set(pair.portalA.x, 0.185, pair.portalA.z);
+          groupA.position.set(pair.portalA.x, 0.188, pair.portalA.z);
 
-          const discGeoA = new THREE.CylinderGeometry(r, r, 0.02, 24);
-          const ringGeoA = new THREE.TorusGeometry(r * 0.9, 0.05, 12, 24);
-          ringGeoA.rotateX(Math.PI / 2);
+          const discGeoA = new THREE.CylinderGeometry(r, r, 0.018, 24);
+          discGeoA.translate(0, 0.009, 0);
+          const ringGeoA = new THREE.TorusGeometry(r * 0.85, 0.04, 16, 28);
+          ringGeoA.translate(0, 0.36, 0);
           disposableCourseGeos.push(discGeoA, ringGeoA);
 
           const discMeshA = new THREE.Mesh(discGeoA, sharedMats.portalCenterA);
           const ringMeshA = new THREE.Mesh(ringGeoA, sharedMats.portalRingA);
           groupA.add(discMeshA, ringMeshA);
 
+          // Node B
           const groupB = new THREE.Group();
-          groupB.position.set(pair.portalB.x, 0.185, pair.portalB.z);
+          groupB.position.set(pair.portalB.x, 0.188, pair.portalB.z);
 
-          const discGeoB = new THREE.CylinderGeometry(r, r, 0.02, 24);
-          const ringGeoB = new THREE.TorusGeometry(r * 0.9, 0.05, 12, 24);
-          ringGeoB.rotateX(Math.PI / 2);
+          const discGeoB = new THREE.CylinderGeometry(r, r, 0.018, 24);
+          discGeoB.translate(0, 0.009, 0);
+          const ringGeoB = new THREE.TorusGeometry(r * 0.85, 0.04, 16, 28);
+          ringGeoB.translate(0, 0.36, 0);
           disposableCourseGeos.push(discGeoB, ringGeoB);
 
           const discMeshB = new THREE.Mesh(discGeoB, sharedMats.portalCenterB);
@@ -3769,17 +3762,14 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         const wave = (elapsed * 6) % (Math.PI * 2);
         item.chevrons.forEach((cMesh, idx) => {
           const pulse = (Math.sin(wave + idx * 1.2) + 1) * 0.5;
-          cMesh.scale.set(1 + pulse * 0.15, 1, 1 + pulse * 0.15);
+          (cMesh.material as THREE.MeshBasicMaterial).color.setHSL(0.14, 1.0, 0.5 + pulse * 0.35);
         });
       }
 
-      // Animate portals rotating and pulsing
+      // Animate portals rotating
       for (const item of portalMeshes) {
         item.meshA.rotation.y += dt * 1.8;
         item.meshB.rotation.y -= dt * 1.8;
-        const pulse = 1 + Math.sin(elapsed * 4) * 0.06;
-        item.meshA.scale.set(pulse, 1, pulse);
-        item.meshB.scale.set(pulse, 1, pulse);
       }
 
       // Smoothly decay bumper hit scale pulse

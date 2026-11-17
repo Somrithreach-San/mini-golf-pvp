@@ -416,7 +416,7 @@ export function stepBallPhysics(
       if (dist < wallRadius) {
         let nx = w.nx;
         let nz = w.nz;
-        if (t <= 0.001 || t >= 0.999) {
+        if ((w.nx === 0 && w.nz === 0) || t <= 0.001 || t >= 0.999) {
           if (dist > 0.0001) {
             nx = dx / dist;
             nz = dz / dist;

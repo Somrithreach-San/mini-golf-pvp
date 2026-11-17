@@ -202,9 +202,8 @@ export const ALL_HOLES: HoleCourse[] = [
     start: [0, 5.0],
     hole: [0, -5.0],
     internalWalls: [
-      // Wall separating the twin routes in the middle
-      { x1: -0.2, z1: 2.2, x2: -0.2, z2: -2.2, nx: -1, nz: 0 },
-      { x1: 0.2, z1: 2.2, x2: 0.2, z2: -2.2, nx: 1, nz: 0 },
+      // Clean single central divider wall separating the twin routes in the middle
+      { x1: 0, z1: 2.2, x2: 0, z2: -2.2, nx: 0, nz: 0 },
     ],
     gapBounds: [
       // Water void gap between the bridges
