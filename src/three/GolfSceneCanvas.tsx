@@ -9,11 +9,6 @@ import {
   getCourseBounds,
   GOLF_WORLDS,
   getMultiplayerTeePositions,
-  RotatingSweeperObstacle,
-  TimedDrawbridge,
-  BoostPad,
-  PortalPair,
-  SpecialSurfaceZone,
 } from '../data/courses';
 import { GolfBallSkin, GOLF_BALL_SKINS } from '../data/balls';
 import {
@@ -378,73 +373,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       hintDot: new THREE.MeshBasicMaterial({ color: 0xffd43b }),
       hintBeacon: new THREE.MeshBasicMaterial({ color: 0xffb703, transparent: true, opacity: 0.85, side: THREE.DoubleSide }),
       hintCupBeacon: new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.9, side: THREE.DoubleSide }),
-      iceSurface: new THREE.MeshStandardMaterial({
-        color: 0x93e6fb,
-        roughness: 0.05,
-        metalness: 0.25,
-      }),
-      slimeSurface: new THREE.MeshStandardMaterial({
-        color: 0x4ade80,
-        roughness: 0.35,
-        metalness: 0.05,
-      }),
-      boostPadBase: new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        roughness: 0.5,
-        metalness: 0.4,
-      }),
-      boostChevronMat: new THREE.MeshBasicMaterial({
-        color: 0xfef08a,
-      }),
-      portalRingA: new THREE.MeshStandardMaterial({
-        color: 0xa855f7,
-        emissive: 0x9333ea,
-        emissiveIntensity: 0.9,
-        roughness: 0.2,
-      }),
-      portalRingB: new THREE.MeshStandardMaterial({
-        color: 0x06b6d4,
-        emissive: 0x0891b2,
-        emissiveIntensity: 0.9,
-        roughness: 0.2,
-      }),
-      portalCenterA: new THREE.MeshStandardMaterial({
-        color: 0x8b5cf6,
-        emissive: 0x7c3aed,
-        emissiveIntensity: 0.85,
-        roughness: 0.3,
-      }),
-      portalCenterB: new THREE.MeshStandardMaterial({
-        color: 0x06b6d4,
-        emissive: 0x0891b2,
-        emissiveIntensity: 0.85,
-        roughness: 0.3,
-      }),
-      sweeperHubMat: new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        metalness: 0.8,
-        roughness: 0.25,
-      }),
-      sweeperBladeMat: new THREE.MeshStandardMaterial({
-        color: 0xd92d20,
-        roughness: 0.4,
-        metalness: 0.1,
-      }),
-      sweeperCautionMat: new THREE.MeshStandardMaterial({
-        color: 0xfacc15,
-        roughness: 0.4,
-        metalness: 0.05,
-      }),
-      drawbridgeMat: new THREE.MeshStandardMaterial({
-        color: 0x92400e,
-        roughness: 0.75,
-        metalness: 0.1,
-      }),
-      drawbridgeHingeMat: new THREE.MeshStandardMaterial({
-        color: 0x334155,
-        metalness: 0.8,
-        roughness: 0.3,
-      }),
     };
 
     // 6. Root Scene Hierarchy
@@ -1047,10 +975,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
 
     let movingBlockMeshes: { mesh: THREE.Group; index: number }[] = [];
     let bumperMeshes: THREE.Group[] = [];
-    let sweeperMeshes: { mesh: THREE.Group; sweeper: RotatingSweeperObstacle }[] = [];
-    let drawbridgeMeshes: { pivotGroup: THREE.Group; bridge: TimedDrawbridge; platformMesh: THREE.Mesh }[] = [];
-    let boostPadMeshes: { group: THREE.Group; pad: BoostPad; chevrons: THREE.Mesh[] }[] = [];
-    let portalMeshes: { group: THREE.Group; pair: PortalPair; meshA: THREE.Group; meshB: THREE.Group }[] = [];
     let koiActors: KoiActor[] = [];
     let hangingLanternMeshes: THREE.Group[] = [];
     let flagPennantMesh: THREE.Mesh | null = null;
@@ -1971,10 +1895,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
       }
       movingBlockMeshes = [];
       bumperMeshes = [];
-      sweeperMeshes = [];
-      drawbridgeMeshes = [];
-      boostPadMeshes = [];
-      portalMeshes = [];
       koiActors = [];
       hangingLanternMeshes = [];
       flagPennantMesh = null;
@@ -2060,11 +1980,13 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         cellSet.add(`${c},${r}`);
       }
 
-      // Solve exact, non-overlapping cell boundaries for all fairway cells.
-      // Every cell meets its neighbors edge-to-edge with 0.00 overlap.
-      // Outer edges expand cleanly by FAIRWAY_PAD to meet the outer perimeter walls.
-      const cellBoundsMap = new Map<string, { x1: number; x2: number; z1: number; z2: number }>();
+      // Solve exact cell boundaries for all cells so every corridor has:
+      // 1. Equal width (3.40 = CELL_SIZE + 2 * FAIRWAY_PAD)
+      // 2. Corner cells are symmetric 3.40 x 3.40 squares centered at (cx, cz)
+      // 3. Straight segments seamlessly connect between corners and ends without lopsided sub-tiles or gaps
+      const cellBoundsMap = new Map<string, { x1: number; x2: number; z1: number; z2: number; isCorner: boolean }>();
 
+      // Step 1: Identify all corner intersection cells
       for (const [col, row] of activeCourse.cells) {
         const key = `${col},${row}`;
         const cx = col * CELL_SIZE;
@@ -2073,13 +1995,123 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         const hasE = cellSet.has(`${col + 1},${row}`);
         const hasN = cellSet.has(`${col},${row - 1}`);
         const hasS = cellSet.has(`${col},${row + 1}`);
+        const isCorner = (hasN || hasS) && (hasE || hasW);
 
-        const x1 = hasW ? cx - 1.0 : cx - 1.0 - FAIRWAY_PAD;
-        const x2 = hasE ? cx + 1.0 : cx + 1.0 + FAIRWAY_PAD;
-        const z1 = hasN ? cz - 1.0 : cz - 1.0 - FAIRWAY_PAD;
-        const z2 = hasS ? cz + 1.0 : cz + 1.0 + FAIRWAY_PAD;
+        if (isCorner) {
+          cellBoundsMap.set(key, {
+            x1: cx - 1.0 - FAIRWAY_PAD,
+            x2: cx + 1.0 + FAIRWAY_PAD,
+            z1: cz - 1.0 - FAIRWAY_PAD,
+            z2: cz + 1.0 + FAIRWAY_PAD,
+            isCorner: true,
+          });
+        }
+      }
 
-        cellBoundsMap.set(key, { x1, x2, z1, z2 });
+      // Step 2: Solve straight corridor segments between ends and corners
+      const visitedCells = new Set<string>();
+      for (const [col, row] of activeCourse.cells) {
+        const key = `${col},${row}`;
+        if (cellBoundsMap.has(key) || visitedCells.has(key)) continue;
+
+        const hasN = cellSet.has(`${col},${row - 1}`);
+        const hasS = cellSet.has(`${col},${row + 1}`);
+        const hasW = cellSet.has(`${col - 1},${row}`);
+        const hasE = cellSet.has(`${col + 1},${row}`);
+
+        const isVert = (hasN || hasS) || (!hasW && !hasE);
+
+        if (isVert) {
+          let minR = row;
+          while (cellSet.has(`${col},${minR - 1}`) && !cellBoundsMap.has(`${col},${minR - 1}`)) {
+            minR--;
+          }
+          let maxR = row;
+          while (cellSet.has(`${col},${maxR + 1}`) && !cellBoundsMap.has(`${col},${maxR + 1}`)) {
+            maxR++;
+          }
+
+          for (let r = minR; r <= maxR; r++) visitedCells.add(`${col},${r}`);
+
+          const cx = col * CELL_SIZE;
+          const x1 = cx - 1.0 - FAIRWAY_PAD;
+          const x2 = cx + 1.0 + FAIRWAY_PAD;
+
+          let zStart: number;
+          const northNeighborKey = `${col},${minR - 1}`;
+          if (cellBoundsMap.has(northNeighborKey)) {
+            zStart = cellBoundsMap.get(northNeighborKey)!.z2;
+          } else {
+            zStart = minR * CELL_SIZE - 1.0 - FAIRWAY_PAD;
+          }
+
+          let zEnd: number;
+          const southNeighborKey = `${col},${maxR + 1}`;
+          if (cellBoundsMap.has(southNeighborKey)) {
+            zEnd = cellBoundsMap.get(southNeighborKey)!.z1;
+          } else {
+            zEnd = maxR * CELL_SIZE + 1.0 + FAIRWAY_PAD;
+          }
+
+          const numCells = maxR - minR + 1;
+          const cellLen = (zEnd - zStart) / numCells;
+
+          for (let i = 0; i < numCells; i++) {
+            const r = minR + i;
+            cellBoundsMap.set(`${col},${r}`, {
+              x1,
+              x2,
+              z1: zStart + i * cellLen,
+              z2: zStart + (i + 1) * cellLen,
+              isCorner: false,
+            });
+          }
+        } else {
+          let minC = col;
+          while (cellSet.has(`${minC - 1},${row}`) && !cellBoundsMap.has(`${minC - 1},${row}`)) {
+            minC--;
+          }
+          let maxC = col;
+          while (cellSet.has(`${maxC + 1},${row}`) && !cellBoundsMap.has(`${maxC + 1},${row}`)) {
+            maxC++;
+          }
+
+          for (let c = minC; c <= maxC; c++) visitedCells.add(`${c},${row}`);
+
+          const cz = row * CELL_SIZE;
+          const z1 = cz - 1.0 - FAIRWAY_PAD;
+          const z2 = cz + 1.0 + FAIRWAY_PAD;
+
+          let xStart: number;
+          const westNeighborKey = `${minC - 1},${row}`;
+          if (cellBoundsMap.has(westNeighborKey)) {
+            xStart = cellBoundsMap.get(westNeighborKey)!.x2;
+          } else {
+            xStart = minC * CELL_SIZE - 1.0 - FAIRWAY_PAD;
+          }
+
+          let xEnd: number;
+          const eastNeighborKey = `${maxC + 1},${row}`;
+          if (cellBoundsMap.has(eastNeighborKey)) {
+            xEnd = cellBoundsMap.get(eastNeighborKey)!.x1;
+          } else {
+            xEnd = maxC * CELL_SIZE + 1.0 + FAIRWAY_PAD;
+          }
+
+          const numCells = maxC - minC + 1;
+          const cellLen = (xEnd - xStart) / numCells;
+
+          for (let i = 0; i < numCells; i++) {
+            const c = minC + i;
+            cellBoundsMap.set(`${c},${row}`, {
+              x1: xStart + i * cellLen,
+              x2: xStart + (i + 1) * cellLen,
+              z1,
+              z2,
+              isCorner: false,
+            });
+          }
+        }
       }
 
       // Sub-tiles have height 0.06, centered at y = 0.145 -> top surface is at y = 0.175
@@ -2088,23 +2120,25 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         const bounds = cellBoundsMap.get(`${col},${row}`);
         if (!bounds) continue;
 
-        const cx = col * CELL_SIZE;
-        const cz = row * CELL_SIZE;
+        const hasW = cellSet.has(`${col - 1},${row}`);
+        const hasE = cellSet.has(`${col + 1},${row}`);
+        const hasN = cellSet.has(`${col},${row - 1}`);
+        const hasS = cellSet.has(`${col},${row + 1}`);
 
-        // Base foundation box: matches top tiles bounds exactly so cream base never sticks out
-        const bx1 = bounds.x1;
-        const bx2 = bounds.x2;
-        const bz1 = bounds.z1;
-        const bz2 = bounds.z2;
+        // Base foundation box: extends 0.28 under outer walls and corner turns
+        const bx1 = bounds.isCorner ? bounds.x1 - 0.28 : bounds.x1 - (hasW ? 0.01 : 0.28);
+        const bx2 = bounds.isCorner ? bounds.x2 + 0.28 : bounds.x2 + (hasE ? 0.01 : 0.28);
+        const bz1 = bounds.isCorner ? bounds.z1 - 0.28 : bounds.z1 - (hasN ? 0.01 : 0.28);
+        const bz2 = bounds.isCorner ? bounds.z2 + 0.28 : bounds.z2 + (hasS ? 0.01 : 0.28);
 
         _dummyPos.set((bx1 + bx2) * 0.5, 0.065, (bz1 + bz2) * 0.5);
         _dummyScale.set(bx2 - bx1, 1, bz2 - bz1);
         _dummyMatrix.compose(_dummyPos, _dummyQuat, _dummyScale);
         baseInstanced.setMatrixAt(baseIdx++, _dummyMatrix);
 
-        // Sub-tiles: 2x2 grid split cleanly at the cell core center (cx, cz)
-        const midX = cx;
-        const midZ = cz;
+        // Sub-tiles: 2x2 grid split exactly at the cell midpoints
+        const midX = (bounds.x1 + bounds.x2) * 0.5;
+        const midZ = (bounds.z1 + bounds.z2) * 0.5;
 
         for (let sx = 0; sx < 2; sx++) {
           for (let sz = 0; sz < 2; sz++) {
@@ -2160,26 +2194,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           sMesh.position.set(s.x, 0.181, s.z);
           sMesh.receiveShadow = !isSoftwareGl;
           courseGroup.add(sMesh);
-        }
-      }
-
-      // 3b. Special Surface Zones: Sand, Ice, Slime (elevated cleanly above y = 0.175 grass top)
-      if (activeCourse.surfaceZones) {
-        for (const zone of activeCourse.surfaceZones) {
-          const zGeo = new THREE.BoxGeometry(zone.width, 0.02, zone.depth);
-          disposableCourseGeos.push(zGeo);
-
-          let zoneMat = sharedMats.sand;
-          if (zone.type === 'ice') {
-            zoneMat = sharedMats.iceSurface;
-          } else if (zone.type === 'slime') {
-            zoneMat = sharedMats.slimeSurface;
-          }
-
-          const zMesh = new THREE.Mesh(zGeo, zoneMat);
-          zMesh.position.set(zone.x, 0.186, zone.z);
-          zMesh.receiveShadow = !isSoftwareGl;
-          courseGroup.add(zMesh);
         }
       }
 
@@ -2498,180 +2512,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
           courseGroup.add(mbGroup);
           movingBlockMeshes.push({ mesh: mbGroup, index });
         });
-      }
-
-      // 8b. Rotating Windmills / Sweepers
-      if (activeCourse.sweepers) {
-        for (const sw of activeCourse.sweepers) {
-          const swGroup = new THREE.Group();
-          const swX = sw.x ?? (sw as any).pivot?.[0] ?? 0;
-          const swZ = sw.z ?? (sw as any).pivot?.[1] ?? 0;
-          swGroup.position.set(swX, 0.182, swZ);
-
-          const hubGeo = new THREE.CylinderGeometry(0.26, 0.30, 0.42, 20);
-          hubGeo.translate(0, 0.21, 0);
-          const hubCapGeo = new THREE.SphereGeometry(0.20, 16, 12);
-          hubCapGeo.translate(0, 0.42, 0);
-          disposableCourseGeos.push(hubGeo, hubCapGeo);
-
-          const hubMesh = new THREE.Mesh(hubGeo, sharedMats.sweeperHubMat);
-          hubMesh.castShadow = !isSoftwareGl;
-          const capMesh = new THREE.Mesh(hubCapGeo, sharedMats.goldAccent);
-          swGroup.add(hubMesh, capMesh);
-
-          const bladeThick = sw.bladeWidth ?? sw.bladeThickness ?? 0.28;
-          const bladeH = sw.bladeHeight ?? 0.32;
-          for (let b = 0; b < sw.bladeCount; b++) {
-            const angle = (b / sw.bladeCount) * Math.PI * 2;
-            const armPivot = new THREE.Group();
-            armPivot.rotation.y = angle;
-
-            const bladeGeo = new THREE.BoxGeometry(sw.bladeLength, bladeH, bladeThick);
-            bladeGeo.translate(sw.bladeLength / 2, bladeH / 2, 0);
-
-            const stripeGeo = new THREE.BoxGeometry(sw.bladeLength * 0.25, bladeH + 0.02, bladeThick + 0.02);
-            stripeGeo.translate(sw.bladeLength * 0.875, bladeH / 2, 0);
-
-            disposableCourseGeos.push(bladeGeo, stripeGeo);
-
-            const bladeMesh = new THREE.Mesh(bladeGeo, sharedMats.sweeperBladeMat);
-            bladeMesh.castShadow = !isSoftwareGl;
-            const stripeMesh = new THREE.Mesh(stripeGeo, sharedMats.sweeperCautionMat);
-
-            armPivot.add(bladeMesh, stripeMesh);
-            swGroup.add(armPivot);
-          }
-
-          courseGroup.add(swGroup);
-          sweeperMeshes.push({ mesh: swGroup, sweeper: sw });
-        }
-      }
-
-      // 8c. Timed Drawbridges
-      if (activeCourse.drawbridges) {
-        for (const db of activeCourse.drawbridges) {
-          let hingeX = db.x;
-          let hingeZ = db.z;
-          let offX = 0;
-          let offZ = 0;
-
-          if (db.hingeEdge === 'minZ') {
-            hingeZ = db.z - db.depth / 2;
-            offZ = db.depth / 2;
-          } else if (db.hingeEdge === 'maxZ') {
-            hingeZ = db.z + db.depth / 2;
-            offZ = -db.depth / 2;
-          } else if (db.hingeEdge === 'minX') {
-            hingeX = db.x - db.width / 2;
-            offX = db.width / 2;
-          } else {
-            hingeX = db.x + db.width / 2;
-            offX = -db.width / 2;
-          }
-
-          const pivotGroup = new THREE.Group();
-          pivotGroup.position.set(hingeX, 0.185, hingeZ);
-
-          const deckGeo = new THREE.BoxGeometry(db.width, 0.05, db.depth);
-          deckGeo.translate(offX, 0.025, offZ);
-          disposableCourseGeos.push(deckGeo);
-
-          const deckMesh = new THREE.Mesh(deckGeo, sharedMats.drawbridgeMat);
-          deckMesh.castShadow = !isSoftwareGl;
-          deckMesh.receiveShadow = !isSoftwareGl;
-          pivotGroup.add(deckMesh);
-
-          const pinLen = (db.hingeEdge === 'minZ' || db.hingeEdge === 'maxZ') ? db.width + 0.1 : db.depth + 0.1;
-          const pinGeo = new THREE.CylinderGeometry(0.045, 0.045, pinLen, 12);
-          if (db.hingeEdge === 'minZ' || db.hingeEdge === 'maxZ') {
-            pinGeo.rotateZ(Math.PI / 2);
-          }
-          disposableCourseGeos.push(pinGeo);
-          const pinMesh = new THREE.Mesh(pinGeo, sharedMats.drawbridgeHingeMat);
-          pivotGroup.add(pinMesh);
-
-          courseGroup.add(pivotGroup);
-          drawbridgeMeshes.push({ pivotGroup, bridge: db, platformMesh: deckMesh });
-        }
-      }
-
-      // 8d. Directional Boost Pads
-      if (activeCourse.boostPads) {
-        for (const bp of activeCourse.boostPads) {
-          const bpGroup = new THREE.Group();
-          bpGroup.position.set(bp.x, 0.182, bp.z);
-
-          const baseGeo = new THREE.BoxGeometry(bp.width, 0.018, bp.depth);
-          disposableCourseGeos.push(baseGeo);
-          const baseMesh = new THREE.Mesh(baseGeo, sharedMats.boostPadBase);
-          baseMesh.position.y = 0.009;
-          baseMesh.receiveShadow = !isSoftwareGl;
-          bpGroup.add(baseMesh);
-
-          const angle = Math.atan2(bp.dirX, bp.dirZ);
-          const chevrons: THREE.Mesh[] = [];
-
-          const numChevrons = 3;
-          for (let c = 0; c < numChevrons; c++) {
-            const chevGeo = new THREE.BoxGeometry(0.36, 0.008, 0.16);
-            disposableCourseGeos.push(chevGeo);
-
-            const chevMesh = new THREE.Mesh(chevGeo, sharedMats.boostChevronMat);
-            chevMesh.rotation.y = angle;
-            const offsetDist = (c - (numChevrons - 1) / 2) * 0.42;
-            chevMesh.position.set(bp.dirX * offsetDist, 0.022, bp.dirZ * offsetDist);
-            bpGroup.add(chevMesh);
-            chevrons.push(chevMesh);
-          }
-
-          courseGroup.add(bpGroup);
-          boostPadMeshes.push({ group: bpGroup, pad: bp, chevrons });
-        }
-      }
-
-      // 8e. Paired Portals / Teleporters
-      if (activeCourse.portals) {
-        for (const pair of activeCourse.portals) {
-          const portalGroup = new THREE.Group();
-          const nodeA = pair.a || (pair as any).portalA;
-          const nodeB = pair.b || (pair as any).portalB;
-          if (!nodeA || !nodeB) continue;
-
-          const rA = nodeA.radius ?? pair.radius ?? 0.42;
-          const rB = nodeB.radius ?? pair.radius ?? 0.42;
-
-          // Node A
-          const groupA = new THREE.Group();
-          groupA.position.set(nodeA.x, 0.188, nodeA.z);
-
-          const discGeoA = new THREE.CylinderGeometry(rA, rA, 0.018, 24);
-          discGeoA.translate(0, 0.009, 0);
-          const ringGeoA = new THREE.TorusGeometry(rA * 0.85, 0.04, 16, 28);
-          ringGeoA.translate(0, 0.36, 0);
-          disposableCourseGeos.push(discGeoA, ringGeoA);
-
-          const discMeshA = new THREE.Mesh(discGeoA, sharedMats.portalCenterA);
-          const ringMeshA = new THREE.Mesh(ringGeoA, sharedMats.portalRingA);
-          groupA.add(discMeshA, ringMeshA);
-
-          // Node B
-          const groupB = new THREE.Group();
-          groupB.position.set(nodeB.x, 0.188, nodeB.z);
-
-          const discGeoB = new THREE.CylinderGeometry(rB, rB, 0.018, 24);
-          discGeoB.translate(0, 0.009, 0);
-          const ringGeoB = new THREE.TorusGeometry(rB * 0.85, 0.04, 16, 28);
-          ringGeoB.translate(0, 0.36, 0);
-          disposableCourseGeos.push(discGeoB, ringGeoB);
-
-          const discMeshB = new THREE.Mesh(discGeoB, sharedMats.portalCenterB);
-          const ringMeshB = new THREE.Mesh(ringGeoB, sharedMats.portalRingB);
-          groupB.add(discMeshB, ringMeshB);
-
-          portalGroup.add(groupA, groupB);
-          courseGroup.add(portalGroup);
-          portalMeshes.push({ group: portalGroup, pair, meshA: groupA, meshB: groupB });
-        }
       }
 
       // 9. Environment Setpieces & Foliage: Chinese Garden Diorama (Level 1) vs Classic Meadow
@@ -3625,46 +3465,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
         }
       }
 
-      // Animate rotating sweepers
-      for (const item of sweeperMeshes) {
-        const sw = item.sweeper;
-        const phase = sw.phase ?? 0;
-        item.mesh.rotation.y = elapsed * sw.speed + phase;
-      }
-
-      // Animate timed drawbridges
-      for (const item of drawbridgeMeshes) {
-        const db = item.bridge;
-        const phase = db.phase ?? 0;
-        const cycleTime = (elapsed + phase) % db.cycleDuration;
-        const isOpen = cycleTime < db.openDuration;
-        const targetAngle = isOpen ? Math.PI / 2.7 : 0;
-        if (db.hingeEdge === 'minZ') {
-          item.pivotGroup.rotation.x = THREE.MathUtils.damp(item.pivotGroup.rotation.x, targetAngle, 9, dt);
-        } else if (db.hingeEdge === 'maxZ') {
-          item.pivotGroup.rotation.x = THREE.MathUtils.damp(item.pivotGroup.rotation.x, -targetAngle, 9, dt);
-        } else if (db.hingeEdge === 'minX') {
-          item.pivotGroup.rotation.z = THREE.MathUtils.damp(item.pivotGroup.rotation.z, -targetAngle, 9, dt);
-        } else {
-          item.pivotGroup.rotation.z = THREE.MathUtils.damp(item.pivotGroup.rotation.z, targetAngle, 9, dt);
-        }
-      }
-
-      // Animate boost pad chevrons pulsing
-      for (const item of boostPadMeshes) {
-        const wave = (elapsed * 6) % (Math.PI * 2);
-        item.chevrons.forEach((cMesh, idx) => {
-          const pulse = (Math.sin(wave + idx * 1.2) + 1) * 0.5;
-          (cMesh.material as THREE.MeshBasicMaterial).color.setHSL(0.14, 1.0, 0.5 + pulse * 0.35);
-        });
-      }
-
-      // Animate portals rotating
-      for (const item of portalMeshes) {
-        item.meshA.rotation.y += dt * 1.8;
-        item.meshB.rotation.y -= dt * 1.8;
-      }
-
       // Smoothly decay bumper hit scale pulse
       for (const bMesh of bumperMeshes) {
         bMesh.scale.x = THREE.MathUtils.damp(bMesh.scale.x, 1, 12, dt);
@@ -3990,17 +3790,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
             soundEngine.playBumperBounce();
             spawnImpactBurst(events.hitX, events.hitZ, events.hitNx, events.hitNz, 0.95, true);
           }
-          if (events.boostedJustNow) {
-            soundEngine.playBoost();
-            spawnImpactBurst(physicsState.x, physicsState.z, 0, 1, 1.2, true);
-          }
-          if (events.teleportedJustNow) {
-            soundEngine.playPortal();
-            spawnSinkBurst(physicsState.x, physicsState.z);
-          }
-          if (events.hazardHitIntensity && events.hazardHitIntensity > 0) {
-            soundEngine.playHazard();
-          }
           if (events.sunkJustNow) {
             soundEngine.playHoleSink();
             spawnSinkBurst(activeCourse.hole[0], activeCourse.hole[1]);
@@ -4029,17 +3818,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
               soundEngine.playBumperBounce();
               spawnImpactBurst(events.hitX, events.hitZ, events.hitNx, events.hitNz, 0.95, true);
             }
-            if (events.boostedJustNow) {
-              soundEngine.playBoost();
-              spawnImpactBurst(physicsState.x, physicsState.z, 0, 1, 1.2, true);
-            }
-            if (events.teleportedJustNow) {
-              soundEngine.playPortal();
-              spawnSinkBurst(physicsState.x, physicsState.z);
-            }
-            if (events.hazardHitIntensity && events.hazardHitIntensity > 0) {
-              soundEngine.playHazard();
-            }
             if (events.sunkJustNow) {
               soundEngine.playHoleSink();
               spawnSinkBurst(activeCourse.hole[0], activeCourse.hole[1]);
@@ -4054,17 +3832,6 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
               bumperMeshes[events2.bumperHitIndex].scale.set(1.28, 1.0, 1.28);
               soundEngine.playBumperBounce();
               spawnImpactBurst(events2.hitX, events2.hitZ, events2.hitNx, events2.hitNz, 0.95, true);
-            }
-            if (events2.boostedJustNow) {
-              soundEngine.playBoost();
-              spawnImpactBurst(physicsState2.x, physicsState2.z, 0, 1, 1.2, true);
-            }
-            if (events2.teleportedJustNow) {
-              soundEngine.playPortal();
-              spawnSinkBurst(physicsState2.x, physicsState2.z);
-            }
-            if (events2.hazardHitIntensity && events2.hazardHitIntensity > 0) {
-              soundEngine.playHazard();
             }
             if (events2.sunkJustNow) {
               soundEngine.playHoleSink();
@@ -4139,13 +3906,13 @@ export const GolfSceneCanvas: React.FC<GolfSceneCanvasProps> = ({
               const jitterZ = (Math.random() - 0.5) * 0.16;
               const isChinese = activeCourse.theme === 'chinese-garden';
               const trailColor = (events && events.isOnSand)
-                ? (Math.random() > 0.4 ? 0xfde68a : 0xf59e0b)
-                : (events && events.isOnIce)
-                ? (Math.random() > 0.4 ? 0x93e6fb : 0xe0f2fe)
-                : (events && events.isOnSlime)
-                ? (Math.random() > 0.4 ? 0x4ade80 : 0x22c55e)
+                ? Math.random() > 0.4
+                  ? 0xfde68a
+                  : 0xf59e0b
                 : isChinese
-                ? (Math.random() > 0.45 ? 0xffb8d1 : 0xffd43b)
+                ? Math.random() > 0.45
+                  ? 0xffb8d1
+                  : 0xffd43b
                 : Math.random() > 0.35
                 ? 0xffffff
                 : 0xd9f99d;

@@ -10,8 +10,8 @@ import { soundEngine } from '../audio/soundEngine';
 import { Language, TRANSLATIONS } from '../data/i18n';
 import { UserAvatar } from './UserAvatar';
 import { getSavedAvatarSeed } from '../data/userProfile';
-import { TOTAL_GAME_STARS } from '../data/courses';
 import { firebaseSync, GlobalStarRankingUser } from '../services/firebaseSync';
+import { GameModal } from './GameModals';
 
 export interface LeaderboardModalProps {
   isOpen: boolean;
@@ -59,13 +59,14 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         if (!hasCurrent) {
           const currentEntry: GlobalStarRankingUser = {
             uid: 'current_user',
-            displayName: playerName,
+            displayName: playerName || 'You',
             avatarSeed: effectiveAvatar,
-            totalStars,
+            totalStars: totalStars,
             currentHole: 1,
             isCurrentUser: true,
           };
-          const merged = [...users, currentEntry].sort((a, b) => b.totalStars - a.totalStars);
+          const merged = [...users, currentEntry];
+          merged.sort((a, b) => b.totalStars - a.totalStars);
           setGlobalRankings(merged);
         } else {
           setGlobalRankings(users);
@@ -77,171 +78,155 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   if (!isOpen) return null;
 
   const commitName = () => {
-    const trimmed = nameDraft.trim() || 'Golf Pro';
+    const trimmed = nameDraft.trim() || 'Golfer';
     setNameDraft(trimmed);
     onChangePlayerName(trimmed);
     setEditingName(false);
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-3 py-3 select-none"
-      onClick={onClose}
+    <GameModal
+      title="Leaderboards"
+      onClose={onClose}
+      maxWidth="480px"
+      footer={
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playClick();
+            onClose();
+          }}
+          className="btn-3d-green rounded-xl w-full py-2.5 text-white font-display font-bold text-base whitespace-nowrap cursor-pointer shadow-md"
+        >
+          {t.done}
+        </button>
+      }
     >
-      <div
-        className="bg-white rounded-[28px] w-full max-w-[430px] md:max-w-[480px] max-h-[90dvh] flex flex-col p-4 md:p-5 shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.35)] animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-[#ffe066] to-[#f59f00] flex items-center justify-center text-white shadow-xs shrink-0">
-              <Trophy className="w-5 h-5 stroke-[2.5]" />
-            </div>
-            <div>
-              <h2 className="font-display text-[21px] font-bold text-[#163a5f] leading-none">
-                Leaderboards
-              </h2>
-              <p className="text-[11px] font-extrabold text-amber-600 mt-0.5 flex items-center gap-1">
-                <Star className="w-3 h-3 fill-amber-400 text-amber-500 inline" /> Ranked by Most Stars
-              </p>
-            </div>
-          </div>
+      {/* Subheader info & Golfer Name Pill */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <p className="text-[12px] font-extrabold text-amber-600 flex items-center gap-1">
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 inline" /> Ranked by Most Stars
+        </p>
 
-          {/* Golfer Name Pill */}
-          <div className="flex items-center gap-1.5 bg-sky-50 border border-sky-200 rounded-full pl-1.5 pr-2.5 py-0.5 shrink-0">
-            <UserAvatar seed={avatarSeed || getSavedAvatarSeed()} size={20} showBorder={false} />
-            {editingName ? (
-              <input
-                type="text"
-                value={nameDraft}
-                maxLength={14}
-                autoFocus
-                onChange={(e) => setNameDraft(e.target.value)}
-                onBlur={commitName}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') commitName();
-                }}
-                className="w-20 text-[11px] font-extrabold text-[#163a5f] bg-white px-1.5 py-0.5 rounded border border-sky-300 outline-none"
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setEditingName(true)}
-                className="text-[11px] font-extrabold text-[#163a5f] cursor-pointer max-w-[85px] truncate"
-                title={t.editGolferNameTooltip}
-              >
-                {playerName} ✎
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Global Rankings Table */}
-        <div className="flex-1 min-h-0 overflow-y-auto border border-slate-200 rounded-2xl bg-slate-50/70">
-          {isLoadingGlobal ? (
-            <div className="h-56 flex flex-col items-center justify-center gap-2 text-slate-400">
-              <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
-              <span className="text-xs font-bold">Loading Star Rankings…</span>
-            </div>
-          ) : globalRankings.length === 0 ? (
-            <div className="h-56 flex flex-col items-center justify-center gap-1 text-slate-400">
-              <Star className="w-8 h-8 text-amber-300" />
-              <span className="text-xs font-bold">No star rankings recorded yet</span>
-            </div>
+        {/* Golfer Name Pill */}
+        <div className="ui-chip rounded-full pl-1.5 pr-2.5 py-0.5 flex items-center gap-1.5 shrink-0">
+          <UserAvatar seed={avatarSeed || getSavedAvatarSeed()} size={20} showBorder={false} />
+          {editingName ? (
+            <input
+              type="text"
+              value={nameDraft}
+              maxLength={14}
+              autoFocus
+              onChange={(e) => setNameDraft(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitName();
+              }}
+              className="w-20 text-[11px] font-extrabold text-[#51336d] bg-white px-1.5 py-0.5 rounded border border-purple-300 outline-none"
+            />
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 bg-slate-100/95 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 border-b border-slate-200 z-10">
-                <tr>
-                  <th className="py-2.5 pl-3 pr-1 w-12 text-center">#</th>
-                  <th className="py-2.5 px-2">Golfer</th>
-                  <th className="py-2.5 px-2 text-center">Progress</th>
-                  <th className="py-2.5 pl-1 pr-3 text-right">Stars</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200/60 text-xs font-bold text-[#163a5f]">
-                {globalRankings.map((user, idx) => {
-                  const rank = idx + 1;
-                  return (
-                    <tr
-                      key={user.uid}
-                      className={`transition-colors ${
-                        user.isCurrentUser ? 'bg-amber-100/70 font-extrabold' : 'hover:bg-white/60'
-                      }`}
-                    >
-                      {/* Rank Badge */}
-                      <td className="py-2.5 pl-3 pr-1 text-center">
-                        {rank <= 3 ? (
-                          <span
-                            className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white font-display font-bold text-xs shadow-xs ${
-                              rank === 1
-                                ? 'bg-gradient-to-b from-[#ffe066] to-[#f59f00]'
-                                : rank === 2
-                                ? 'bg-gradient-to-b from-[#cbd5e1] to-[#64748b]'
-                                : 'bg-gradient-to-b from-[#f6ad55] to-[#c05621]'
-                            }`}
-                          >
-                            {rank}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center justify-center w-6 h-6 text-slate-500 font-extrabold text-[11px] tabular-nums">
-                            {rank}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Golfer Avatar & Name */}
-                      <td className="py-2.5 px-2">
-                        <div className="flex items-center gap-2">
-                          <UserAvatar seed={user.avatarSeed} size={24} showBorder={false} />
-                          <span className="truncate max-w-[120px] md:max-w-[150px] text-[#163a5f]">
-                            {user.displayName}
-                          </span>
-                          {user.isCurrentUser && (
-                            <span className="bg-[#2ecc71] text-white text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full shrink-0">
-                              YOU
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Current Hole Progress */}
-                      <td className="py-2.5 px-2 text-center">
-                        <span className="text-[11px] font-bold text-slate-500 bg-white border border-slate-200 rounded-full px-2 py-0.5">
-                          Hole {user.currentHole || 1}
-                        </span>
-                      </td>
-
-                      {/* Total Stars Pill */}
-                      <td className="py-2.5 pl-1 pr-3 text-right">
-                        <div className="inline-flex items-center gap-1 bg-amber-50 border border-amber-300 rounded-full px-2.5 py-0.5 text-amber-700 font-display font-bold text-xs">
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-500 shrink-0" />
-                          <span>{user.totalStars}</span>
-                          <span className="text-[10px] text-amber-500/80 font-normal">/ {TOTAL_GAME_STARS}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <button
+              type="button"
+              onClick={() => setEditingName(true)}
+              className="text-[11px] font-extrabold text-[#51336d] cursor-pointer max-w-[85px] truncate"
+              title={t.editGolferNameTooltip}
+            >
+              {playerName} ✎
+            </button>
           )}
         </div>
-
-        {/* Footer Actions */}
-        <div className="flex items-center justify-center mt-3.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              soundEngine.playClick();
-              onClose();
-            }}
-            className="btn-3d-green rounded-full w-full py-2.5 text-white font-display font-bold text-[16px] whitespace-nowrap cursor-pointer shadow-md"
-          >
-            {t.done}
-          </button>
-        </div>
       </div>
-    </div>
+
+      {/* Global Rankings Table */}
+      <div className="overflow-y-auto border-2 border-[#e6d9f0] rounded-2xl bg-white/70">
+        {isLoadingGlobal ? (
+          <div className="h-56 flex flex-col items-center justify-center gap-2 text-slate-400">
+            <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+            <span className="text-xs font-bold text-[#51336d]">Loading Star Rankings…</span>
+          </div>
+        ) : globalRankings.length === 0 ? (
+          <div className="h-56 flex flex-col items-center justify-center gap-1 text-slate-400">
+            <Star className="w-8 h-8 text-amber-300" />
+            <span className="text-xs font-bold text-[#51336d]">No star rankings recorded yet</span>
+          </div>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 bg-[#f7f1fc] text-[10px] font-extrabold uppercase tracking-wider text-[#7d36c8] border-b-2 border-[#e6d9f0] z-10">
+              <tr>
+                <th className="py-2.5 pl-3 pr-1 w-12 text-center">#</th>
+                <th className="py-2.5 px-2">Golfer</th>
+                <th className="py-2.5 px-2 text-center">Progress</th>
+                <th className="py-2.5 pl-1 pr-3 text-right">Stars</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e6d9f0]/70 text-xs font-bold text-[#51336d]">
+              {globalRankings.map((user, idx) => {
+                const rank = idx + 1;
+                return (
+                  <tr
+                    key={user.uid}
+                    className={`transition-colors ${
+                      user.isCurrentUser ? 'bg-amber-100/70 font-extrabold' : 'hover:bg-purple-50/50'
+                    }`}
+                  >
+                    {/* Rank Badge */}
+                    <td className="py-2.5 pl-3 pr-1 text-center">
+                      {rank <= 3 ? (
+                        <span
+                          className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-white font-display font-bold text-xs shadow-xs ${
+                            rank === 1
+                              ? 'bg-gradient-to-b from-[#ffe066] to-[#f59f00]'
+                              : rank === 2
+                              ? 'bg-gradient-to-b from-[#cbd5e1] to-[#64748b]'
+                              : 'bg-gradient-to-b from-[#f6ad55] to-[#c05621]'
+                          }`}
+                        >
+                          {rank}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center justify-center w-6 h-6 text-slate-500 font-extrabold text-[11px] tabular-nums">
+                          {rank}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Golfer Avatar & Name */}
+                    <td className="py-2.5 px-2">
+                      <div className="flex items-center gap-2">
+                        <UserAvatar seed={user.avatarSeed} size={24} showBorder={false} />
+                        <span className="truncate max-w-[120px] md:max-w-[150px] text-[#51336d]">
+                          {user.displayName}
+                        </span>
+                        {user.isCurrentUser && (
+                          <span className="bg-[#2ba93c] text-white text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full shrink-0">
+                            YOU
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Current Hole Progress */}
+                    <td className="py-2.5 px-2 text-center">
+                      <span className="text-[11px] font-bold text-slate-500 bg-white border border-[#e6d9f0] rounded-full px-2 py-0.5">
+                        Hole {user.currentHole || 1}
+                      </span>
+                    </td>
+
+                    {/* Total Stars Pill */}
+                    <td className="py-2.5 pl-1 pr-3 text-right">
+                      <div className="inline-flex items-center gap-1 bg-amber-50 border border-amber-300 rounded-full px-2.5 py-0.5 text-amber-700 font-display font-bold text-xs">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-500 shrink-0" />
+                        <span>{user.totalStars}</span>
+                        <span className="text-[10px] text-amber-500/80 font-normal">/ 90</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </GameModal>
   );
 };

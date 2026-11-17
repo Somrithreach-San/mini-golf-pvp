@@ -20,67 +20,7 @@ export interface SandStrip {
   z: number;
   width: number;
   depth: number;
-  frictionMultiplier?: number;
-}
-
-export interface RotatingSweeperObstacle {
-  x: number;
-  z: number;
-  bladeCount: number; // 2, 3, or 4 blades
-  bladeLength: number; // length from center pivot
-  bladeWidth: number; // blade thickness
-  speed: number; // rad/s (positive = CCW, negative = CW)
-  phase?: number;
-}
-
-export interface TimedDrawbridge {
-  x: number;
-  z: number;
-  width: number;
-  depth: number;
-  axis: 'x' | 'z';
-  cycleDuration: number; // total period in seconds (e.g. 4.0)
-  openDuration: number; // time bridge is open/retracted (gap impassable, e.g. 2.0)
-  phase?: number;
-}
-
-export interface BoostPad {
-  x: number;
-  z: number;
-  width: number;
-  depth: number;
-  dirX: number; // normalized boost vector X
-  dirZ: number; // normalized boost vector Z
-  boostSpeed: number; // target speed in m/s (e.g. 14.0 to 16.5)
-}
-
-export interface PortalNode {
-  x: number;
-  z: number;
-  radius: number; // trigger radius, e.g. 0.42
-  exitDir: [number, number]; // [dirX, dirZ] launch direction upon exiting
-}
-
-export interface PortalPair {
-  id: string;
-  a: PortalNode;
-  b: PortalNode;
-  color?: string; // hex color for visual rings
-}
-
-export interface SpecialSurfaceZone {
-  x: number;
-  z: number;
-  width: number;
-  depth: number;
-  type: 'sand' | 'ice' | 'slime';
-}
-
-export interface GapRegion {
-  minX: number;
-  maxX: number;
-  minZ: number;
-  maxZ: number;
+  frictionMultiplier?: number; // e.g. 0.96 for slow sand or 1.03 for speed ramp
 }
 
 export interface WallSegment {
@@ -93,11 +33,13 @@ export interface WallSegment {
 }
 
 export interface HoleCourse {
-  holeNumber: number; // 1..9
-  worldIndex: number; // 0..2
+  holeNumber: number; // 1..30
+  worldIndex: number; // 0..4
   name: string;
   par: number;
-  theme?: 'chinese-garden' | 'shifting-ruins' | 'neon-lab';
+  theme?: 'chinese-garden';
+  // Each cell [col, row] represents a 2x2 unit block in world space (centered at col*2, row*2)
+  // Inside each 2x2 cell, we render a 2x2 sub-grid of 1x1 alternating light/dark green checkerboard tiles
   cells: [number, number][];
   start: [number, number]; // world [x, z]
   hole: [number, number];  // world [x, z]
@@ -105,14 +47,8 @@ export interface HoleCourse {
   sandStrips?: SandStrip[];
   movingBlocks?: MovingBlockObstacle[];
   internalWalls?: WallSegment[];
+  // Default camera orientation angle in radians so Hole 1 looks horizontal like Screenshot 2
   defaultCameraAngle?: number;
-  // Creative modular obstacles & surfaces:
-  sweepers?: RotatingSweeperObstacle[];
-  drawbridges?: TimedDrawbridge[];
-  boostPads?: BoostPad[];
-  portals?: PortalPair[];
-  surfaceZones?: SpecialSurfaceZone[];
-  gapBounds?: GapRegion[];
 }
 
 export interface GolfWorld {
@@ -126,30 +62,45 @@ export interface GolfWorld {
 export const GOLF_WORLDS: GolfWorld[] = [
   {
     index: 0,
-    name: 'Island Courtyard',
-    subtitle: 'Bank angles, split paths & windmills',
+    name: 'Sunny Meadow',
+    subtitle: 'Gentle green fairways',
     islandColor: '#78eb46',
     wallTopColor: '#f08b62',
   },
   {
     index: 1,
-    name: 'Shifting Ruins',
-    subtitle: 'Piston gauntlets, abyss gaps & sand traps',
-    islandColor: '#d4a373',
-    wallTopColor: '#bc6c25',
+    name: 'Pine Valley',
+    subtitle: 'Bank shots and bumper pins',
+    islandColor: '#6ce03b',
+    wallTopColor: '#f08b62',
   },
   {
     index: 2,
-    name: 'Neon Lab',
-    subtitle: 'Warp portals, zero-g ice & drawbridges',
-    islandColor: '#1d2d44',
-    wallTopColor: '#00e5ff',
+    name: 'Golden Dunes',
+    subtitle: 'Sand strips and doglegs',
+    islandColor: '#74e642',
+    wallTopColor: '#eb7f54',
+  },
+  {
+    index: 3,
+    name: 'Emerald Ridge',
+    subtitle: 'Moving gates and tight corners',
+    islandColor: '#64d836',
+    wallTopColor: '#e8784e',
+  },
+  {
+    index: 4,
+    name: 'Starlight Champions',
+    subtitle: 'Master championship courses',
+    islandColor: '#78eb46',
+    wallTopColor: '#f08b62',
   },
 ];
 
 export const CELL_SIZE = 2.0; // Base logical cell step (2.0 world units)
-export const FAIRWAY_PAD = 0.70; // Outward corridor expansion (+70% wider fairways for 2-player space)
+export const FAIRWAY_PAD = 0.70; // Outward corridor expansion on all outer boundaries (+70% wider fairways = 3.40 units wide for 2-player space)
 
+// Helper to generate rectangular ranges of [col, row] cells without duplicates
 function rectCells(c1: number, r1: number, c2: number, r2: number): [number, number][] {
   const list: [number, number][] = [];
   const minC = Math.min(c1, c2);
@@ -175,453 +126,545 @@ function mergeCells(...groups: [number, number][][]): [number, number][] {
 }
 
 export const ALL_HOLES: HoleCourse[] = [
-  // =========================================================================
-  // WORLD 1: ISLAND COURTYARD (Holes 1 - 3)
-  // Theme: Natural lush green island, classical garden architecture, split paths
-  // =========================================================================
-
-  // Hole 1: Twin Bridges (Par 2)
-  // Safe Route A (Left): Walled curve around water feature (2 putts)
-  // Hero Route B (Right): Narrow rail-less bridge over water straight to cup (Hole-in-one potential, out-of-bounds on miss)
+  // ==========================================
+  // WORLD 1: SUNNY MEADOW (Holes 1 - 6)
+  // ==========================================
   {
     holeNumber: 1,
     worldIndex: 0,
-    name: 'Twin Bridges',
+    name: 'Straight Shot',
     par: 2,
-    cells: mergeCells(
-      // Starting tee pad
-      rectCells(-1, 2, 1, 3),
-      // Left Safe Route A (Col -2, rows -2..1 and turn into green)
-      rectCells(-2, -1, -2, 1),
-      rectCells(-2, -2, 0, -2),
-      // Right Hero Route B (Col 1, rows -2..1)
-      rectCells(1, -2, 1, 1),
-      // Green connecting both
-      rectCells(-1, -3, 1, -2)
-    ),
-    start: [0, 5.0],
-    hole: [0, -5.0],
-    internalWalls: [
-      // Clean single central divider wall separating the twin routes in the middle
-      { x1: 0, z1: 2.2, x2: 0, z2: -2.2, nx: 0, nz: 0 },
-    ],
-    gapBounds: [
-      // Water void gap between the bridges
-      { minX: -0.8, maxX: 0.8, minZ: -2.0, maxZ: 2.0 },
-    ],
+    // 5 cells along Z (row -2..2), viewed from the right (+X looking toward -X)
+    cells: rectCells(0, -2, 0, 2),
+    start: [0, 3.2],
+    hole: [0, -3.2],
     defaultCameraAngle: 0,
   },
-
-  // Hole 2: The Courtyard Windmill (Par 3)
-  // U-shaped green guarded by a 4-blade rotating windmill in center + corner pinball bumpers
-  // Route A: Bank along outer curve timing around blades (3 putts)
-  // Route B: Thread the shot directly through the moving blade timing window to the flag
   {
     holeNumber: 2,
     worldIndex: 0,
-    name: 'The Courtyard Windmill',
-    par: 3,
-    cells: mergeCells(
-      // West stem (Tee)
-      rectCells(-2, 0, -1, 3),
-      // North cross connector
-      rectCells(-2, -2, 2, -1),
-      // East stem (Green)
-      rectCells(1, 0, 2, 3)
-    ),
-    start: [-3.0, 5.0],
-    hole: [3.0, 5.0],
-    sweepers: [
-      // 4-blade rotating windmill at center pivot
-      {
-        x: 0,
-        z: -1.0,
-        bladeCount: 4,
-        bladeLength: 1.9,
-        bladeWidth: 0.28,
-        speed: 1.35,
-        phase: 0,
-      },
-    ],
-    bumpers: [
-      { x: -3.4, z: -3.2, radius: 0.38 },
-      { x: 3.4, z: -3.2, radius: 0.38 },
-      { x: 0, z: -3.4, radius: 0.34 },
-    ],
+    name: 'Single Pin',
+    par: 2,
+    cells: rectCells(0, -2, 0, 2),
+    start: [0, 3.2],
+    hole: [0, -3.2],
+    bumpers: [{ x: 0, z: -0.6, radius: 0.34 }],
     defaultCameraAngle: 0,
   },
-
-  // Hole 3: Zig-Zag Canyon (Par 3)
-  // Multi-tier switchback with ramps
-  // Route A: Bank tier-by-tier down the zig-zag
-  // Route B: Take diagonal boost ramp jump straight across canyon gap to bottom green
   {
     holeNumber: 3,
     worldIndex: 0,
-    name: 'Zig-Zag Canyon',
+    name: 'Sunny Corner',
     par: 3,
-    cells: mergeCells(
-      // Top Tier (Tee)
-      rectCells(-2, 2, 1, 3),
-      // Middle Tier
-      rectCells(-1, 0, 2, 1),
-      // Bottom Tier (Green)
-      rectCells(-2, -3, 1, -2)
-    ),
-    start: [-3.2, 5.2],
-    hole: [0, -5.2],
-    boostPads: [
-      // Diagonal jump boost pad on top ledge pointing down-right across canyon
-      {
-        x: 1.0,
-        z: 4.2,
-        width: 1.6,
-        depth: 1.4,
-        dirX: 0.35,
-        dirZ: -0.93,
-        boostSpeed: 14.5,
-      },
-    ],
-    bumpers: [
-      { x: 2.8, z: 0.8, radius: 0.36 },
-      { x: -2.8, z: -0.8, radius: 0.36 },
-    ],
-    gapBounds: [
-      // Canyon gap separating top tier from bottom tier
-      { minX: -3.5, maxX: -1.2, minZ: 1.2, maxZ: 3.0 },
-      { minX: 1.2, maxX: 3.5, minZ: -1.5, maxZ: 0.5 },
-    ],
+    // L-shape: vertical stem on left (col -1, row -2..2) + top horizontal arm to right (col 0..2, row -2)
+    cells: mergeCells(rectCells(-1, -2, -1, 2), rectCells(-1, -2, 2, -2)),
+    start: [-2, 3.0],
+    hole: [3.6, -4.0],
+    sandStrips: [{ x: 1.0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.96 }],
     defaultCameraAngle: 0,
   },
-
-  // =========================================================================
-  // WORLD 2: SHIFTING RUINS (Holes 4 - 6)
-  // Theme: Sunken stone temples, alternating piston walls, deep sand traps
-  // =========================================================================
-
-  // Hole 4: Piston Gauntlet (Par 3)
-  // 3 alternating sliding stone walls guarding the central corridor + flanking sand traps
-  // Route A: Cautious staged putts between piston phases
-  // Route B: Full-power threaded shot through all 3 open piston gates
   {
     holeNumber: 4,
-    worldIndex: 1,
-    name: 'Piston Gauntlet',
-    par: 3,
-    cells: mergeCells(
-      // Central long fairway
-      rectCells(-1, -3, 1, 3),
-      // Side wings for sand bunkers
-      rectCells(-2, -1, -1, 1),
-      rectCells(1, -1, 2, 1)
-    ),
-    start: [0, 5.6],
-    hole: [0, -5.6],
-    movingBlocks: [
-      // Piston 1 (South)
-      { x: 0, z: 3.0, width: 1.9, depth: 0.65, axis: 'x', range: 1.5, speed: 2.1, phase: 0 },
-      // Piston 2 (Middle - Opposite phase)
-      { x: 0, z: 0.0, width: 1.9, depth: 0.65, axis: 'x', range: 1.5, speed: 2.1, phase: Math.PI },
-      // Piston 3 (North)
-      { x: 0, z: -3.0, width: 1.9, depth: 0.65, axis: 'x', range: 1.5, speed: 2.1, phase: 0.5 * Math.PI },
-    ],
-    surfaceZones: [
-      // West sand bunker
-      { x: -2.6, z: 0, width: 2.2, depth: 4.2, type: 'sand' },
-      // East sand bunker
-      { x: 2.6, z: 0, width: 2.2, depth: 4.2, type: 'sand' },
-    ],
+    worldIndex: 0,
+    name: 'Left Bend',
+    par: 2,
+    // Inverted L-shape to left: vertical stem on right (col 1, row -2..2) + top arm to left (col -2..1, row -2)
+    cells: mergeCells(rectCells(1, -2, 1, 2), rectCells(-2, -2, 1, -2)),
+    start: [2, 3.0],
+    hole: [-3.4, -4.0],
     defaultCameraAngle: 0,
   },
-
-  // Hole 5: Boost Over the Abyss (Par 4)
-  // Dogleg course with a vast abyss gap in the inner corner
-  // Route A: Long safe bank-shot route around the perimeter
-  // Route B: Diagonal boost pad launching ball across the abyss void onto raised green
   {
     holeNumber: 5,
-    worldIndex: 1,
-    name: 'Boost Over the Abyss',
-    par: 4,
-    cells: mergeCells(
-      // South starting corridor
-      rectCells(-3, 1, -1, 3),
-      // Outer perimeter dogleg (West to East)
-      rectCells(-3, -2, -2, 1),
-      rectCells(-2, -3, 2, -2),
-      // North-East Green
-      rectCells(1, 0, 3, 2)
-    ),
-    start: [-4.0, 5.0],
-    hole: [4.0, 3.2],
-    boostPads: [
-      // Diagonal jump pad launching north-east across the abyss
-      {
-        x: -2.2,
-        z: 2.4,
-        width: 1.6,
-        depth: 1.4,
-        dirX: 0.88,
-        dirZ: -0.47,
-        boostSpeed: 15.8,
-      },
-    ],
-    bumpers: [
-      { x: -4.8, z: -3.8, radius: 0.38 },
-      { x: 0.0, z: -4.8, radius: 0.38 },
-    ],
-    gapBounds: [
-      // Central abyss void
-      { minX: -1.5, maxX: 1.5, minZ: -1.2, maxZ: 1.8 },
-    ],
+    worldIndex: 0,
+    name: 'Corner Guard',
+    par: 2,
+    cells: mergeCells(rectCells(-1, -2, -1, 2), rectCells(-1, -2, 2, -2)),
+    start: [-2, 3.0],
+    hole: [3.6, -4.0],
+    bumpers: [{ x: 0.6, z: -4.0, radius: 0.34 }],
     defaultCameraAngle: 0,
   },
-
-  // Hole 6: The Sunken Spiral (Par 4)
-  // Descending spiral ramp surrounded by high-restitution bumper pillars
-  // Route A: Follow the outer spiral curves cleanly using gentle bank shots
-  // Route B: Slingshot ricochet off the strategic corner bumper straight into the cup
   {
     holeNumber: 6,
-    worldIndex: 1,
-    name: 'The Sunken Spiral',
-    par: 4,
+    worldIndex: 0,
+    name: 'Horseshoe Bend',
+    par: 2,
+    // U-shape: left leg (col -1, row -2..2), top bridge (col 0, row -2), right leg (col 1, row -2..1)
     cells: mergeCells(
-      // Outer ring: North
-      rectCells(-2, -2, 2, -2),
-      // Outer ring: East
-      rectCells(2, -2, 2, 2),
-      // Outer ring: South
-      rectCells(-2, 2, 2, 2),
-      // Inner spiral arm: West
-      rectCells(-2, 0, -2, 2),
-      // Central Island Cup
-      rectCells(0, 0, 1, 0)
+      rectCells(-1, -2, -1, 2),
+      rectCells(-1, -2, 1, -2),
+      rectCells(1, -2, 1, 1)
     ),
-    start: [-3.8, 3.8],
-    hole: [1.0, 0.0],
-    bumpers: [
-      { x: -3.8, z: -3.8, radius: 0.40 },
-      { x: 3.8, z: -3.8, radius: 0.40 },
-      { x: 3.8, z: 3.8, radius: 0.40 },
-      { x: -0.6, z: 1.6, radius: 0.34 },
-    ],
-    surfaceZones: [
-      // Sand strip punishing reckless wide spiral turns
-      { x: 3.8, z: 0.0, width: 1.6, depth: 3.0, type: 'sand' },
-    ],
+    start: [-2, 3.0],
+    hole: [2, 1.8],
+    sandStrips: [{ x: 0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.96 }],
     defaultCameraAngle: 0,
   },
 
-  // =========================================================================
-  // WORLD 3: NEON LAB (Holes 7 - 9)
-  // Theme: Cyber tech lab, portals, low-friction ice sheets, timed drawbridges
-  // =========================================================================
-
-  // Hole 7: Portal Ricochet (Par 3)
-  // Cup sits inside an enclosed chamber
-  // Route A: Wait and time shot through a narrow timed drawbridge
-  // Route B: Bank off angled wall into Portal A to instantly warp into the cup room
+  // ==========================================
+  // WORLD 2: PINE VALLEY (Holes 7 - 12)
+  // Includes Hole 9 matching Screenshot 1's main menu island!
+  // ==========================================
   {
     holeNumber: 7,
-    worldIndex: 2,
-    name: 'Portal Ricochet',
-    par: 3,
-    cells: mergeCells(
-      // Outer approach fairway
-      rectCells(-2, 1, 2, 3),
-      // Side bank wings
-      rectCells(-2, -1, -2, 1),
-      rectCells(2, -1, 2, 1),
-      // Inner Enclosed Cup Chamber
-      rectCells(-1, -3, 1, -1)
-    ),
-    start: [0, 5.4],
-    hole: [0, -5.0],
-    drawbridges: [
-      // Central entry drawbridge to chamber
-      {
-        x: 0,
-        z: -1.0,
-        width: 1.8,
-        depth: 1.6,
-        axis: 'z',
-        cycleDuration: 4.0,
-        openDuration: 2.2,
-        phase: 0,
-      },
-    ],
-    portals: [
-      {
-        id: 'portal-7',
-        a: { x: -3.6, z: 0.0, radius: 0.42, exitDir: [0.0, -1.0] },
-        b: { x: 0.0, z: -3.2, radius: 0.42, exitDir: [0.0, -1.0] },
-        color: '#00e5ff',
-      },
-    ],
+    worldIndex: 1,
+    name: 'Twin Bumpers',
+    par: 2,
+    cells: rectCells(0, -2, 0, 2),
+    start: [0, 3.2],
+    hole: [0, -3.4],
     bumpers: [
-      { x: -3.6, z: 3.2, radius: 0.35 },
-      { x: 3.6, z: 3.2, radius: 0.35 },
-    ],
-    gapBounds: [
-      // Drawbridge void gap
-      { minX: -1.2, maxX: 1.2, minZ: -1.8, maxZ: -0.2 },
+      { x: -0.64, z: -0.5, radius: 0.27 },
+      { x: 0.64, z: -0.5, radius: 0.27 },
     ],
     defaultCameraAngle: 0,
   },
-
-  // Hole 8: Zero-Friction Drift (Par 4)
-  // S-curved ice arena with near-zero friction and rail-less outer edges
-  // Route A: Gentle touch control along inner bumper track
-  // Route B: High-speed drift shot using bumpers to slingshot around the ice bend directly to cup
   {
     holeNumber: 8,
-    worldIndex: 2,
-    name: 'Zero-Friction Drift',
-    par: 4,
+    worldIndex: 1,
+    name: 'Zig-Zag Alley',
+    par: 3,
     cells: mergeCells(
-      // Starting tee pad
-      rectCells(-1, 2, 1, 3),
-      // Broad curved ice arena
-      rectCells(-2, -1, 2, 1),
-      // Upper green
-      rectCells(0, -3, 2, -2)
+      rectCells(-1, 0, -1, 2),
+      rectCells(-1, 0, 1, 0),
+      rectCells(1, -2, 1, 0)
     ),
-    start: [0, 5.2],
-    hole: [2.0, -5.2],
-    surfaceZones: [
-      // Large slick ice sheet covering the arena
-      { x: 0, z: 0, width: 8.6, depth: 4.8, type: 'ice' },
-      // Slime patch on the far outer corner that kills momentum
-      { x: -3.2, z: 0, width: 1.8, depth: 3.0, type: 'slime' },
-    ],
+    start: [-2, 3.4],
+    hole: [2, -3.4],
+    bumpers: [{ x: 0, z: 0, radius: 0.34 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 9,
+    worldIndex: 1,
+    name: 'Meadow Dogleg',
+    par: 3,
+    // Matches Screenshot 1 Main Menu preview island: L-shape with tee at top-right leg, sand strip in bottom leg, hole at bottom-left!
+    cells: mergeCells(
+      rectCells(1, -2, 1, 1),
+      rectCells(-2, 1, 1, 1)
+    ),
+    start: [2.0, -3.2],
+    hole: [-3.4, 2.0],
+    sandStrips: [{ x: -0.6, z: 2.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.96 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 10,
+    worldIndex: 1,
+    name: 'Pinball Lane',
+    par: 3,
+    cells: rectCells(-1, -2, 0, 2),
+    start: [-1, 3.2],
+    hole: [-1, -3.2],
     bumpers: [
-      // Pinball bumpers acting as drift slingshots
-      { x: -1.2, z: 0.0, radius: 0.38 },
-      { x: 1.2, z: 0.0, radius: 0.38 },
-      { x: 0.0, z: -2.4, radius: 0.38 },
+      { x: -1.0, z: 0.8, radius: 0.35 },
+      { x: -1.8, z: -0.6, radius: 0.35 },
+      { x: -0.2, z: -0.6, radius: 0.35 },
     ],
-    gapBounds: [
-      // Rail-less outer cliff edge
-      { minX: -4.5, maxX: -2.8, minZ: -2.5, maxZ: -0.5 },
-      { minX: 2.8, maxX: 4.5, minZ: 0.5, maxZ: 2.5 },
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 11,
+    worldIndex: 1,
+    name: 'Double Corner',
+    par: 3,
+    cells: mergeCells(
+      rectCells(-2, 0, -2, 2),
+      rectCells(-2, 0, 0, 0),
+      rectCells(0, -2, 0, 0),
+      rectCells(0, -2, 2, -2)
+    ),
+    start: [-4, 3.4],
+    hole: [3.4, -4.0],
+    sandStrips: [{ x: -2.0, z: 0.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.96 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 12,
+    worldIndex: 1,
+    name: 'Valley Loop',
+    par: 3,
+    cells: mergeCells(
+      rectCells(-1, -2, 1, -2),
+      rectCells(-1, 2, 1, 2),
+      rectCells(-1, -2, -1, 2),
+      rectCells(1, -2, 1, 2)
+    ),
+    start: [0, 4.0],
+    hole: [0, -4.0],
+    bumpers: [
+      { x: -2.0, z: 0, radius: 0.34 },
+      { x: 2.0, z: 0, radius: 0.34 },
     ],
     defaultCameraAngle: 0,
   },
 
-  // Hole 9: Grand Finale (Par 5)
-  // Master championship course:
-  // Starting boost jump -> sliding piston gauntlet & timed drawbridge -> dual warp portals -> rotating windmill-guarded elevated green!
+  // ==========================================
+  // WORLD 3: BREEZY DUNES (Holes 13 - 18)
+  // ==========================================
   {
-    holeNumber: 9,
+    holeNumber: 13,
     worldIndex: 2,
-    name: 'Grand Finale',
-    par: 5,
+    name: 'Sandy Straight',
+    par: 2,
+    cells: rectCells(0, -3, 0, 2),
+    start: [0, 3.4],
+    hole: [0, -5.2],
+    sandStrips: [
+      { x: 0, z: 0.5, width: 3.40, depth: 1.1, frictionMultiplier: 0.94 },
+      { x: 0, z: -2.5, width: 3.40, depth: 1.1, frictionMultiplier: 0.94 },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 14,
+    worldIndex: 2,
+    name: 'Dune Bank',
+    par: 3,
+    cells: mergeCells(rectCells(-1, -2, -1, 2), rectCells(-1, -2, 2, -2)),
+    start: [-2, 3.2],
+    hole: [3.4, -4.0],
+    bumpers: [
+      { x: -2.0, z: -1.0, radius: 0.32 },
+      { x: 1.2, z: -4.0, radius: 0.32 },
+    ],
+    sandStrips: [{ x: 1.0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 15,
+    worldIndex: 2,
+    name: 'Oasis S-Bend',
+    par: 3,
     cells: mergeCells(
-      // Zone 1: Launch Tee
-      rectCells(-1, 3, 1, 4),
-      // Zone 2: Piston Gauntlet & Bridge Hub
-      rectCells(-2, 0, 2, 2),
-      // Zone 3: Portal Wing
-      rectCells(-3, -2, -2, 0),
-      rectCells(2, -2, 3, 0),
-      // Zone 4: Elevated Championship Green
-      rectCells(-1, -4, 1, -2)
+      rectCells(-2, -2, 0, -2),
+      rectCells(0, -2, 0, 2),
+      rectCells(0, 2, 2, 2)
     ),
-    start: [0, 7.2],
-    hole: [0, -7.2],
-    boostPads: [
-      // Starting launch pad
-      {
-        x: 0,
-        z: 5.6,
-        width: 1.8,
-        depth: 1.4,
-        dirX: 0.0,
-        dirZ: -1.0,
-        boostSpeed: 15.2,
-      },
+    start: [3.4, 4.0],
+    hole: [-3.4, -4.0],
+    bumpers: [{ x: 0, z: 0, radius: 0.36 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 16,
+    worldIndex: 2,
+    name: 'Mirage Hook',
+    par: 3,
+    cells: mergeCells(
+      rectCells(1, -2, 1, 2),
+      rectCells(-1, -2, 1, -2),
+      rectCells(-1, -2, -1, 1)
+    ),
+    start: [2.0, 3.4],
+    hole: [-2.0, 1.4],
+    sandStrips: [{ x: 1.0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 }],
+    bumpers: [{ x: -2.0, z: -1.5, radius: 0.32 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 17,
+    worldIndex: 2,
+    name: 'Pyramid Ricochet',
+    par: 3,
+    cells: mergeCells(rectCells(-1, -1, 1, 1), rectCells(0, 2, 0, 2), rectCells(0, -2, 0, -2)),
+    start: [0, 3.5],
+    hole: [0, -3.5],
+    bumpers: [
+      { x: 0, z: 1.2, radius: 0.34 },
+      { x: -1.2, z: 0, radius: 0.34 },
+      { x: 1.2, z: 0, radius: 0.34 },
+      { x: 0, z: -1.2, radius: 0.34 },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 18,
+    worldIndex: 2,
+    name: 'Canyon U-Turn',
+    par: 4,
+    cells: mergeCells(
+      rectCells(-2, -2, -2, 2),
+      rectCells(-2, -2, 2, -2),
+      rectCells(2, -2, 2, 2)
+    ),
+    start: [-4.0, 3.4],
+    hole: [4.0, 3.4],
+    sandStrips: [
+      { x: -1.0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 },
+      { x: 1.0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 },
+    ],
+    bumpers: [{ x: 0, z: -4.0, radius: 0.34 }],
+    defaultCameraAngle: 0,
+  },
+
+  // ==========================================
+  // WORLD 4: EMERALD RIDGE (Holes 19 - 24)
+  // Introduces moving blocks + bumpers
+  // ==========================================
+  {
+    holeNumber: 19,
+    worldIndex: 3,
+    name: 'Sweeper Gate',
+    par: 2,
+    cells: rectCells(0, -3, 0, 2),
+    start: [0, 3.4],
+    hole: [0, -5.2],
+    movingBlocks: [
+      { x: 0, z: -1.0, width: 0.7, depth: 0.35, axis: 'x', range: 0.55, speed: 2.2 },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 20,
+    worldIndex: 3,
+    name: 'Ridge Turn',
+    par: 3,
+    cells: mergeCells(rectCells(-1, -2, -1, 2), rectCells(-1, -2, 2, -2)),
+    start: [-2.0, 3.2],
+    hole: [3.4, -4.0],
+    movingBlocks: [
+      { x: 1.0, z: -4.0, width: 0.35, depth: 0.7, axis: 'z', range: 0.55, speed: 2.4 },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 21,
+    worldIndex: 3,
+    name: 'Twin Pistons',
+    par: 3,
+    cells: rectCells(0, -3, 0, 3),
+    start: [0, 5.2],
+    hole: [0, -5.2],
+    movingBlocks: [
+      { x: 0, z: 1.5, width: 0.75, depth: 0.35, axis: 'x', range: 0.52, speed: 2.0, phase: 0 },
+      { x: 0, z: -1.5, width: 0.75, depth: 0.35, axis: 'x', range: 0.52, speed: 2.0, phase: Math.PI },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 22,
+    worldIndex: 3,
+    name: 'Emerald Bend',
+    par: 3,
+    cells: mergeCells(
+      rectCells(1, -1, 1, 2),
+      rectCells(-2, -1, 1, -1),
+      rectCells(-2, -3, -2, -1)
+    ),
+    start: [2.0, 3.4],
+    hole: [-4.0, -5.2],
+    bumpers: [{ x: -0.5, z: -2.0, radius: 0.35 }],
+    movingBlocks: [
+      { x: -4.0, z: -3.5, width: 0.7, depth: 0.35, axis: 'x', range: 0.5, speed: 2.5 },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 23,
+    worldIndex: 3,
+    name: 'Emerald Diamond',
+    par: 3,
+    cells: mergeCells(
+      rectCells(0, 1, 0, 3),
+      rectCells(-1, -1, 1, 1),
+      rectCells(0, -3, 0, -1)
+    ),
+    start: [0, 5.2],
+    hole: [0, -5.2],
+    bumpers: [
+      { x: 0, z: 0, radius: 0.42 },
+      { x: -1.3, z: 0, radius: 0.32 },
+      { x: 1.3, z: 0, radius: 0.32 },
+    ],
+    sandStrips: [{ x: 0, z: -3.2, width: 3.40, depth: 1.0, frictionMultiplier: 0.95 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 24,
+    worldIndex: 3,
+    name: 'Spiral Fortress',
+    par: 4,
+    cells: mergeCells(
+      rectCells(-2, -2, -2, 2),
+      rectCells(-2, -2, 2, -2),
+      rectCells(2, -2, 2, 1),
+      rectCells(0, 1, 2, 1)
+    ),
+    start: [-4.0, 3.4],
+    hole: [0.4, 2.0],
+    bumpers: [{ x: 0, z: -4.0, radius: 0.35 }],
+    movingBlocks: [
+      { x: 4.0, z: -1.0, width: 0.7, depth: 0.35, axis: 'x', range: 0.65, speed: 2.3 },
+    ],
+    defaultCameraAngle: 0,
+  },
+
+  // ==========================================
+  // WORLD 5: STARLIGHT CHAMPIONS (Holes 25 - 30)
+  // ==========================================
+  {
+    holeNumber: 25,
+    worldIndex: 4,
+    name: 'Gauntlet Run',
+    par: 3,
+    cells: rectCells(0, -3, 0, 3),
+    start: [0, 5.4],
+    hole: [0, -5.4],
+    bumpers: [
+      { x: -0.64, z: 2.0, radius: 0.27 },
+      { x: 0.64, z: 2.0, radius: 0.27 },
+      { x: 0, z: -2.0, radius: 0.34 },
     ],
     movingBlocks: [
-      // Mid-course sliding barrier
-      { x: 0, z: 2.0, width: 2.0, depth: 0.65, axis: 'x', range: 1.8, speed: 2.4, phase: 0 },
+      { x: 0, z: 0, width: 0.75, depth: 0.35, axis: 'x', range: 0.65, speed: 2.6 },
     ],
-    drawbridges: [
-      // Timed drawbridge crossing to final green
-      {
-        x: 0,
-        z: -2.0,
-        width: 1.8,
-        depth: 1.6,
-        axis: 'z',
-        cycleDuration: 4.5,
-        openDuration: 2.2,
-        phase: 1.0,
-      },
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 26,
+    worldIndex: 4,
+    name: 'Starlight Z',
+    par: 3,
+    cells: mergeCells(
+      rectCells(-2, 1, 0, 1),
+      rectCells(0, -1, 0, 1),
+      rectCells(0, -1, 2, -1)
+    ),
+    start: [-3.4, 2.0],
+    hole: [3.4, -2.0],
+    sandStrips: [{ x: 0, z: 0, width: 3.40, depth: 1.0, frictionMultiplier: 0.95 }],
+    bumpers: [
+      { x: 0, z: 2.0, radius: 0.32 },
+      { x: 0, z: -2.0, radius: 0.32 },
     ],
-    portals: [
-      {
-        id: 'portal-finale',
-        a: { x: -4.5, z: -1.0, radius: 0.42, exitDir: [0.7, -0.7] },
-        b: { x: 0.0, z: -4.8, radius: 0.42, exitDir: [0.0, -1.0] },
-        color: '#d946ef',
-      },
-    ],
-    sweepers: [
-      // 3-blade championship sweeper guarding the cup
-      {
-        x: 0,
-        z: -6.0,
-        bladeCount: 3,
-        bladeLength: 1.7,
-        bladeWidth: 0.28,
-        speed: 1.6,
-        phase: 0,
-      },
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 27,
+    worldIndex: 4,
+    name: 'Triple Crown',
+    par: 4,
+    cells: mergeCells(
+      rectCells(-2, -2, -2, 2),
+      rectCells(-2, -2, 2, -2),
+      rectCells(2, -2, 2, 2)
+    ),
+    start: [4.0, 3.4],
+    hole: [-4.0, 3.4],
+    movingBlocks: [
+      { x: 0, z: -4.0, width: 0.35, depth: 0.75, axis: 'z', range: 0.52, speed: 2.5 },
     ],
     bumpers: [
-      { x: -1.8, z: -7.0, radius: 0.36 },
-      { x: 1.8, z: -7.0, radius: 0.36 },
+      { x: 4.0, z: 0, radius: 0.34 },
+      { x: -4.0, z: 0, radius: 0.34 },
     ],
-    gapBounds: [
-      // Chasm between hub and championship green
-      { minX: -2.5, maxX: 2.5, minZ: -2.8, maxZ: -1.2 },
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 28,
+    worldIndex: 4,
+    name: 'Ricochet Chamber',
+    par: 3,
+    cells: mergeCells(
+      rectCells(-1, 1, -1, 3),
+      rectCells(-1, -1, 1, 1),
+      rectCells(1, -3, 1, -1)
+    ),
+    start: [-2.0, 5.2],
+    hole: [2.0, -5.2],
+    bumpers: [
+      { x: -1.5, z: 0, radius: 0.35 },
+      { x: 0, z: 0, radius: 0.38 },
+      { x: 1.5, z: 0, radius: 0.35 },
+    ],
+    sandStrips: [{ x: 2.0, z: -3.0, width: 3.40, depth: 1.0, frictionMultiplier: 0.95 }],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 29,
+    worldIndex: 4,
+    name: 'Pendulum Bridge',
+    par: 4,
+    cells: mergeCells(
+      rectCells(-2, 0, -2, 2),
+      rectCells(-2, 0, 2, 0),
+      rectCells(2, -2, 2, 0)
+    ),
+    start: [-4.0, 3.4],
+    hole: [4.0, -3.4],
+    movingBlocks: [
+      { x: -1.0, z: 0, width: 0.35, depth: 0.75, axis: 'z', range: 0.65, speed: 2.5, phase: 0 },
+      { x: 1.0, z: 0, width: 0.35, depth: 0.75, axis: 'z', range: 0.65, speed: 2.5, phase: Math.PI },
+    ],
+    defaultCameraAngle: 0,
+  },
+  {
+    holeNumber: 30,
+    worldIndex: 4,
+    name: 'Grand Finale',
+    par: 4,
+    cells: mergeCells(
+      rectCells(0, 1, 0, 3),
+      rectCells(-2, 1, 0, 1),
+      rectCells(-2, -2, -2, 1),
+      rectCells(-2, -2, 2, -2),
+      rectCells(2, -2, 2, 0)
+    ),
+    start: [0, 5.4],
+    hole: [4.0, -0.4],
+    sandStrips: [
+      { x: -2.0, z: 2.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 },
+      { x: 0, z: -4.0, width: 1.0, depth: 3.40, frictionMultiplier: 0.95 },
+    ],
+    bumpers: [
+      { x: -4.0, z: -1.0, radius: 0.34 },
+      { x: 2.0, z: -4.0, radius: 0.34 },
+    ],
+    movingBlocks: [
+      { x: 4.0, z: -2.0, width: 0.72, depth: 0.35, axis: 'x', range: 0.65, speed: 2.4 },
     ],
     defaultCameraAngle: 0,
   },
 ];
 
-export const TOTAL_GAME_STARS = ALL_HOLES.length * 3; // 27 stars total (3 worlds x 3 holes)
-
+/**
+ * Automatically extracts clean, merged perimeter wall segments from a course's cell list.
+ * Each cell [col, row] occupies:
+ *   x in [col * 2 - 1, col * 2 + 1]
+ *   z in [row * 2 - 1, row * 2 + 1]
+ */
 export function computeCourseWalls(course: HoleCourse): WallSegment[] {
   const cellSet = new Set<string>();
   for (const [c, r] of course.cells) {
     cellSet.add(`${c},${r}`);
   }
 
-  const rawEdges: { x1: number; z1: number; x2: number; z2: number; nx: number; nz: number }[] = [];
+  const rawEdges: WallSegment[] = [];
 
   for (const [c, r] of course.cells) {
-    const minX = c * CELL_SIZE - CELL_SIZE / 2;
-    const maxX = c * CELL_SIZE + CELL_SIZE / 2;
-    const minZ = r * CELL_SIZE - CELL_SIZE / 2;
-    const maxZ = r * CELL_SIZE + CELL_SIZE / 2;
+    const xMin = c * CELL_SIZE - CELL_SIZE / 2;
+    const xMax = c * CELL_SIZE + CELL_SIZE / 2;
+    const zMin = r * CELL_SIZE - CELL_SIZE / 2;
+    const zMax = r * CELL_SIZE + CELL_SIZE / 2;
 
-    // North (row - 1): -Z
+    // North edge (z = zMin), normal points +Z (inward)
     if (!cellSet.has(`${c},${r - 1}`)) {
-      rawEdges.push({ x1: minX, z1: minZ, x2: maxX, z2: minZ, nx: 0, nz: 1 });
+      rawEdges.push({ x1: xMin, z1: zMin, x2: xMax, z2: zMin, nx: 0, nz: 1 });
     }
-    // South (row + 1): +Z
+    // South edge (z = zMax), normal points -Z (inward)
     if (!cellSet.has(`${c},${r + 1}`)) {
-      rawEdges.push({ x1: minX, z1: maxZ, x2: maxX, z2: maxZ, nx: 0, nz: -1 });
+      rawEdges.push({ x1: xMin, z1: zMax, x2: xMax, z2: zMax, nx: 0, nz: -1 });
     }
-    // West (col - 1): -X
+    // West edge (x = xMin), normal points +X (inward)
     if (!cellSet.has(`${c - 1},${r}`)) {
-      rawEdges.push({ x1: minX, z1: minZ, x2: minX, z2: maxZ, nx: 1, nz: 0 });
+      rawEdges.push({ x1: xMin, z1: zMin, x2: xMin, z2: zMax, nx: 1, nz: 0 });
     }
-    // East (col + 1): +X
+    // East edge (x = xMax), normal points -X (inward)
     if (!cellSet.has(`${c + 1},${r}`)) {
-      rawEdges.push({ x1: maxX, z1: minZ, x2: maxX, z2: maxZ, nx: -1, nz: 0 });
+      rawEdges.push({ x1: xMax, z1: zMin, x2: xMax, z2: zMax, nx: -1, nz: 0 });
     }
   }
 
@@ -661,7 +704,8 @@ export function computeCourseWalls(course: HoleCourse): WallSegment[] {
     }
   }
 
-  // Offset every merged orthogonal wall outward by FAIRWAY_PAD
+  // Offset every merged orthogonal wall outward by FAIRWAY_PAD so all corridors are +2*FAIRWAY_PAD wider!
+  // Each corner vertex (x, z) is shared by one horizontal wall (with normal nz) and one vertical wall (with normal nx).
   const vertNxAtCorner = new Map<string, number>();
   const horizNzAtCorner = new Map<string, number>();
   const vKey = (x: number, z: number) => `${x.toFixed(2)},${z.toFixed(2)}`;
@@ -739,17 +783,17 @@ export function getCourseBounds(course: HoleCourse) {
 
 /**
  * Checks whether a chapter/world is unlocked.
- * World 0 is unlocked by default.
- * Subsequent worlds unlock when the player has earned at least 2 stars on each hole in preceding worlds.
+ * World 0 (Sunny Meadow) is unlocked by default.
+ * For any subsequent world W, all preceding worlds must have EVERY hole maxed out with 3 stars!
  */
 export function isWorldUnlocked(worldIndex: number, holeStars: Record<number, number>): boolean {
   if (worldIndex <= 0) return true;
   for (let w = 0; w < worldIndex; w++) {
     const holesInWorld = ALL_HOLES.filter((h) => h.worldIndex === w);
-    const isWorldCleared =
+    const isWorldMaxed =
       holesInWorld.length > 0 &&
-      holesInWorld.every((h) => (holeStars[h.holeNumber] || 0) >= 2);
-    if (!isWorldCleared) return false;
+      holesInWorld.every((h) => (holeStars[h.holeNumber] || 0) === 3);
+    if (!isWorldMaxed) return false;
   }
   return true;
 }
@@ -772,7 +816,7 @@ export function isHoleUnlocked(holeNumber: number, holeStars: Record<number, num
     return false;
   }
 
-  // If it's the first hole of its world (1, 4, 7), world unlock unlocks it
+  // If it's the first hole of its world (1, 7, 13, 19, 25), world unlock unlocks it
   const worldHoles = ALL_HOLES.filter((h) => h.worldIndex === course.worldIndex);
   if (worldHoles.length > 0 && worldHoles[0].holeNumber === holeNumber) {
     return true;
@@ -796,7 +840,7 @@ export function getHoleLockReason(
 
   if (!isWorldUnlocked(course.worldIndex, holeStars)) {
     const prevWorld = GOLF_WORLDS[course.worldIndex - 1];
-    return `Earn at least 2★ on all holes in ${prevWorld ? prevWorld.name : 'previous world'}`;
+    return `Max out 3★ on all holes in ${prevWorld ? prevWorld.name : 'previous chapter'}`;
   }
 
   const prevHoleStars = holeStars[holeNumber - 1] || 0;
@@ -820,7 +864,8 @@ export function getHighestUnlockedHole(holeStars: Record<number, number>): numbe
 
 /**
  * Calculates dual multiplayer tee-off positions that are GUARANTEED to be
- * on the exact same starting line (side-by-side perpendicular to the fairway direction).
+ * on the exact same starting line (side-by-side perpendicular to the fairway direction),
+ * regardless of whether the fairway runs along Z, along X, or diagonally.
  */
 export function getMultiplayerTeePositions(course: HoleCourse): {
   p1: [number, number];

@@ -1,16 +1,4 @@
-import {
-  HoleCourse,
-  WallSegment,
-  CELL_SIZE,
-  computeCourseWalls,
-  isPointInsideCourse,
-  RotatingSweeperObstacle,
-  TimedDrawbridge,
-  BoostPad,
-  PortalPair,
-  SpecialSurfaceZone,
-  GapRegion,
-} from '../data/courses';
+import { HoleCourse, WallSegment, CELL_SIZE, computeCourseWalls, isPointInsideCourse } from '../data/courses';
 
 export const BALL_RADIUS = 0.15;
 export const HOLE_RADIUS = 0.37;
@@ -24,7 +12,6 @@ export interface BallPhysicsState {
   isMoving: boolean;
   isSunk: boolean;
   sinkProgress: number; // 0..1 animation into the cup
-  teleportCooldown?: number; // portal teleport immunity cooldown
 }
 
 export interface PhysicsStepEvents {
@@ -36,11 +23,6 @@ export interface PhysicsStepEvents {
   hitNx: number;
   hitNz: number;
   isOnSand: boolean;
-  isOnIce?: boolean;
-  isOnSlime?: boolean;
-  boostedJustNow?: boolean;
-  teleportedJustNow?: boolean;
-  hazardHitIntensity?: number;
 }
 
 export function stepBallPhysics(
@@ -60,11 +42,6 @@ export function stepBallPhysics(
     hitNx: 0,
     hitNz: 1,
     isOnSand: false,
-    isOnIce: false,
-    isOnSlime: false,
-    boostedJustNow: false,
-    teleportedJustNow: false,
-    hazardHitIntensity: 0,
   };
 
   if (state.isSunk) {
@@ -75,21 +52,11 @@ export function stepBallPhysics(
     return events;
   }
 
-  // Check portal cooldown
-  if (state.teleportCooldown && state.teleportCooldown > 0) {
-    state.teleportCooldown = Math.max(0, state.teleportCooldown - dt);
-  }
+  // Even if the ball is stationary, check if a moving block slides into it
+  const hasMovingBlocks = Boolean(course.movingBlocks && course.movingBlocks.length > 0);
+  if (!state.isMoving && !hasMovingBlocks) return events;
 
-  // Active moving obstacles can impart motion to stationary balls
-  const hasDynamicObstacles = Boolean(
-    (course.movingBlocks && course.movingBlocks.length > 0) ||
-    (course.sweepers && course.sweepers.length > 0) ||
-    (course.drawbridges && course.drawbridges.length > 0)
-  );
-
-  if (!state.isMoving && !hasDynamicObstacles) return events;
-
-  const actualSubSteps = state.isMoving ? subSteps : 2;
+  const actualSubSteps = state.isMoving ? subSteps : 1;
   const subDt = dt / actualSubSteps;
 
   for (let step = 0; step < actualSubSteps; step++) {
@@ -97,47 +64,21 @@ export function stepBallPhysics(
     const safeZ = state.z;
     const stepTime = elapsedTime + step * subDt;
 
-    // 1. Advance Ball Position
     if (state.isMoving) {
+      // Advance position
       state.x += state.vx * subDt;
       state.z += state.vz * subDt;
 
-      // 2. Surface Zones & Friction
-      let dampingPerSec = 1.95; // default grass rolling drag
-      let curRestitution = 0.82; // standard wall restitution
-
-      // Check legacy sandStrips
+      // Pure ground rolling physics (Zero air resistance or wind drift forces)
+      let dampingPerSec = 1.95; // standard grass rolling resistance
       if (course.sandStrips) {
         for (const s of course.sandStrips) {
           if (
             Math.abs(state.x - s.x) <= s.width / 2 + BALL_RADIUS * 0.4 &&
             Math.abs(state.z - s.z) <= s.depth / 2 + BALL_RADIUS * 0.4
           ) {
-            dampingPerSec = 4.8;
+            dampingPerSec = 4.6; // sand slows the ball down noticeably
             events.isOnSand = true;
-            break;
-          }
-        }
-      }
-
-      // Check creative specialSurfaceZones (Sand, Ice, Slime)
-      if (course.surfaceZones) {
-        for (const sz of course.surfaceZones) {
-          if (
-            Math.abs(state.x - sz.x) <= sz.width / 2 + BALL_RADIUS * 0.35 &&
-            Math.abs(state.z - sz.z) <= sz.depth / 2 + BALL_RADIUS * 0.35
-          ) {
-            if (sz.type === 'sand') {
-              dampingPerSec = 5.2;
-              events.isOnSand = true;
-            } else if (sz.type === 'ice') {
-              dampingPerSec = 0.22; // Low drag: smooth sliding drift
-              events.isOnIce = true;
-            } else if (sz.type === 'slime') {
-              dampingPerSec = 8.8; // High drag + kills bounce
-              curRestitution = 0.05;
-              events.isOnSlime = true;
-            }
             break;
           }
         }
@@ -149,9 +90,8 @@ export function stepBallPhysics(
         const factor = Math.max(0, 1 - dampingPerSec * subDt);
         state.vx *= factor;
         state.vz *= factor;
-
-        // Extra constant rolling drag at low speeds (unless on low-friction ice)
-        const linearDrag = (events.isOnIce ? 0.08 : 0.55) * subDt;
+        // Extra constant rolling drag at low speeds so the ball settles crisply
+        const linearDrag = 0.55 * subDt;
         const curSpeed = Math.hypot(state.vx, state.vz);
         if (curSpeed <= linearDrag) {
           state.vx = 0;
@@ -163,64 +103,19 @@ export function stepBallPhysics(
         }
       }
 
-      // 3. Boost Pads / Speed Strips
-      if (course.boostPads) {
-        for (const bp of course.boostPads) {
-          if (
-            Math.abs(state.x - bp.x) <= bp.width / 2 &&
-            Math.abs(state.z - bp.z) <= bp.depth / 2
-          ) {
-            const curSpd = Math.hypot(state.vx, state.vz);
-            const targetSpd = Math.max(curSpd * 1.35, bp.boostSpeed);
-            state.vx = bp.dirX * targetSpd;
-            state.vz = bp.dirZ * targetSpd;
-            state.isMoving = true;
-            events.boostedJustNow = true;
-            break;
-          }
-        }
-      }
-
-      // 4. Paired Portals / Teleporters
-      if (course.portals && (!state.teleportCooldown || state.teleportCooldown <= 0)) {
-        for (const pair of course.portals) {
-          const distA = Math.hypot(state.x - pair.a.x, state.z - pair.a.z);
-          if (distA < pair.a.radius) {
-            const curSpd = Math.max(4.5, Math.hypot(state.vx, state.vz));
-            state.x = pair.b.x + pair.b.exitDir[0] * (pair.b.radius + 0.12);
-            state.z = pair.b.z + pair.b.exitDir[1] * (pair.b.radius + 0.12);
-            state.vx = pair.b.exitDir[0] * curSpd;
-            state.vz = pair.b.exitDir[1] * curSpd;
-            state.teleportCooldown = 0.65;
-            events.teleportedJustNow = true;
-            break;
-          }
-
-          const distB = Math.hypot(state.x - pair.b.x, state.z - pair.b.z);
-          if (distB < pair.b.radius) {
-            const curSpd = Math.max(4.5, Math.hypot(state.vx, state.vz));
-            state.x = pair.a.x + pair.a.exitDir[0] * (pair.a.radius + 0.12);
-            state.z = pair.a.z + pair.a.exitDir[1] * (pair.a.radius + 0.12);
-            state.vx = pair.a.exitDir[0] * curSpd;
-            state.vz = pair.a.exitDir[1] * curSpd;
-            state.teleportCooldown = 0.65;
-            events.teleportedJustNow = true;
-            break;
-          }
-        }
-      }
-
-      // 5. Check Hole Capture & Rim Attraction
+      // Check hole capture / rim attraction
       const dxHole = course.hole[0] - state.x;
       const dzHole = course.hole[1] - state.z;
       const distHole = Math.hypot(dxHole, dzHole);
       const curSpeed = Math.hypot(state.vx, state.vz);
 
       if (distHole < HOLE_RADIUS) {
+        // Gravity pull toward center of cup
         if (distHole > 0.001) {
           state.vx += (dxHole / distHole) * 9.5 * subDt;
           state.vz += (dzHole / distHole) * 9.5 * subDt;
         }
+        // Sink if within capture radius and not blasting across at max speed
         if (distHole < HOLE_RADIUS * 0.78 && curSpeed < 9.5) {
           state.isSunk = true;
           state.isMoving = false;
@@ -231,7 +126,7 @@ export function stepBallPhysics(
         }
       }
 
-      // 6. Pinball Bumper Pillars (High Restitution Rebound = 1.38x)
+      // Collide with Bumpers
       if (course.bumpers) {
         for (let i = 0; i < course.bumpers.length; i++) {
           const b = course.bumpers[i];
@@ -242,14 +137,15 @@ export function stepBallPhysics(
           if (dist < minDist && dist > 0.0001) {
             const nx = dx / dist;
             const nz = dz / dist;
+            // Push out
             state.x = b.x + nx * minDist;
             state.z = b.z + nz * minDist;
 
             const vn = state.vx * nx + state.vz * nz;
             if (vn < 0) {
-              const bumperRestitution = 1.38; // Arcade pinball punch!
-              state.vx -= (1 + bumperRestitution) * vn * nx;
-              state.vz -= (1 + bumperRestitution) * vn * nz;
+              const restitution = 0.92;
+              state.vx -= (1 + restitution) * vn * nx;
+              state.vz -= (1 + restitution) * vn * nz;
               events.bumperHitIndex = i;
               events.hitX = b.x + nx * b.radius;
               events.hitZ = b.z + nz * b.radius;
@@ -261,77 +157,7 @@ export function stepBallPhysics(
       }
     }
 
-    // 7. Rotating Windmills / Sweepers
-    if (course.sweepers) {
-      for (const sw of course.sweepers) {
-        const baseAngle = stepTime * sw.speed + (sw.phase ?? 0);
-        const bladeHalfW = sw.bladeWidth / 2;
-        const colRadius = BALL_RADIUS + bladeHalfW;
-
-        for (let k = 0; k < sw.bladeCount; k++) {
-          const bladeAngle = baseAngle + (k * 2 * Math.PI) / sw.bladeCount;
-          const cosA = Math.cos(bladeAngle);
-          const sinA = Math.sin(bladeAngle);
-
-          // Blade segment: (sw.x, sw.z) -> (tipX, tipZ)
-          const tipX = sw.x + cosA * sw.bladeLength;
-          const tipZ = sw.z + sinA * sw.bladeLength;
-
-          const segX = tipX - sw.x;
-          const segZ = tipZ - sw.z;
-          const segLenSq = segX * segX + segZ * segZ;
-          if (segLenSq < 0.0001) continue;
-
-          let t = ((state.x - sw.x) * segX + (state.z - sw.z) * segZ) / segLenSq;
-          t = Math.max(0, Math.min(1, t));
-
-          const cx = sw.x + t * segX;
-          const cz = sw.z + t * segZ;
-          const dx = state.x - cx;
-          const dz = state.z - cz;
-          const dist = Math.hypot(dx, dz);
-
-          if (dist < colRadius) {
-            let nx = -sinA;
-            let nz = cosA;
-            // Align normal pointing toward ball
-            if (dx * nx + dz * nz < 0) {
-              nx = -nx;
-              nz = -nz;
-            }
-
-            state.x = cx + nx * (colRadius + 0.005);
-            state.z = cz + nz * (colRadius + 0.005);
-
-            // Blade tangential velocity at contact point
-            const contactRadius = t * sw.bladeLength;
-            const bladeTanVx = -sinA * sw.speed * contactRadius;
-            const bladeTanVz = cosA * sw.speed * contactRadius;
-
-            const relVx = state.vx - bladeTanVx;
-            const relVz = state.vz - bladeTanVz;
-            const vn = relVx * nx + relVz * nz;
-
-            if (vn < 0) {
-              const restitution = 1.30;
-              state.vx = bladeTanVx + (state.vx - bladeTanVx) - (1 + restitution) * vn * nx;
-              state.vz = bladeTanVz + (state.vz - bladeTanVz) - (1 + restitution) * vn * nz;
-            } else if (!state.isMoving) {
-              state.vx = bladeTanVx * 1.35 + nx * 2.0;
-              state.vz = bladeTanVz * 1.35 + nz * 2.0;
-            }
-            state.isMoving = true;
-            events.hazardHitIntensity = 0.85;
-            events.hitX = cx;
-            events.hitZ = cz;
-            events.hitNx = nx;
-            events.hitNz = nz;
-          }
-        }
-      }
-    }
-
-    // 8. Sliding Piston Walls / Moving Blocks
+    // Collide with Moving Blocks (works even if ball was previously stationary)
     if (course.movingBlocks) {
       for (const mb of course.movingBlocks) {
         const phase = mb.phase ?? 0;
@@ -396,7 +222,7 @@ export function stepBallPhysics(
 
     if (!state.isMoving) break;
 
-    // 9. Perimeter & Internal Walls
+    // Collide with Perimeter & Internal Walls
     const wallRadius = BALL_RADIUS + 0.08;
     for (const w of walls) {
       const wx = w.x2 - w.x1;
@@ -416,7 +242,8 @@ export function stepBallPhysics(
       if (dist < wallRadius) {
         let nx = w.nx;
         let nz = w.nz;
-        if ((w.nx === 0 && w.nz === 0) || t <= 0.001 || t >= 0.999) {
+        if (t <= 0.001 || t >= 0.999) {
+          // Corner endpoint collision (e.g. convex corner of an L-bend)
           if (dist > 0.0001) {
             nx = dx / dist;
             nz = dz / dist;
@@ -443,55 +270,20 @@ export function stepBallPhysics(
       }
     }
 
-    // 10. Void Gap Check & Timed Drawbridges
-    let isInVoidGap = false;
-    if (course.gapBounds) {
-      for (const gap of course.gapBounds) {
-        if (
-          state.x >= gap.minX &&
-          state.x <= gap.maxX &&
-          state.z >= gap.minZ &&
-          state.z <= gap.maxZ
-        ) {
-          // Check if drawbridge covers this gap and is currently closed/walkable
-          let bridgeClosed = false;
-          if (course.drawbridges) {
-            for (const db of course.drawbridges) {
-              const cycleT = (stepTime + (db.phase ?? 0)) % db.cycleDuration;
-              const isClosed = cycleT >= db.openDuration;
-              if (
-                isClosed &&
-                Math.abs(state.x - db.x) <= db.width / 2 &&
-                Math.abs(state.z - db.z) <= db.depth / 2
-              ) {
-                bridgeClosed = true;
-                break;
-              }
-            }
-          }
-          if (!bridgeClosed) {
-            isInVoidGap = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // 11. Out-of-Bounds Recovery (Void gap drop or crossing outside perimeter)
-    if (isInVoidGap || !isPointInsideCourse(course, state.x, state.z, 0.25)) {
-      if (!isInVoidGap && isPointInsideCourse(course, safeX, safeZ, 0.25)) {
+    // Emergency out-of-bounds recovery ONLY if ball somehow crosses completely outside the perimeter walls (margin = +0.25)
+    if (!isPointInsideCourse(course, state.x, state.z, 0.25)) {
+      if (isPointInsideCourse(course, safeX, safeZ, 0.25)) {
         state.x = safeX;
         state.z = safeZ;
         state.vx = -state.vx * 0.4;
         state.vz = -state.vz * 0.4;
       } else {
-        // Drop into void: clean reset onto starting tee
+        // Hard failsafe: return ball safely onto the starting tee so game never soft-locks
         state.x = course.start[0];
         state.z = course.start[1];
         state.vx = 0;
         state.vz = 0;
         state.isMoving = false;
-        events.hazardHitIntensity = 1.0;
       }
     }
   }
@@ -513,6 +305,9 @@ export interface HintResult {
   isHoleInOne: boolean;
 }
 
+/**
+ * Checks if segment (x1, z1) -> (x2, z2) intersects segment (x3, z3) -> (x4, z4).
+ */
 function lineSegmentsIntersect(
   x1: number, z1: number, x2: number, z2: number,
   x3: number, z3: number, x4: number, z4: number
@@ -524,6 +319,10 @@ function lineSegmentsIntersect(
   return t >= 0.001 && t <= 0.999 && u >= 0.001 && u <= 0.999;
 }
 
+/**
+ * Checks if a direct straight path from (x1, z1) to (x2, z2) has clear line of sight
+ * (not obstructed by perimeter walls or bumper obstacles with safety radius buffer).
+ */
 function isLineOfSightClear(
   x1: number, z1: number,
   x2: number, z2: number,
@@ -539,6 +338,7 @@ function isLineOfSightClear(
   const nz = dx / len;
   const margin = BALL_RADIUS + 0.08;
 
+  // Check 3 parallel rays (center, left offset, right offset)
   const offsets = [0, margin, -margin];
 
   for (const off of offsets) {
@@ -554,6 +354,7 @@ function isLineOfSightClear(
     }
   }
 
+  // Check bumper obstacles
   if (bumpers) {
     for (const b of bumpers) {
       const bRad = b.radius + BALL_RADIUS + 0.06;
@@ -569,6 +370,10 @@ function isLineOfSightClear(
   return true;
 }
 
+/**
+ * Uses BFS across course grid cells to find the shortest corridor sequence
+ * from the ball's current cell to the hole cup's cell.
+ */
 function findCorridorCellPath(
   course: HoleCourse,
   startX: number,
@@ -579,119 +384,117 @@ function findCorridorCellPath(
     cellSet.add(`${c},${r}`);
   }
 
-  let startCell: [number, number] = [0, 0];
-  let minStartDist = Infinity;
-  for (const [c, r] of course.cells) {
-    const cx = c * CELL_SIZE;
-    const cz = r * CELL_SIZE;
-    const d = Math.hypot(startX - cx, startZ - cz);
-    if (d < minStartDist) {
-      minStartDist = d;
-      startCell = [c, r];
-    }
-  }
+  const startC = Math.round(startX / CELL_SIZE);
+  const startR = Math.round(startZ / CELL_SIZE);
+  const holeC = Math.round(course.hole[0] / CELL_SIZE);
+  const holeR = Math.round(course.hole[1] / CELL_SIZE);
 
-  let holeCell: [number, number] = [0, 0];
-  let minHoleDist = Infinity;
-  for (const [c, r] of course.cells) {
-    const cx = c * CELL_SIZE;
-    const cz = r * CELL_SIZE;
-    const d = Math.hypot(course.hole[0] - cx, course.hole[1] - cz);
-    if (d < minHoleDist) {
-      minHoleDist = d;
-      holeCell = [c, r];
-    }
-  }
-
-  const startKey = `${startCell[0]},${startCell[1]}`;
-  const holeKey = `${holeCell[0]},${holeCell[1]}`;
-
-  if (startKey === holeKey) {
-    return [startCell];
-  }
-
-  const queue: [number, number][] = [startCell];
-  const visited = new Set<string>([startKey]);
-  const parentMap = new Map<string, [number, number]>();
-
-  const neighbors = [
-    [0, 1],
-    [0, -1],
-    [1, 0],
-    [-1, 0],
-  ];
-
-  let found = false;
-
-  while (queue.length > 0) {
-    const [cc, cr] = queue.shift()!;
-    const curKey = `${cc},${cr}`;
-
-    if (curKey === holeKey) {
-      found = true;
-      break;
-    }
-
-    for (const [dc, dr] of neighbors) {
-      const nc = cc + dc;
-      const nr = cr + dr;
-      const nKey = `${nc},${nr}`;
-
-      if (cellSet.has(nKey) && !visited.has(nKey)) {
-        visited.add(nKey);
-        parentMap.set(nKey, [cc, cr]);
-        queue.push([nc, nr]);
+  let actualStartC = startC;
+  let actualStartR = startR;
+  if (!cellSet.has(`${startC},${startR}`)) {
+    let bestDist = Infinity;
+    for (const [c, r] of course.cells) {
+      const d = Math.hypot(startX - c * CELL_SIZE, startZ - r * CELL_SIZE);
+      if (d < bestDist) {
+        bestDist = d;
+        actualStartC = c;
+        actualStartR = r;
       }
     }
   }
 
-  if (!found) {
-    return [startCell, holeCell];
+  const queue: [number, number][][] = [[[actualStartC, actualStartR]]];
+  const visited = new Set<string>([`${actualStartC},${actualStartR}`]);
+
+  while (queue.length > 0) {
+    const path = queue.shift()!;
+    const [currC, currR] = path[path.length - 1];
+
+    if (currC === holeC && currR === holeR) {
+      return path;
+    }
+
+    const neighbors: [number, number][] = [
+      [currC + 1, currR],
+      [currC - 1, currR],
+      [currC, currR + 1],
+      [currC, currR - 1],
+    ];
+
+    for (const [nc, nr] of neighbors) {
+      const key = `${nc},${nr}`;
+      if (cellSet.has(key) && !visited.has(key)) {
+        visited.add(key);
+        queue.push([...path, [nc, nr]]);
+      }
+    }
   }
 
-  const path: [number, number][] = [];
-  let curr: [number, number] | undefined = holeCell;
-  while (curr) {
-    path.unshift(curr);
-    const k = `${curr[0]},${curr[1]}`;
-    if (k === startKey) break;
-    curr = parentMap.get(k);
-  }
-
-  return path;
+  return [[actualStartC, actualStartR]];
 }
 
+/**
+ * Finds the immediate fairway target waypoint (hole cup or corner bend)
+ * ensuring shots navigate corridors instead of smacking perimeter walls.
+ */
 function findNextTargetWaypoint(
   course: HoleCourse,
   startX: number,
   startZ: number,
   walls: WallSegment[]
 ): [number, number] {
+  // 1. Direct line of sight to hole cup?
   if (isLineOfSightClear(startX, startZ, course.hole[0], course.hole[1], walls, course.bumpers)) {
     return [course.hole[0], course.hole[1]];
   }
 
+  // 2. BFS corridor path
   const cellPath = findCorridorCellPath(course, startX, startZ);
+  if (cellPath.length <= 1) {
+    return [course.hole[0], course.hole[1]];
+  }
 
+  // Extract corridor waypoints (corner turns along path)
+  const waypoints: [number, number][] = [];
+  for (let i = 1; i < cellPath.length - 1; i++) {
+    const prev = cellPath[i - 1];
+    const curr = cellPath[i];
+    const next = cellPath[i + 1];
+    const d1 = [curr[0] - prev[0], curr[1] - prev[1]];
+    const d2 = [next[0] - curr[0], next[1] - curr[1]];
+    if (d1[0] !== d2[0] || d1[1] !== d2[1]) {
+      waypoints.push([curr[0] * CELL_SIZE, curr[1] * CELL_SIZE]);
+    }
+  }
+  waypoints.push([course.hole[0], course.hole[1]]);
+
+  // Find the furthest waypoint that has clear line of sight from ball
+  for (let i = waypoints.length - 1; i >= 0; i--) {
+    const wp = waypoints[i];
+    if (isLineOfSightClear(startX, startZ, wp[0], wp[1], walls, course.bumpers)) {
+      return wp;
+    }
+  }
+
+  // If corner vertex isn't fully visible, find the furthest visible cell center along path
   for (let i = cellPath.length - 1; i >= 0; i--) {
     const [c, r] = cellPath[i];
     const wx = c * CELL_SIZE;
     const wz = r * CELL_SIZE;
-
-    const distFromStart = Math.hypot(wx - startX, wz - startZ);
-    if (distFromStart < 0.6) continue;
-
     if (isLineOfSightClear(startX, startZ, wx, wz, walls, course.bumpers)) {
       return [wx, wz];
     }
   }
 
-  const dx = course.hole[0] - startX;
-  const dz = course.hole[1] - startZ;
-  const len = Math.hypot(dx, dz) || 1;
-  return [startX + (dx / len) * 2.5, startZ + (dz / len) * 2.5];
+  return [course.hole[0], course.hole[1]];
 }
 
+/**
+ * Intelligent AI Caddie / Shot Assistant:
+ * Uses BFS fairway corridor pathfinding, line-of-sight analysis, and multi-candidate
+ * physics simulations to compute the optimal stroke trajectory, recommended power percentage,
+ * and target destination.
+ */
 export function computeHintTrajectory(
   course: HoleCourse,
   startX: number,
@@ -706,24 +509,29 @@ export function computeHintTrajectory(
   const targetAngle = Math.atan2(target[1] - startZ, target[0] - startX);
   const holeAngle = Math.atan2(course.hole[1] - startZ, course.hole[0] - startX);
 
+  // Build candidate shot angles
   const candidateAngles = new Set<number>();
   candidateAngles.add(targetAngle);
   candidateAngles.add(holeAngle);
 
+  // Directional cone around target angle
   for (let deg = -24; deg <= 24; deg += 4) {
     candidateAngles.add(targetAngle + (deg * Math.PI) / 180);
   }
 
+  // Wider bank angles for bouncing off corridor walls
   for (const deg of [-48, -36, 36, 48]) {
     candidateAngles.add(targetAngle + (deg * Math.PI) / 180);
   }
 
+  // If hole angle differs, also test cone around hole in case a bank shot can reach
   if (Math.abs(holeAngle - targetAngle) > 0.2) {
     for (const deg of [-12, -6, 6, 12]) {
       candidateAngles.add(holeAngle + (deg * Math.PI) / 180);
     }
   }
 
+  // Speed candidate levels
   const speedCandidates: number[] = [4.2, 5.8, 7.4, 9.0, 10.8, 12.6, 14.2, 15.8];
 
   let bestAngle = targetAngle;
@@ -766,6 +574,7 @@ export function computeHintTrajectory(
       }
 
       if (sunkStep >= 0) {
+        // Direct Hole In One / Sink!
         const sinkScore = -100000 - (130 - sunkStep) * 100;
         if (sinkScore < bestScore) {
           bestScore = sinkScore;
@@ -788,8 +597,14 @@ export function computeHintTrajectory(
         score = endTargetDist * 1.5 + endHoleDist * 0.8 + minTargetDist * 0.4;
       }
 
+      // Bonus if resting position has line of sight to hole for next putt!
       if (isLineOfSightClear(simState.x, simState.z, course.hole[0], course.hole[1], walls, course.bumpers)) {
-        score -= 2.0;
+        score -= 8.0;
+      }
+
+      // Penalty if ended outside or stuck
+      if (!isPointInsideCourse(course, simState.x, simState.z)) {
+        score += 200.0;
       }
 
       if (score < bestScore) {
@@ -800,8 +615,9 @@ export function computeHintTrajectory(
     }
   }
 
-  // Generate smooth sampled visual trajectory polyline
-  const trajectoryState: BallPhysicsState = {
+  // Re-simulate winning candidate with high fidelity (dt = 0.02) to record trajectory points
+  const points: [number, number][] = [[startX, startZ]];
+  const recordSim: BallPhysicsState = {
     x: startX,
     z: startZ,
     vx: Math.cos(bestAngle) * bestSpeed,
@@ -811,30 +627,42 @@ export function computeHintTrajectory(
     sinkProgress: 0,
   };
 
-  const polyline: [number, number][] = [[startX, startZ]];
-  let lastSampleX = startX;
-  let lastSampleZ = startZ;
+  const highDt = 0.02;
+  let lastRecordedX = startX;
+  let lastRecordedZ = startZ;
 
-  for (let s = 0; s < 140; s++) {
-    stepBallPhysics(trajectoryState, course, walls, simDt, elapsedTime + s * simDt, 4);
+  for (let s = 0; s < 180; s++) {
+    const events = stepBallPhysics(recordSim, course, walls, highDt, elapsedTime + s * highDt, 3);
+    const distFromLast = Math.hypot(recordSim.x - lastRecordedX, recordSim.z - lastRecordedZ);
 
-    const stepDist = Math.hypot(trajectoryState.x - lastSampleX, trajectoryState.z - lastSampleZ);
-    if (stepDist >= 0.28 || trajectoryState.isSunk || !trajectoryState.isMoving) {
-      polyline.push([trajectoryState.x, trajectoryState.z]);
-      lastSampleX = trajectoryState.x;
-      lastSampleZ = trajectoryState.z;
+    if (distFromLast >= 0.22 || events.wallHitIntensity > 0 || recordSim.isSunk) {
+      points.push([recordSim.x, recordSim.z]);
+      lastRecordedX = recordSim.x;
+      lastRecordedZ = recordSim.z;
     }
 
-    if (trajectoryState.isSunk || !trajectoryState.isMoving) break;
+    if (recordSim.isSunk) {
+      points.push([course.hole[0], course.hole[1]]);
+      break;
+    }
+    if (!recordSim.isMoving) break;
   }
 
-  const powerFraction = Math.max(0, Math.min(1, (bestSpeed / MAX_SHOT_SPEED - 0.14) / 0.86));
-  const recommendedPower = Math.round(powerFraction * 100);
+  // Calculate recommended power percentage (0..100)
+  // speed = (0.14 + P * 0.86) * MAX_SHOT_SPEED
+  const rawPower = (bestSpeed / MAX_SHOT_SPEED - 0.14) / 0.86;
+  const recommendedPower = Math.round(Math.max(15, Math.min(100, rawPower * 100)));
+
+  const finalTargetPoint = bestIsSunk
+    ? course.hole
+    : points.length > 1
+    ? points[points.length - 1]
+    : target;
 
   return {
-    points: polyline,
-    recommendedPower: Math.max(15, Math.min(100, recommendedPower)),
-    targetPoint: target,
+    points,
+    recommendedPower,
+    targetPoint: [finalTargetPoint[0], finalTargetPoint[1]],
     isHoleInOne: bestIsSunk,
   };
 }
@@ -846,6 +674,10 @@ export interface BallBallCollisionEvent {
   intensity: number;
 }
 
+/**
+ * Resolves physical elastic collision between two golf balls on the fairway,
+ * exchanging realistic momentum and preventing interpenetration.
+ */
 export function resolveBallBallCollision(
   ball1: BallPhysicsState,
   ball2: BallPhysicsState
@@ -879,8 +711,9 @@ export function resolveBallBallCollision(
     const dvz = ball1.vz - ball2.vz;
     const normalVel = dvx * nx + dvz * nz;
 
+    // Only apply impulse if balls are approaching each other
     if (normalVel > 0) {
-      const restitution = 0.88;
+      const restitution = 0.88; // crisp solid golf ball rebound
       const impulse = ((1 + restitution) * normalVel) * 0.5;
 
       ball1.vx -= impulse * nx;
@@ -895,6 +728,7 @@ export function resolveBallBallCollision(
       event.intensity = Math.min(1, normalVel / 6.0);
     }
 
+    // Positional separation to prevent sticking/jitter
     const overlap = minDist - dist;
     const halfOverlap = overlap * 0.5 + 0.001;
     ball1.x -= nx * halfOverlap;
@@ -906,6 +740,10 @@ export function resolveBallBallCollision(
   return event;
 }
 
+/**
+ * Simultaneously steps two balls with high-fidelity 120Hz sub-stepping,
+ * resolving wall collisions, terrain, and ball-on-ball physical bumping.
+ */
 export function stepMultiplayerPhysics(
   ball1: BallPhysicsState,
   ball2: BallPhysicsState,
@@ -961,13 +799,8 @@ export function stepMultiplayerPhysics(
     if (e2.sunkJustNow) lastEvents2.sunkJustNow = true;
     if (e1.isOnSand) lastEvents1.isOnSand = true;
     if (e2.isOnSand) lastEvents2.isOnSand = true;
-    if (e1.boostedJustNow) lastEvents1.boostedJustNow = true;
-    if (e2.boostedJustNow) lastEvents2.boostedJustNow = true;
-    if (e1.teleportedJustNow) lastEvents1.teleportedJustNow = true;
-    if (e2.teleportedJustNow) lastEvents2.teleportedJustNow = true;
-    if (e1.hazardHitIntensity) lastEvents1.hazardHitIntensity = e1.hazardHitIntensity;
-    if (e2.hazardHitIntensity) lastEvents2.hazardHitIntensity = e2.hazardHitIntensity;
 
+    // Ball-on-ball physical bumping
     const col = resolveBallBallCollision(ball1, ball2);
     if (col.collided) {
       combinedCollision = col;

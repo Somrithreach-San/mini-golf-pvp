@@ -19,12 +19,13 @@ import {
   Loader2,
   Flag,
   Clock,
+  ShoppingBag,
+  Pause,
 } from 'lucide-react';
 import {
   ALL_HOLES,
   GOLF_WORLDS,
   HoleCourse,
-  TOTAL_GAME_STARS,
   isHoleUnlocked,
   getHoleLockReason,
   getHighestUnlockedHole,
@@ -48,6 +49,8 @@ import {
   BallsModal,
   HelpModal,
   HoleCompleteModal,
+  PausedModal,
+  GameModal,
 } from './components/GameModals';
 import { MultiplayerModal } from './components/MultiplayerModal';
 import { AccountModal } from './components/AccountModal';
@@ -66,14 +69,7 @@ const ENABLE_EMOTES = false;
 
 export default function App() {
   // Game Screen State: 'menu' | 'holes' | 'play'
-  const [screen, setScreen] = useState<'menu' | 'holes' | 'play'>(() => {
-    try {
-      const p = new URLSearchParams(window.location.search);
-      const s = p.get('screen');
-      if (s === 'play' || s === 'holes') return s;
-    } catch {}
-    return 'menu';
-  });
+  const [screen, setScreen] = useState<'menu' | 'holes' | 'play'>('menu');
 
   // Language State: 'en' | 'zh'
   const [language, setLanguage] = useState<Language>(() => getSavedLanguage());
@@ -99,9 +95,6 @@ export default function App() {
   // Current active hole (defaults to Hole 1)
   const [currentHoleNumber, setCurrentHoleNumber] = useState<number>(() => {
     try {
-      const p = new URLSearchParams(window.location.search);
-      const h = p.get('hole');
-      if (h) return Math.min(Math.max(Number(h) || 1, 1), ALL_HOLES.length);
       const saved = localStorage.getItem('minigolf_current_hole_v2');
       if (saved) return Number(saved) || 1;
     } catch {}
@@ -142,6 +135,7 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [victoryOpen, setVictoryOpen] = useState(false);
+  const [pausedOpen, setPausedOpen] = useState(false);
   const [multiplayerOpen, setMultiplayerOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [surrenderConfirmOpen, setSurrenderConfirmOpen] = useState(false);
@@ -409,7 +403,7 @@ export default function App() {
 
   // Live Hole Stopwatch during active gameplay
   const anyModalOpen =
-    settingsOpen || ballsOpen || helpOpen || leaderboardOpen || victoryOpen || multiplayerOpen || !!mpHoleResult || !!mpState.matchWinner;
+    settingsOpen || ballsOpen || helpOpen || leaderboardOpen || victoryOpen || pausedOpen || multiplayerOpen || !!mpHoleResult || !!mpState.matchWinner;
 
   useEffect(() => {
     if (screen !== 'play' || anyModalOpen || isHoleFinishedRef.current) return;
@@ -606,6 +600,62 @@ export default function App() {
     setLeaderboardOpen(true);
   }, []);
 
+  // ── AUTH GATE ─────────────────────────────────────────────────────────────
+  // Show a full-screen loading spinner until Firebase resolves auth state.
+  // Then, if not authenticated, show the sign-in / register splash (non-closeable).
+  if (!authReady) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#96d1ff] via-[#d8f0ff] to-[#f2faff]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-6xl">⛳</div>
+          <p className="text-white font-display font-bold text-xl tracking-wide drop-shadow">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#96d1ff] via-[#d8f0ff] to-[#f2faff] overflow-hidden p-4 select-none">
+        <AccountModal
+          isOpen={true}
+          onClose={() => {
+            // Guest play
+            setIsAuthenticated(true);
+          }}
+          playerName={playerName}
+          onUpdatePlayerName={(name) => {
+            setPlayerName(name);
+            savePlayerName(name);
+          }}
+          avatarSeed={avatarSeed}
+          onUpdateAvatarSeed={(seed) => {
+            setAvatarSeed(seed);
+            saveAvatarSeed(seed);
+          }}
+          totalStars={totalStars}
+          currentHole={currentHoleNumber}
+          selectedBallId={selectedBallId}
+          holeStars={holeStars}
+          syncStatus={syncStatus}
+          onCloudProfileLoaded={(prof) => {
+            if (prof.displayName) {
+              setPlayerName(prof.displayName);
+              savePlayerName(prof.displayName);
+            }
+            if (prof.avatarSeed) {
+              setAvatarSeed(prof.avatarSeed);
+              saveAvatarSeed(prof.avatarSeed);
+            }
+            setIsAuthenticated(true);
+          }}
+          isAuthGate={true}
+        />
+      </div>
+    );
+  }
+  // ── END AUTH GATE ──────────────────────────────────────────────────────────
+
   return (
     <div className="relative w-screen h-dvh overflow-hidden select-none flex flex-col bg-gradient-to-b from-[#96d1ff] via-[#d8f0ff] to-[#f2faff]">
       {/* =================================================================
@@ -641,11 +691,11 @@ export default function App() {
                     soundEngine.playClick();
                     setAccountOpen(true);
                   }}
-                  className="bg-white/95 rounded-full pl-1.5 pr-3 py-1 shadow-[0_4px_0_rgba(143,192,235,0.65)] flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform shrink-0"
+                  className="ui-chip rounded-full pl-1.5 pr-3 py-1 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 transition-transform shrink-0"
                   title="Golfer Account & Profile"
                 >
                   <UserAvatar seed={avatarSeed} size={28} showBorder={false} />
-                  <span className="text-xs md:text-sm font-black text-[#163a5f] max-w-[120px] sm:max-w-[150px] truncate">
+                  <span className="text-xs md:text-sm font-black text-[#51336d] max-w-[120px] sm:max-w-[150px] truncate">
                     {playerName}
                   </span>
                 </button>
@@ -656,7 +706,7 @@ export default function App() {
                     soundEngine.playClick();
                     setAccountOpen(true);
                   }}
-                  className="btn-3d-purple rounded-full px-3.5 py-1.5 md:px-4 md:py-2 flex items-center gap-2 cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-transform shrink-0"
+                  className="btn-3d-purple rounded-2xl px-3.5 py-1.5 md:px-4 md:py-2 flex items-center gap-2 cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-transform shrink-0"
                   title="Sign In or Register"
                 >
                   <User className="w-4 h-4 md:w-4.5 md:h-4.5 text-white" />
@@ -665,10 +715,10 @@ export default function App() {
                   </span>
                 </button>
               )}
-              <div className="bg-white/95 rounded-full px-3 py-1 sm:px-3.5 sm:py-1.5 md:px-4 md:py-2 shadow-[0_4px_0_rgba(143,192,235,0.65)] flex items-center gap-1.5 shrink-0">
+              <div className="ui-chip rounded-full px-3 py-1 sm:px-3.5 sm:py-1.5 md:px-4 md:py-2 flex items-center gap-1.5 shrink-0">
                 <Star className="w-4 h-4 md:w-5 md:h-5 fill-[#ffc82c] text-[#d97706] shrink-0" />
-                <span className="text-[13px] sm:text-[14px] md:text-[16px] font-extrabold text-[#163a5f] tabular-nums whitespace-nowrap">
-                  {totalStars} / {TOTAL_GAME_STARS}
+                <span className="text-[13px] sm:text-[14px] md:text-[16px] font-extrabold text-[#51336d] tabular-nums whitespace-nowrap">
+                  {totalStars} / 90
                 </span>
               </div>
             </div>
@@ -710,68 +760,52 @@ export default function App() {
             </div>
           </div>
 
-          {/* Menu Control Stack:
-              - Mobile (< md): Compact bottom half stack below floating island
-              - Tablet (md:): Spacious centered lower dock below large floating island
-              - PC (lg:): Right-half centered vertical stack */}
-          <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-end lg:items-end lg:justify-center pb-2 md:pb-5 lg:pb-0 lg:pr-[8%] xl:pr-[12%] pointer-events-none">
-            <div className="w-full max-w-[380px] md:max-w-[460px] lg:max-w-[490px] flex flex-col items-center pointer-events-auto">
-              {/* "Mini Golf PvP" Outlined Title (Yellow "Mini Golf" + White "PvP" with matching navy outline) */}
-              <h1 className="flex items-baseline justify-center gap-2.5 md:gap-3.5 text-[34px] min-[380px]:text-[42px] sm:text-[50px] md:text-[58px] lg:text-[64px] leading-none tracking-normal select-none text-center whitespace-nowrap mb-5 md:mb-6 lg:mb-7">
-                <span className="title-logo-text">{t.gameTitle}</span>
-                <span className="title-logo-3d">PvP</span>
-              </h1>
-
-              {/* Primary "Continue / Hole X" Wide Green 3D Button */}
-              {(() => {
-                const continueHole = isHoleUnlocked(currentHoleNumber, holeStars)
-                  ? currentHoleNumber
-                  : getHighestUnlockedHole(holeStars);
-                return (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playClick();
-                      soundEngine.startMusic();
-                      startHole(continueHole);
-                    }}
-                    className="btn-3d-green rounded-full w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] h-[64px] md:h-[72px] px-4 md:px-6 flex items-center justify-center gap-3.5 mb-2.5 md:mb-3 cursor-pointer"
-                  >
-                    <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#1e7a2f] flex items-center justify-center text-white shrink-0 shadow-inner">
-                      <Play className="w-5 h-5 fill-white ml-0.5" />
-                    </div>
-                    <div className="flex flex-col items-start text-left leading-tight">
-                      <span className="font-display font-bold text-white text-[23px] md:text-[26px] tracking-wide drop-shadow-[0_2px_0_rgba(0,0,0,0.18)]">
-                        {t.continue}
-                      </span>
-                      <span className="font-bold text-[#eaffea] text-[13px] md:text-[14px]">
-                        {t.holeLabel(continueHole)}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })()}
-
-              {/* 2-Player Real-Time Online Match Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playClick();
-                  setMultiplayerOpen(true);
-                }}
-                className="btn-3d-purple rounded-full w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] h-[64px] md:h-[72px] px-4 md:px-6 flex items-center justify-center gap-3.5 mb-3 md:mb-3.5 cursor-pointer shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform"
-              >
-                <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#6c2bd9] flex items-center justify-center text-white shrink-0 shadow-inner">
-                  <Users className="w-5 h-5 fill-white/20 stroke-[2.5]" />
+          {/* Menu Control Stack: Rendered inside the authentic Cartoon UI Panel from Mockup */}
+          <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center my-auto pointer-events-none">
+            <div className="w-full max-w-[340px] md:max-w-[380px] pointer-events-auto">
+              <div className="ui-panel pt-11 pb-5 px-5 md:pt-12 md:pb-6 md:px-6 flex flex-col items-center gap-3.5 shadow-2xl">
+                {/* Overlapping Purple Banner: "Home" */}
+                <div className="ui-panel-title">
+                  <span>Home</span>
                 </div>
-                <span className="font-display font-bold text-white text-[20px] md:text-[23px] tracking-wide drop-shadow-[0_2px_0_rgba(0,0,0,0.18)] whitespace-nowrap">
-                  2-Player Online
-                </span>
-              </button>
 
-              {/* 2 Square Rounded Action Buttons: Holes | Balls */}
-              <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-[260px] md:max-w-[290px] lg:max-w-[270px] mb-4 md:mb-5">
-                {/* Holes Button (Orange) */}
+                {/* Squircle Close Button from Mockup */}
+                <button
+                  type="button"
+                  className="ui-panel-close"
+                  onClick={() => {
+                    soundEngine.playClick();
+                    setSettingsOpen(true);
+                  }}
+                  title="Settings"
+                >
+                  ✕
+                </button>
+
+                {/* Primary "Play" Wide Gold 3D Button */}
+                {(() => {
+                  const continueHole = isHoleUnlocked(currentHoleNumber, holeStars)
+                    ? currentHoleNumber
+                    : getHighestUnlockedHole(holeStars);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
+                        soundEngine.startMusic();
+                        startHole(continueHole);
+                      }}
+                      className="btn-3d-orange w-full h-14 md:h-16 rounded-2xl flex items-center justify-center gap-3 text-white cursor-pointer shadow-md"
+                    >
+                      <Play className="w-6 h-6 fill-white ml-0.5" />
+                      <span className="font-display font-black text-2xl md:text-[26px] tracking-wide">
+                        Play
+                      </span>
+                    </button>
+                  );
+                })()}
+
+                {/* Secondary "Levels" Wide Gold 3D Button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -779,32 +813,70 @@ export default function App() {
                     setSelectedWorldIndex(activeCourse.worldIndex);
                     setScreen('holes');
                   }}
-                  className="btn-3d-orange h-[78px] md:h-[88px] lg:h-[86px] rounded-[20px] md:rounded-[22px] flex flex-col items-center justify-center gap-1 md:gap-1.5 text-white cursor-pointer"
+                  className="btn-3d-orange w-full h-14 md:h-16 rounded-2xl flex items-center justify-center gap-3 text-white cursor-pointer shadow-md"
                 >
-                  <Grid className="w-6 h-6 md:w-7 md:h-7 fill-white/20 stroke-[2.5]" />
-                  <span className="font-display font-bold text-[13px] md:text-[14px]">{t.holes}</span>
+                  <Grid className="w-5 h-5 fill-white/20 stroke-[2.75]" />
+                  <span className="font-display font-black text-2xl md:text-[26px] tracking-wide">
+                    Levels
+                  </span>
                 </button>
 
-                {/* Balls Button (Teal with Dotted Golf Ball SVG Icon) */}
+                {/* 2-Player Real-Time Online Match Button */}
                 <button
                   type="button"
                   onClick={() => {
                     soundEngine.playClick();
-                    setBallsOpen(true);
+                    setMultiplayerOpen(true);
                   }}
-                  className="btn-3d-teal h-[78px] md:h-[88px] lg:h-[86px] rounded-[20px] md:rounded-[22px] flex flex-col items-center justify-center gap-1 md:gap-1.5 text-white cursor-pointer"
+                  className="btn-3d-purple w-full h-13 md:h-14 rounded-2xl flex items-center justify-center gap-2.5 text-white cursor-pointer shadow-md"
                 >
-                  <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="16" r="13" fill="white" />
-                    <circle cx="13" cy="11" r="1.5" fill="#16b5c9" />
-                    <circle cx="18" cy="10" r="1.5" fill="#16b5c9" />
-                    <circle cx="11" cy="16" r="1.5" fill="#16b5c9" />
-                    <circle cx="16" cy="15" r="1.5" fill="#16b5c9" />
-                    <circle cx="21" cy="15" r="1.5" fill="#16b5c9" />
-                    <circle cx="14" cy="20" r="1.5" fill="#16b5c9" />
-                  </svg>
-                  <span className="font-display font-bold text-[13px] md:text-[14px]">{t.balls}</span>
+                  <Users className="w-5 h-5 fill-white/20 stroke-[2.5]" />
+                  <span className="font-display font-black text-xl md:text-2xl tracking-wide">
+                    2-Player PvP
+                  </span>
                 </button>
+
+                {/* Bottom Row of 3 Round Gold Action Coins (Exact match to Home reference mockup!) */}
+                <div className="flex items-center justify-center gap-4 mt-1">
+                  {/* Coin 1: Golfer Profile */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setAccountOpen(true);
+                    }}
+                    className="btn-round-gold"
+                    title="Profile & Account"
+                  >
+                    <User className="w-6 h-6 stroke-[2.75]" />
+                  </button>
+
+                  {/* Coin 2: Golf Balls Shop */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setBallsOpen(true);
+                    }}
+                    className="btn-round-gold"
+                    title="Golf Balls Shop"
+                  >
+                    <ShoppingBag className="w-6 h-6 stroke-[2.75]" />
+                  </button>
+
+                  {/* Coin 3: Settings */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEngine.playClick();
+                      setSettingsOpen(true);
+                    }}
+                    className="btn-round-gold"
+                    title="Settings"
+                  >
+                    <Settings className="w-6 h-6 stroke-[2.75]" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -856,11 +928,11 @@ export default function App() {
                     <LogOut className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
 
-                  <div className="bg-white rounded-[20px] md:rounded-[22px] min-w-[200px] md:min-w-[260px] px-5 py-1 md:py-1.5 shadow-[0_4px_0_rgba(143,192,235,0.65)] text-center border-2 border-white flex flex-col items-center">
-                    <div className="font-display font-bold text-[17px] md:text-[20px] text-[#163a5f] leading-tight">
+                  <div className="ui-status-pill rounded-[20px] md:rounded-[22px] min-w-[200px] md:min-w-[260px] px-5 py-1 md:py-1.5 text-center flex flex-col items-center">
+                    <div className="font-display font-bold text-[17px] md:text-[20px] text-[#51336d] leading-tight">
                       {t.holeLabel(activeCourse.holeNumber)} • Par {activeCourse.par}
                     </div>
-                    <div className="text-[11px] md:text-[12px] font-extrabold text-[#7c3aed] leading-tight flex items-center gap-1">
+                    <div className="text-[11px] md:text-[12px] font-extrabold text-[#7d36c8] leading-tight flex items-center gap-1">
                       <Radio className="w-3 h-3 text-red-500 animate-pulse" /> Match Hole {mpState.holeIndex + 1} of {mpState.matchHoles}
                     </div>
                   </div>
@@ -871,7 +943,7 @@ export default function App() {
                 {/* Multiplayer Match Players & Turn Bar */}
                 <div className="w-full max-w-[620px] flex items-center justify-between gap-2 px-1">
                   {/* Player 1 Card (Host) */}
-                  <div className={`relative flex-1 bg-white/95 rounded-2xl px-2.5 py-1.5 md:py-2 shadow-[0_3px_0_rgba(143,192,235,0.6)] border-2 ${mpState.currentTurn === 'p1' ? 'border-transparent' : 'border-slate-200'} flex items-center gap-2 transition-all`}>
+                  <div className={`ui-player-card ${mpState.currentTurn === 'p1' ? 'is-active' : ''} relative flex-1 rounded-2xl px-2.5 py-1.5 md:py-2 flex items-center gap-2 transition-all`}>
                     <CardTimerBorder
                       player="p1"
                       isActive={mpState.currentTurn === 'p1'}
@@ -881,11 +953,11 @@ export default function App() {
                     <UserAvatar
                       seed={mpState.isHost ? mpState.localPlayer.avatarSeed : mpState.remotePlayer?.avatarSeed || 'Host'}
                       size={32}
-                      className="border-2 border-[#00e5ff]"
+                      className="border-2 border-[#7d36c8]"
                     />
                     <div className="flex-1 min-w-0 text-left leading-tight">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs md:text-sm font-bold text-slate-800 truncate">
+                        <span className="text-xs md:text-sm font-bold text-[#51336d] truncate">
                           {mpState.isHost ? `${mpState.localPlayer.name} (You)` : (mpState.remotePlayer?.name || 'Player 1')}
                         </span>
                         {mpState.currentTurn === 'p1' && (
@@ -894,14 +966,14 @@ export default function App() {
                               ? 'bg-red-500 text-white animate-pulse'
                               : mpState.turnTimeRemaining <= 15
                               ? 'bg-amber-100 text-amber-700 font-bold'
-                              : 'bg-sky-100 text-[#0077b6]'
+                              : 'bg-purple-100 text-[#7d36c8]'
                           }`}>
                             {Math.ceil(mpState.turnTimeRemaining)}s
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] md:text-[11px] text-slate-500 font-extrabold">
-                        Wins: <span className="text-[#0077b6]">{mpState.p1HolesWon}</span> • Strokes: <span className="text-slate-900">{mpState.p1Strokes}</span>
+                      <div className="text-[10px] md:text-[11px] text-[#8e76a6] font-extrabold">
+                        Wins: <span className="text-[#7d36c8]">{mpState.p1HolesWon}</span> • Strokes: <span className="text-[#51336d]">{mpState.p1Strokes}</span>
                       </div>
                     </div>
                   </div>
@@ -925,7 +997,7 @@ export default function App() {
                   </div>
 
                   {/* Player 2 Card (Guest) */}
-                  <div className={`relative flex-1 bg-white/95 rounded-2xl px-2.5 py-1.5 md:py-2 shadow-[0_3px_0_rgba(143,192,235,0.6)] border-2 ${mpState.currentTurn === 'p2' ? 'border-transparent' : 'border-slate-200'} flex items-center gap-2 transition-all`}>
+                  <div className={`ui-player-card ${mpState.currentTurn === 'p2' ? 'is-active' : ''} relative flex-1 rounded-2xl px-2.5 py-1.5 md:py-2 flex items-center gap-2 transition-all`}>
                     <CardTimerBorder
                       player="p2"
                       isActive={mpState.currentTurn === 'p2'}
@@ -935,11 +1007,11 @@ export default function App() {
                     <UserAvatar
                       seed={!mpState.isHost ? mpState.localPlayer.avatarSeed : mpState.remotePlayer?.avatarSeed || 'Guest'}
                       size={32}
-                      className="border-2 border-[#ff5722]"
+                      className="border-2 border-[#ed7c08]"
                     />
                     <div className="flex-1 min-w-0 text-left leading-tight">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs md:text-sm font-bold text-slate-800 truncate">
+                        <span className="text-xs md:text-sm font-bold text-[#51336d] truncate">
                           {!mpState.isHost ? `${mpState.localPlayer.name} (You)` : (mpState.remotePlayer?.name || 'Player 2')}
                         </span>
                         {mpState.currentTurn === 'p2' && (
@@ -948,14 +1020,14 @@ export default function App() {
                               ? 'bg-red-500 text-white animate-pulse'
                               : mpState.turnTimeRemaining <= 15
                               ? 'bg-amber-100 text-amber-700 font-bold'
-                              : 'bg-orange-100 text-[#d84315]'
+                              : 'bg-orange-100 text-[#ed7c08]'
                           }`}>
                             {Math.ceil(mpState.turnTimeRemaining)}s
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] md:text-[11px] text-slate-500 font-extrabold">
-                        Wins: <span className="text-[#d84315]">{mpState.p2HolesWon}</span> • Strokes: <span className="text-slate-900">{mpState.p2Strokes}</span>
+                      <div className="text-[10px] md:text-[11px] text-[#8e76a6] font-extrabold">
+                        Wins: <span className="text-[#ed7c08]">{mpState.p2HolesWon}</span> • Strokes: <span className="text-[#51336d]">{mpState.p2Strokes}</span>
                       </div>
                     </div>
                   </div>
@@ -980,11 +1052,11 @@ export default function App() {
                     <Grid className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
                   </button>
 
-                  <div className="bg-white rounded-[20px] md:rounded-[22px] min-w-[170px] md:min-w-[215px] px-6 md:px-9 lg:px-10 py-1 md:py-1.5 shadow-[0_4px_0_rgba(143,192,235,0.65)] text-center border-2 border-white">
-                    <div className="font-display font-bold text-[19px] md:text-[22px] lg:text-[23px] text-[#163a5f] leading-tight">
+                  <div className="ui-status-pill rounded-[20px] md:rounded-[22px] min-w-[170px] md:min-w-[215px] px-6 md:px-9 lg:px-10 py-1 md:py-1.5 text-center">
+                    <div className="font-display font-bold text-[19px] md:text-[22px] lg:text-[23px] text-[#51336d] leading-tight">
                       {t.holeLabel(activeCourse.holeNumber)}
                     </div>
-                    <div className="text-[11px] md:text-[12px] font-extrabold text-[#2ecc71] leading-tight truncate">
+                    <div className="text-[11px] md:text-[12px] font-extrabold text-[#7d36c8] leading-tight truncate">
                       {localizedActiveWorldName}
                     </div>
                   </div>
@@ -1005,6 +1077,17 @@ export default function App() {
                       type="button"
                       onClick={() => {
                         soundEngine.playClick();
+                        setPausedOpen(true);
+                      }}
+                      className="btn-round-gold !w-11 !h-11 md:!w-12 md:!h-12"
+                      title="Pause Game"
+                    >
+                      <Pause className="w-5 h-5 fill-current stroke-[2]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundEngine.playClick();
                         setSettingsOpen(true);
                       }}
                       className="btn-3d-purple w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white cursor-pointer"
@@ -1018,38 +1101,38 @@ export default function App() {
                 {/* Row 2: Fixed-Size Status Pills (Consistent height h-9 md:h-10 and fixed widths so zero shaking!) */}
                 <div className="w-full grid grid-cols-4 gap-1.5 md:flex md:w-auto md:items-center md:justify-center md:gap-3">
                   {/* Strokes Pill */}
-                  <div className="h-9 md:h-10 md:w-[116px] bg-white rounded-full px-2.5 md:px-4 shadow-[0_3px_0_rgba(143,192,235,0.6)] flex items-center justify-center gap-1 md:gap-2 shrink-0">
-                    <span className="text-[11px] md:text-[13px] font-bold text-[#2c4c6b] leading-none">
+                  <div className="ui-status-pill h-9 md:h-10 md:w-[116px] rounded-full px-2.5 md:px-4 flex items-center justify-center gap-1 md:gap-2 shrink-0">
+                    <span className="text-[11px] md:text-[13px] font-bold text-[#51336d] leading-none">
                       {t.strokes}
                     </span>
-                    <span className="w-5 md:w-6 text-center font-display font-bold text-[15px] md:text-[18px] text-[#163a5f] tabular-nums leading-none">
+                    <span className="w-5 md:w-6 text-center font-display font-bold text-[15px] md:text-[18px] text-[#7d36c8] tabular-nums leading-none">
                       {strokes}
                     </span>
                   </div>
 
                   {/* Par Pill */}
-                  <div className="h-9 md:h-10 md:w-[92px] bg-white rounded-full px-2.5 md:px-4 shadow-[0_3px_0_rgba(143,192,235,0.6)] flex items-center justify-center gap-1 md:gap-2 shrink-0">
-                    <span className="text-[11px] md:text-[13px] font-bold text-[#2c4c6b] leading-none">
+                  <div className="ui-status-pill h-9 md:h-10 md:w-[92px] rounded-full px-2.5 md:px-4 flex items-center justify-center gap-1 md:gap-2 shrink-0">
+                    <span className="text-[11px] md:text-[13px] font-bold text-[#51336d] leading-none">
                       {t.par}
                     </span>
-                    <span className="w-4 md:w-5 text-center font-display font-bold text-[15px] md:text-[18px] text-[#163a5f] tabular-nums leading-none">
+                    <span className="w-4 md:w-5 text-center font-display font-bold text-[15px] md:text-[18px] text-[#2ba93c] tabular-nums leading-none">
                       {activeCourse.par}
                     </span>
                   </div>
 
                   {/* Time Pill (MM:SS fixed width) */}
-                  <div className="h-9 md:h-10 md:w-[130px] bg-white rounded-full px-2 md:px-4 shadow-[0_3px_0_rgba(143,192,235,0.6)] flex items-center justify-center gap-1 md:gap-2 shrink-0">
-                    <span className="hidden md:inline text-[13px] font-bold text-[#2c4c6b] leading-none">
+                  <div className="ui-status-pill h-9 md:h-10 md:w-[130px] rounded-full px-2 md:px-4 flex items-center justify-center gap-1 md:gap-2 shrink-0">
+                    <span className="hidden md:inline text-[13px] font-bold text-[#51336d] leading-none">
                       {t.time}
                     </span>
-                    <span className="w-[44px] md:w-[50px] text-center font-display font-bold text-[14px] md:text-[17px] text-[#d97706] tabular-nums leading-none">
+                    <span className="w-[44px] md:w-[50px] text-center font-display font-bold text-[14px] md:text-[17px] text-[#ed7c08] tabular-nums leading-none">
                       {formatGolfTime(elapsedMs)}
                     </span>
                   </div>
 
                   {/* Power Pill (Matches exact height h-9 md:h-10 of other pills) */}
-                  <div className="h-9 md:h-10 md:w-[186px] bg-white rounded-full px-2.5 md:px-4 shadow-[0_3px_0_rgba(143,192,235,0.6)] flex flex-col md:flex-row items-center justify-center md:gap-2.5 shrink-0">
-                    <span className="text-[9px] md:text-[13px] font-extrabold md:font-bold uppercase md:capitalize text-[#2c4c6b] leading-none mb-1 md:mb-0 text-center shrink-0">
+                  <div className="ui-status-pill h-9 md:h-10 md:w-[186px] rounded-full px-2.5 md:px-4 flex flex-col md:flex-row items-center justify-center md:gap-2.5 shrink-0">
+                    <span className="text-[9px] md:text-[13px] font-extrabold md:font-bold uppercase md:capitalize text-[#51336d] leading-none mb-1 md:mb-0 text-center shrink-0">
                       {t.power}
                     </span>
                     <div className="w-full md:w-28 h-2 md:h-3 rounded-full bg-[#e6edf5] overflow-hidden shrink-0 relative">
@@ -1059,10 +1142,10 @@ export default function App() {
                           width: `${powerPercent}%`,
                           background:
                             powerPercent > 75
-                              ? '#ff5e57'
+                              ? '#da3f4c'
                               : powerPercent > 45
-                              ? '#ffa801'
-                              : '#2ecc71',
+                              ? '#ed7c08'
+                              : '#2ba93c',
                         }}
                       />
                       {hintInfo && (
@@ -1395,6 +1478,21 @@ export default function App() {
         }}
       />
 
+      <PausedModal
+        isOpen={pausedOpen}
+        onResume={() => setPausedOpen(false)}
+        onRetry={() => {
+          setPausedOpen(false);
+          resetHoleCounters();
+          setRetryTrigger((t) => t + 1);
+        }}
+        onHome={() => {
+          setPausedOpen(false);
+          resetHoleCounters();
+          setScreen('menu');
+        }}
+      />
+
       <MultiplayerModal
         isOpen={multiplayerOpen}
         onClose={() => setMultiplayerOpen(false)}
@@ -1534,33 +1632,19 @@ export default function App() {
 
       {/* Surrender Confirmation Modal */}
       {surrenderConfirmOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-3.5 select-none animate-in fade-in duration-150"
-          onClick={() => setSurrenderConfirmOpen(false)}
-        >
-          <div
-            className="bg-white rounded-[28px] w-full max-w-[360px] p-5 shadow-[0_12px_0_rgba(0,0,0,0.14),0_20px_40px_rgba(0,0,0,0.28)] flex flex-col items-center text-center animate-in zoom-in-95 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
-              <Flag className="w-7 h-7 stroke-[2.5]" />
-            </div>
-
-            <h3 className="font-display font-black text-2xl text-[#163a5f] mb-1">
-              Surrender Match?
-            </h3>
-            <p className="text-xs font-bold text-slate-500 mb-5 max-w-[270px]">
-              Leaving now will forfeit the game. Your opponent will be awarded the win.
-            </p>
-
-            <div className="flex items-center gap-2.5 w-full">
+        <GameModal
+          title="Surrender?"
+          onClose={() => setSurrenderConfirmOpen(false)}
+          maxWidth="370px"
+          footer={
+            <>
               <button
                 type="button"
                 onClick={() => {
                   soundEngine.playClick();
                   setSurrenderConfirmOpen(false);
                 }}
-                className="btn-3d-blue flex-1 py-2.5 rounded-full font-display font-bold text-white text-sm cursor-pointer"
+                className="btn-3d-purple flex-1 py-2.5 rounded-xl font-display font-bold text-white text-sm cursor-pointer"
               >
                 Keep Playing
               </button>
@@ -1573,13 +1657,22 @@ export default function App() {
                   setMpHoleResult(null);
                   setScreen('menu');
                 }}
-                className="btn-3d-red flex-1 py-2.5 rounded-full font-display font-bold text-white text-sm cursor-pointer"
+                className="btn-3d-red flex-1 py-2.5 rounded-xl font-display font-bold text-white text-sm cursor-pointer"
               >
                 Surrender
               </button>
+            </>
+          }
+        >
+          <div className="flex flex-col items-center text-center py-2">
+            <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3 shadow-xs">
+              <Flag className="w-7 h-7 stroke-[2.5]" />
             </div>
+            <p className="text-xs font-bold text-[#51336d] max-w-[270px]">
+              Leaving now will forfeit the game. Your opponent will be awarded the win.
+            </p>
           </div>
-        </div>
+        </GameModal>
       )}
     </div>
   );

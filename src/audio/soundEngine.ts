@@ -389,65 +389,6 @@ class SoundEngine {
     osc2.start(now + 0.03);
     osc2.stop(now + 0.36);
   }
-
-  public playBoost() {
-    if (!this.sfxEnabled) return;
-    const ctx = this.ensureContext();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(240, now);
-    osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
-    gain.gain.setValueAtTime(0.12, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.26);
-  }
-
-  public playPortal() {
-    if (!this.sfxEnabled) return;
-    const ctx = this.ensureContext();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-
-    [440, 659.25, 880].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + i * 0.04);
-      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.25);
-      gain.gain.setValueAtTime(0.10, now + i * 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + i * 0.04);
-      osc.stop(now + 0.32);
-    });
-  }
-
-  public playHazard() {
-    if (!this.sfxEnabled) return;
-    const ctx = this.ensureContext();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.exponentialRampToValueAtTime(50, now + 0.12);
-    gain.gain.setValueAtTime(0.20, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.15);
-  }
 }
 
 export const soundEngine = new SoundEngine();
