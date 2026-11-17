@@ -86,9 +86,9 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               <Home className="w-5 h-5 stroke-[2.5]" />
             </button>
 
-            <div className="ui-chip rounded-full px-4 py-1.5 flex items-center gap-1.5">
+            <div className="bg-white rounded-full px-4 py-1.5 flex items-center gap-1.5 shadow-[0_4px_0_rgba(143,192,235,0.65)]">
               <Star className="w-4 h-4 fill-[#ffc82c] text-[#d97706]" />
-              <span className="font-extrabold text-[16px] text-[#51336d] tabular-nums">
+              <span className="font-extrabold text-[16px] text-[#163a5f] tabular-nums">
                 {totalStars}
               </span>
             </div>
@@ -120,7 +120,7 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
           </button>
 
           {/* World Selector Pill Bar (Full width on Mobile, Flex-1 Center on Tablet & PC) */}
-          <div className="w-full md:flex-1 ui-status-pill rounded-full px-2.5 py-1.5 md:px-3 md:py-1.5 lg:py-2 flex items-center justify-between">
+          <div className="w-full md:flex-1 bg-white rounded-full px-2.5 py-1.5 md:px-3 md:py-1.5 lg:py-2 flex items-center justify-between shadow-[0_4px_0_rgba(143,192,235,0.65)] border-2 border-white">
             <button
               type="button"
               disabled={selectedWorldIndex === 0}
@@ -132,8 +132,8 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               }}
               className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
                 selectedWorldIndex === 0
-                  ? 'bg-purple-100 text-purple-300 cursor-default'
-                  : 'bg-[#7d36c8] hover:bg-[#6b26b5] active:scale-95 text-white shadow-xs'
+                  ? 'bg-[#d8f3dc] text-white cursor-default'
+                  : 'bg-[#37c84c] hover:bg-[#2eb842] active:scale-95 text-white shadow-xs'
               }`}
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
@@ -142,11 +142,11 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
             <div className="text-center px-2 min-w-0">
               <div className="font-display font-bold text-[18px] md:text-[20px] lg:text-[21px] flex items-center justify-center gap-1.5 leading-tight truncate">
                 {!worldUnlocked && <Lock className="w-4 h-4 text-amber-500 shrink-0" />}
-                <span className={worldUnlocked ? 'text-[#7d36c8]' : 'text-slate-600'}>
+                <span className={worldUnlocked ? 'text-[#2ecc71]' : 'text-slate-600'}>
                   {localizedWorld.name}
                 </span>
               </div>
-              <div className="text-[11px] md:text-[12px] font-bold text-[#51336d] leading-tight truncate">
+              <div className="text-[11px] md:text-[12px] font-bold text-[#3c5a78] leading-tight truncate">
                 {worldUnlocked
                   ? `${starsInWorld}/${maxWorldStars}★ • ${localizedWorld.subtitle}`
                   : `🔒 Max out 3★ on all holes in previous chapter to unlock`}
@@ -164,8 +164,8 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               }}
               className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
                 selectedWorldIndex === GOLF_WORLDS.length - 1
-                  ? 'bg-purple-100 text-purple-300 cursor-default'
-                  : 'bg-[#7d36c8] hover:bg-[#6b26b5] active:scale-95 text-white shadow-xs'
+                  ? 'bg-[#d8f3dc] text-white cursor-default'
+                  : 'bg-[#37c84c] hover:bg-[#2eb842] active:scale-95 text-white shadow-xs'
               }`}
             >
               <ChevronRight className="w-5 h-5 md:w-6 md:h-6 stroke-[3]" />
@@ -174,9 +174,9 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
 
           {/* Tablet & PC Right Stars Badge + Leaderboard Button */}
           <div className="hidden md:flex items-center gap-2 lg:gap-2.5 shrink-0">
-            <div className="ui-chip rounded-full px-3.5 py-1.5 lg:px-4 lg:py-2 flex items-center gap-1.5">
+            <div className="bg-white rounded-full px-3.5 py-1.5 lg:px-4 lg:py-2 flex items-center gap-1.5 shadow-[0_4px_0_rgba(143,192,235,0.65)]">
               <Star className="w-4 h-4 lg:w-5 lg:h-5 fill-[#ffc82c] text-[#d97706]" />
-              <span className="font-extrabold text-[17px] lg:text-[18px] text-[#51336d] tabular-nums">
+              <span className="font-extrabold text-[17px] lg:text-[18px] text-[#163a5f] tabular-nums">
                 {totalStars}
               </span>
             </div>
@@ -248,14 +248,14 @@ export const HolesSelectScreen: React.FC<HolesSelectScreenProps> = ({
               }}
               className={`group relative rounded-[18px] md:rounded-[20px] lg:rounded-[22px] p-2 pb-2.5 md:p-2.5 md:pb-3 transition-transform flex flex-col items-center ${
                 unlocked
-                  ? 'ui-card shadow-[0_5px_0_#ded4e7] hover:-translate-y-1 active:translate-y-0.5 cursor-pointer'
-                  : 'bg-slate-100/95 shadow-[0_4px_0_rgba(180,195,210,0.5)] cursor-not-allowed border-2 border-slate-200'
+                  ? 'bg-white shadow-[0_5px_0_rgba(143,192,235,0.75)] hover:-translate-y-1 active:translate-y-0.5 cursor-pointer'
+                  : 'bg-slate-100/95 shadow-[0_4px_0_rgba(180,195,210,0.5)] cursor-not-allowed border border-slate-200'
               }`}
             >
               {/* Top-Left Circular Hole Badge */}
               <div
                 className={`absolute -top-2 -left-2 md:-top-2.5 md:-left-2.5 z-20 w-8 h-8 md:w-9 md:h-9 rounded-full border-2 border-white shadow-md flex items-center justify-center font-display font-bold text-white text-[15px] md:text-[16px] ${
-                  unlocked ? 'bg-[#7d36c8]' : 'bg-slate-400'
+                  unlocked ? 'bg-[#40c952]' : 'bg-slate-400'
                 }`}
               >
                 {unlocked ? displayIndex : <Lock className="w-3.5 h-3.5 stroke-[2.5]" />}

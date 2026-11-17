@@ -275,15 +275,6 @@ export function stepBallPhysics(
       if (isPointInsideCourse(course, safeX, safeZ, 0.25)) {
         state.x = safeX;
         state.z = safeZ;
-        state.vx = -state.vx * 0.4;
-        state.vz = -state.vz * 0.4;
-      } else {
-        // Hard failsafe: return ball safely onto the starting tee so game never soft-locks
-        state.x = course.start[0];
-        state.z = course.start[1];
-        state.vx = 0;
-        state.vz = 0;
-        state.isMoving = false;
       }
     }
   }
@@ -696,13 +687,9 @@ export function resolveBallBallCollision(
   const dist = Math.hypot(dx, dz);
   const minDist = BALL_RADIUS * 2; // 0.30
 
-  if (dist < minDist) {
-    let nx = 1;
-    let nz = 0;
-    if (dist > 0.0001) {
-      nx = dx / dist;
-      nz = dz / dist;
-    }
+  if (dist < minDist && dist > 0.0001) {
+    const nx = dx / dist;
+    const nz = dz / dist;
 
     event.contactX = ball1.x + nx * BALL_RADIUS;
     event.contactZ = ball1.z + nz * BALL_RADIUS;
